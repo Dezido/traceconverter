@@ -1,5 +1,7 @@
-import pandas as pd
 import json
+import tkinter
+
+import pandas as pd
 
 
 ###Removes unwanted columns from Trace###
@@ -41,6 +43,28 @@ def print_characteristics(file):
     mm = mean / median
 
 
+trace_template = {"traceheader": {
+    "metainformation": {
+        "name": "",
+        "source": "",
+        "description": "",
+        "date": "",
+        "user": ""
+    },
+    "statistical characteristics": {
+        "mean": 0,
+        "median": 0,
+        "skew": 0,
+        "kurtosis": 0,
+        "correlation": 0,
+    }
+},
+    "tracebody": {
+        "data description": "",
+        "tracedata": []
+    }
+}
+
 example_trc = {"traceheader": {
     "metainformation": {
         "name": "oneswarm-timing-attack-trace.csv",
@@ -73,10 +97,10 @@ example_trc = {"traceheader": {
 # print(example_trc["tracebody"]["tracedata"])
 # get_df('result_oneswarm.trace')
 
-# with open('result.json', 'w') as fp:
-#    json.dump(example_trc, fp, indent=4)
+with open('result.json', 'w') as fp:
+   json.dump(example_trc, fp, indent=4)
 
 # convert_file('oneswarm-timing-attack-trace.csv', [0], 'result_oneswarm.trace')
-# convert_file('ask.csv', [0,3,4,5,6,7,8,], 'result_ask_cr.trace')
+# convert_file('ask.csv', [0,3,4,5,6,7,8], 'result_ask_cr.trace')
 print(get_tracedata('test.csv', [0, 3, 4]))
 # print_characteristics('result_oneswarm.trace')
