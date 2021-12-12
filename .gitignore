@@ -127,3 +127,12 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# files
+*csv
+*json
+*txt
+*trace
+
+#IDEA folder
+.idea
