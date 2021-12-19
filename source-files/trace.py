@@ -60,11 +60,11 @@ mytrace = Trace(thd, tbd)
 
 example_trc = {"traceheader": {
     "metainformation": {
-        "name": "oneswarm-timing-attack-trace.csv",
-        "source": "UMass Tracerepository",
-        "description": "Result of a simple timing attack on the OneSwarm peer-to-peer data sharing network",
+        "original tracefilename": "oneswarm-timing-attack-trace.csv",
+        "tracesource": "UMass Tracerepository",
+        "tracedescription": "Result of a simple timing attack on the OneSwarm peer-to-peer data sharing network",
         "date": "13.11.2021",
-        "user": "Dennis Ziebart"
+        "username": "Dennis Ziebart"
     },
     "statistical characteristics": {
         "mean": 1817.484124,
@@ -82,5 +82,5 @@ example_trc = {"traceheader": {
 
 print(example_trc)
 
-with open('result.json', 'w') as fp:
+with open('../result.json', 'w') as fp:
     json.dump(example_trc, fp, indent=4)

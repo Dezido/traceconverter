@@ -18,13 +18,14 @@ def extract_tracedata(trace, name):
         df.insert(loc=index, column="col", value=trace["tracebody"]["tracedata"][index], allow_duplicates=True)
     df2 = df.copy()
     df2.to_csv(name, float_format="%e", index=False, header=False)
+    return
 
 
 ###gets the relevant columns for the tracedata lists###
 def get_tracedata(file, columns):
     df = pd.read_csv(file, header=0, delimiter=',')
     df.drop(df.columns[columns], axis=1, inplace=True)
-    return df.values.tolist()
+    return df.values.reshape(1, -1).ravel().tolist()
 
 
 def get_df(file):
@@ -97,10 +98,10 @@ example_trc = {"traceheader": {
 # print(example_trc["tracebody"]["tracedata"])
 # get_df('result_oneswarm.trace')
 
-with open('result.json', 'w') as fp:
+with open('../result.json', 'w') as fp:
    json.dump(example_trc, fp, indent=4)
 
 # convert_file('oneswarm-timing-attack-trace.csv', [0], 'result_oneswarm.trace')
 # convert_file('ask.csv', [0,3,4,5,6,7,8], 'result_ask_cr.trace')
-print(get_tracedata('test.csv', [0, 3, 4]))
+print(get_tracedata('oneswarm-timing-attack-trace.csv', [0]))
 # print_characteristics('result_oneswarm.trace')
