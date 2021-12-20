@@ -1,11 +1,10 @@
+import json
 from tkinter import *
 from tkinter import ttk
-from tkinter.filedialog import askopenfile, askopenfilename
 
 import pandas as pd
 
-from converter import trace_template, get_tracedata
-import json
+from converter import trace_template, get_tracedata_from_file
 
 
 class TraceConverterGUI:
@@ -39,7 +38,9 @@ class TraceConverterGUI:
         Label(convert_tab, text="Result Filename").grid(row=8)
 
         org_name_entry = Entry(convert_tab)
+        org_name_entry.insert(END, "ota.csv")
         columns_entry = Entry(convert_tab)
+        columns_entry.insert(END, ['0', '1', '2', '3'])
         source_entry = Entry(convert_tab)
         description_entry = Entry(convert_tab)
         tracedatadescription_entry = Entry(convert_tab)
@@ -59,7 +60,8 @@ class TraceConverterGUI:
         result_filename_entry.grid(row=8, column=1)
 
         def convert_trace():
-            trace_template["tracebody"]["tracedata"] = get_tracedata(org_name_entry.get(), [0])
+            trace_template["tracebody"]["tracedata"] = [get_tracedata_from_file(org_name_entry.get(),
+                                                                                int(columns_entry.get()))]
             trace_template["tracebody"]["tracedatadescription"] = tracedatadescription_entry.get()
             trace_template["traceheader"]["metainformation"]["name"] = org_name_entry.get()
             trace_template["traceheader"]["metainformation"]["source"] = source_entry.get()
@@ -67,13 +69,14 @@ class TraceConverterGUI:
             trace_template["traceheader"]["metainformation"]["date"] = date_entry.get()
             trace_template["traceheader"]["metainformation"]["user"] = username_entry.get()
             trace_template["traceheader"]["metainformation"]["customfield"] = custom_field_entry.get()
-            df= pd.DataFrame(trace_template["tracebody"]["tracedata"])
-            print(df.mean())
-            #trace_template["traceheader"]["statistical characteristics"]["mean"] = df.mean()
-            #trace_template["traceheader"]["statistical characteristics"]["median"] = df.median()
-            #trace_template["traceheader"]["statistical characteristics"]["skew"] = df.skew()
-            #trace_template["traceheader"]["statistical characteristics"]["kurtosis"] = df.kurtosis()
-            #trace_template["traceheader"]["statistical characteristics"]["correlation"] = df.corr()
+
+            df = pd.DataFrame(trace_template["tracebody"]["tracedata"][0][0])
+
+            trace_template["traceheader"]["statistical characteristics"]["mean"] = df[0].mean()
+            trace_template["traceheader"]["statistical characteristics"]["median"] = df[0].median()
+            trace_template["traceheader"]["statistical characteristics"]["skew"] = df[0].skew()
+            trace_template["traceheader"]["statistical characteristics"]["kurtosis"] = df[0].kurtosis()
+            trace_template["traceheader"]["statistical characteristics"]["autocorrelation"] = df[0].autocorr()
 
             with open(result_filename_entry.get() + '.json', 'w') as fp:
                 json.dump(trace_template, fp, indent=4)

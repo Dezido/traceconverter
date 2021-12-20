@@ -1,17 +1,14 @@
-import json
-import tkinter
-
 import pandas as pd
 
 
-###Removes unwanted columns from Trace###
-def convert_file(file, columns, name):
+# Removes unwanted columns from Trace
+def relevant_columns_to_csv(file, columns, name):
     df = pd.read_csv(file, header=0, delimiter=',')
     df.drop(df.columns[columns], axis=1, inplace=True)
     df.to_csv(name, float_format="%e", index=False, header=False)
 
 
-###Extrats the Tracedata into csv for ProFiDo###
+# Extracts the Tracedata into csv for ProFiDo
 def extract_tracedata(trace, name):
     df = pd.DataFrame()
     for index in range(len(trace["tracebody"]["tracedata"])):
@@ -21,29 +18,26 @@ def extract_tracedata(trace, name):
     return
 
 
-###gets the relevant columns for the tracedata lists###
-def get_tracedata(file, columns):
+# gets the relevant columns for the tracedata lists
+def get_tracedata_from_file(file, cols):
     df = pd.read_csv(file, header=0, delimiter=',')
-    df.drop(df.columns[columns], axis=1, inplace=True)
-    return df.values.reshape(1, -1).ravel().tolist()
+    res_list = []
+    df.drop(df.columns[cols], axis=1, inplace=True)
+    print(df)
+    for column in df:
+        res_list.append(df[column].values.reshape(1, -1).ravel().tolist())
+    return res_list
 
 
-def get_df(file):
-    df = pd.read_csv(file, delimiter=' ')
-    # df.drop(df.columns[columns], axis=1, inplace=True)
+def filter_columns(file, cols):
+    df = pd.read_csv(file, header=0, delimiter=',')
+    df = df.iloc[:, cols]
     return df
 
 
-def print_characteristics(file):
-    df = pd.read_csv(file, header=0, delimiter=',')
-    mean = df.mean()
-    median = df.median()
-    skew = df.skew()
-    corr = df.corr()
-    kurtosis = df.kurtosis()
-    mm = mean / median
-
-
+# print(filter_columns('ota.csv', 1))
+print(get_tracedata_from_file('ota.csv', 0))
+# print(relevant_columns_to_csv('ota.csv', 0, 'tct'))
 trace_template = {"traceheader": {
     "metainformation": {
         "name": "",
@@ -57,51 +51,11 @@ trace_template = {"traceheader": {
         "median": 0,
         "skew": 0,
         "kurtosis": 0,
-        "correlation": 0,
+        "autocorrelation": 0,
     }
 },
     "tracebody": {
-        "data description": "",
+        "tracedatadescription": "",
         "tracedata": []
     }
 }
-
-example_trc = {"traceheader": {
-    "metainformation": {
-        "name": "oneswarm-timing-attack-trace.csv",
-        "source": "UMass Tracerepository",
-        "description": "Result of a simple timing attack on the OneSwarm peer-to-peer data sharing network",
-        "date": "13.11.2021",
-        "user": "Dennis Ziebart"
-    },
-    "statistical characteristics": {
-        "mean": 0,
-        "median": 1633.619,
-        "skew": 0.581348,
-        "kurtosis": -0.66219,
-        "correlation": 1.476591e+03,
-    }
-},
-    "tracebody": {
-        "data description": "Shows the delay during the resulting from the timing-attack",
-        "tracedata": [[1, 2, 3, 4, 5],
-                      [6, 7, 8, 9, 10]]
-    }
-}
-
-# example_trc["tracebody"]["tracedata"] = open('result_oneswarm.trace', 'r').read().split('\n')
-
-
-# print(len(example_trc["tracebody"]["tracedata"]))
-# extract_tracedata(example_trc, 'ex_dat.trace')
-
-# print(example_trc["tracebody"]["tracedata"])
-# get_df('result_oneswarm.trace')
-
-with open('../result.json', 'w') as fp:
-   json.dump(example_trc, fp, indent=4)
-
-# convert_file('oneswarm-timing-attack-trace.csv', [0], 'result_oneswarm.trace')
-# convert_file('ask.csv', [0,3,4,5,6,7,8], 'result_ask_cr.trace')
-print(get_tracedata('oneswarm-timing-attack-trace.csv', [0]))
-# print_characteristics('result_oneswarm.trace')
