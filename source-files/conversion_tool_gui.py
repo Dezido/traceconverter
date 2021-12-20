@@ -72,14 +72,13 @@ class TraceConverterGUI:
 
             for i in range(len(trace_template["tracebody"]["tracedata"][0])):
                 df = pd.DataFrame(trace_template["tracebody"]["tracedata"][0][i])
-
                 trace_template["traceheader"]["statistical characteristics"]["mean"].append(df[0].mean())
                 trace_template["traceheader"]["statistical characteristics"]["median"].append(df[0].median())
                 trace_template["traceheader"]["statistical characteristics"]["skew"].append(df[0].skew())
                 trace_template["traceheader"]["statistical characteristics"]["kurtosis"].append(df[0].kurtosis())
                 trace_template["traceheader"]["statistical characteristics"]["autocorrelation"].append(df[0].autocorr())
 
-            with open(result_filename_entry.get() + '.json', 'w') as fp:
+            with open('converted_traces/' + result_filename_entry.get() + '.json', 'w') as fp:
                 json.dump(trace_template, fp, indent=4)
 
         Button(convert_tab, text='Quit', command=master.destroy).grid(row=9, column=8, sticky=W, pady=4)

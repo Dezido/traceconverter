@@ -20,7 +20,7 @@ def extract_tracedata(trace, name):
 
 # gets the relevant columns for the tracedata lists
 def get_tracedata_from_file(file, cols):
-    df = pd.read_csv(file, header=0, delimiter=',')
+    df = pd.read_csv('raw_traces/' + file, header=0, delimiter=',')
     res_list = []
     df.drop(df.columns[cols], axis=1, inplace=True)
     print(df)
