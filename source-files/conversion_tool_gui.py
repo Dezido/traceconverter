@@ -38,9 +38,9 @@ class TraceConverterGUI:
         Label(convert_tab, text="Result Filename").grid(row=8)
 
         org_name_entry = Entry(convert_tab)
-        org_name_entry.insert(END, "ota.csv")
+        org_name_entry.insert(END, "tst.csv")
         columns_entry = Entry(convert_tab)
-        columns_entry.insert(END, ['0', '1', '2', '3'])
+        columns_entry.insert(END, ['3'])
         source_entry = Entry(convert_tab)
         description_entry = Entry(convert_tab)
         tracedatadescription_entry = Entry(convert_tab)
@@ -70,13 +70,14 @@ class TraceConverterGUI:
             trace_template["traceheader"]["metainformation"]["user"] = username_entry.get()
             trace_template["traceheader"]["metainformation"]["customfield"] = custom_field_entry.get()
 
-            df = pd.DataFrame(trace_template["tracebody"]["tracedata"][0][0])
+            for i in range(len(trace_template["tracebody"]["tracedata"][0])):
+                df = pd.DataFrame(trace_template["tracebody"]["tracedata"][0][i])
 
-            trace_template["traceheader"]["statistical characteristics"]["mean"] = df[0].mean()
-            trace_template["traceheader"]["statistical characteristics"]["median"] = df[0].median()
-            trace_template["traceheader"]["statistical characteristics"]["skew"] = df[0].skew()
-            trace_template["traceheader"]["statistical characteristics"]["kurtosis"] = df[0].kurtosis()
-            trace_template["traceheader"]["statistical characteristics"]["autocorrelation"] = df[0].autocorr()
+                trace_template["traceheader"]["statistical characteristics"]["mean"].append(df[0].mean())
+                trace_template["traceheader"]["statistical characteristics"]["median"].append(df[0].median())
+                trace_template["traceheader"]["statistical characteristics"]["skew"].append(df[0].skew())
+                trace_template["traceheader"]["statistical characteristics"]["kurtosis"].append(df[0].kurtosis())
+                trace_template["traceheader"]["statistical characteristics"]["autocorrelation"].append(df[0].autocorr())
 
             with open(result_filename_entry.get() + '.json', 'w') as fp:
                 json.dump(trace_template, fp, indent=4)

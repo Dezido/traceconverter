@@ -47,11 +47,11 @@ trace_template = {"traceheader": {
         "user": ""
     },
     "statistical characteristics": {
-        "mean": 0,
-        "median": 0,
-        "skew": 0,
-        "kurtosis": 0,
-        "autocorrelation": 0,
+        "mean": [],
+        "median": [],
+        "skew": [],
+        "kurtosis": [],
+        "autocorrelation": [],
     }
 },
     "tracebody": {
