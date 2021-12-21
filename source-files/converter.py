@@ -18,7 +18,7 @@ def extract_tracedata(trace, name):
     return
 
 
-# gets the relevant columns for the tracedata lists
+# Gets the relevant columns and adds each column as a separate list into the result list
 def get_tracedata_from_file(file, cols):
     df = pd.read_csv('raw_traces/' + file, header=0, delimiter=',')
     res_list = []
@@ -35,9 +35,6 @@ def filter_columns(file, cols):
     return df
 
 
-# print(filter_columns('ota.csv', 1))
-print(get_tracedata_from_file('ota.csv', 0))
-# print(relevant_columns_to_csv('ota.csv', 0, 'tct'))
 trace_template = {"traceheader": {
     "metainformation": {
         "name": "",

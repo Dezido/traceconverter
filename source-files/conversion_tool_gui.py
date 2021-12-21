@@ -37,7 +37,9 @@ class TraceConverterGUI:
         Label(convert_tab, text="Custom Field").grid(row=7)
         Label(convert_tab, text="Result Filename").grid(row=8)
 
+        # Entries
         org_name_entry = Entry(convert_tab)
+        # Prefill Entry
         org_name_entry.insert(END, "tst.csv")
         columns_entry = Entry(convert_tab)
         columns_entry.insert(END, ['3'])
@@ -49,6 +51,7 @@ class TraceConverterGUI:
         custom_field_entry = Entry(convert_tab)
         result_filename_entry = Entry(convert_tab)
 
+        # Place Entries
         org_name_entry.grid(row=0, column=1)
         columns_entry.grid(row=1, column=1)
         source_entry.grid(row=2, column=1)
@@ -59,6 +62,7 @@ class TraceConverterGUI:
         custom_field_entry.grid(row=7, column=1)
         result_filename_entry.grid(row=8, column=1)
 
+        # Generates converted Trace from User Input
         def convert_trace():
             trace_template["tracebody"]["tracedata"] = [get_tracedata_from_file(org_name_entry.get(),
                                                                                 int(columns_entry.get()))]
@@ -70,6 +74,7 @@ class TraceConverterGUI:
             trace_template["traceheader"]["metainformation"]["user"] = username_entry.get()
             trace_template["traceheader"]["metainformation"]["customfield"] = custom_field_entry.get()
 
+            # Generates statistics and adds them into a list. Each list entry represents one column of the raw trace
             for i in range(len(trace_template["tracebody"]["tracedata"][0])):
                 df = pd.DataFrame(trace_template["tracebody"]["tracedata"][0][i])
                 trace_template["traceheader"]["statistical characteristics"]["mean"].append(df[0].mean())
@@ -78,8 +83,16 @@ class TraceConverterGUI:
                 trace_template["traceheader"]["statistical characteristics"]["kurtosis"].append(df[0].kurtosis())
                 trace_template["traceheader"]["statistical characteristics"]["autocorrelation"].append(df[0].autocorr())
 
-            with open('converted_traces/' + result_filename_entry.get() + '.json', 'w') as fp:
+            # Saves trace to file
+            with open('converted_traces/' + result_filename_entry.get() + '_converted.json', 'w') as fp:
                 json.dump(trace_template, fp, indent=4)
+
+            # Clear statistic lists so the next trace won't have old values
+            trace_template["traceheader"]["statistical characteristics"]["mean"].clear()
+            trace_template["traceheader"]["statistical characteristics"]["median"].clear()
+            trace_template["traceheader"]["statistical characteristics"]["skew"].clear()
+            trace_template["traceheader"]["statistical characteristics"]["kurtosis"].clear()
+            trace_template["traceheader"]["statistical characteristics"]["autocorrelation"].clear()
 
         Button(convert_tab, text='Quit', command=master.destroy).grid(row=9, column=8, sticky=W, pady=4)
         Button(convert_tab, text='Convert', command=convert_trace).grid(row=9, column=1, sticky=W, pady=4)
