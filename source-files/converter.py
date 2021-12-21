@@ -20,7 +20,7 @@ def extract_tracedata(trace, name):
 
 # Gets the relevant columns and adds each column as a separate list into the result list
 def get_tracedata_from_file(file, cols):
-    df = pd.read_csv('raw_traces/' + file, header=0, delimiter=',')
+    df = pd.read_csv(file, header=0, delimiter=',')
     res_list = []
     df.drop(df.columns[cols], axis=1, inplace=True)
     print(df)
@@ -34,6 +34,14 @@ def filter_columns(file, cols):
     df = df.iloc[:, cols]
     return df
 
+
+def extract_profido_format(file):
+    df = pd.read_json(file)
+    dictionary = df.to_dict()
+    print(dictionary["tracebody"]["tracedata"][0])
+
+
+#extract_profido_format('converted_traces/result_converted.json')
 
 trace_template = {"traceheader": {
     "metainformation": {
