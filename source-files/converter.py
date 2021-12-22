@@ -41,8 +41,6 @@ def extract_profido_format(file):
     print(dictionary["tracebody"]["tracedata"][0])
 
 
-#extract_profido_format('converted_traces/result_converted.json')
-
 trace_template = {"traceheader": {
     "metainformation": {
         "name": "",

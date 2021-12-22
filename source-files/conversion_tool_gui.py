@@ -1,8 +1,10 @@
+import csv
 import json
 from tkinter import *
 from tkinter import ttk
 import tkinter.filedialog as fd
 
+import pandas
 import pandas as pd
 
 from converter import trace_template, get_tracedata_from_file
@@ -18,11 +20,11 @@ class TraceConverterGUI:
 
         convert_tab = ttk.Frame(tab_parent)
         filter_tab = ttk.Frame(tab_parent)
-        extract_tab = ttk.Frame(tab_parent)
+        profido_format_tab = ttk.Frame(tab_parent)
 
         tab_parent.add(convert_tab, text="Convert Trace")
         tab_parent.add(filter_tab, text="Filter Traces")
-        tab_parent.add(extract_tab, text="Extract ProFiDo Format from Trace")
+        tab_parent.add(profido_format_tab, text="ProFiDo Format from Trace")
 
         tab_parent.pack(expand=1, fill='both')
 
@@ -141,12 +143,48 @@ class TraceConverterGUI:
 
         # Label and Buttons
         label_file_explorer = Label(filter_tab, text="File Explorer using Tkinter", width=100, height=4, fg="blue")
-        button_explore = Button(filter_tab, text="Browse Files", command=browse_files)
-        button_exit = Button(filter_tab, text="Exit", command=master.destroy)
-
         label_file_explorer.grid(column=1, row=1)
+
+        button_explore = Button(filter_tab, text="Browse Files", command=browse_files)
         button_explore.grid(column=1, row=2)
+
+        button_exit = Button(filter_tab, text="Exit", command=master.destroy)
         button_exit.grid(column=1, row=3)
+
+        # ===ProFiDo format Tab
+
+        Label(profido_format_tab, text="Trace").grid(row=0)
+        Label(profido_format_tab, text="Result filename").grid(row=1)
+        choose_trace_entry_profido = Entry(profido_format_tab, width=53)
+
+        def browse_trace():
+            choose_trace_entry_profido.delete(0, END)
+            selected_trace_profido = fd.askopenfilename(initialdir=
+                                                        "C:/Users/Dennis/PycharmProjects/"
+                                                        "traceconverter/source-files/converted_traces",
+                                                        title="Select a File",
+                                                        filetypes=(("JSON files", "*.json*"),))
+            choose_trace_entry_profido.insert(END, selected_trace_profido)
+            choose_trace_entry_profido.grid(row=0, column=1)
+            print(selected_trace_profido)
+
+        def extract_columns():
+            with open(choose_trace_entry_profido.get()) as trace_in:
+                tracedata = json.load(trace_in)["tracebody"]["tracedata"]
+                df = pandas.DataFrame(tracedata)
+                df.transpose().to_csv(result_filename_entry_profido.get() + '_dat.trace', float_format="%e",
+                                      index=False, header=False)
+
+        choose_trace_button_profido = Button(profido_format_tab, text="Browse Trace",
+                                             command=browse_trace)
+        choose_trace_button_profido.grid(row=0, column=2)
+
+        result_filename_entry_profido = Entry(profido_format_tab, width=53)
+        result_filename_entry_profido.grid(row=1, column=1)
+
+        extract_columns_button_profido = Button(profido_format_tab, text="Extract ProFiDo format from trace",
+                                                command=extract_columns)
+        extract_columns_button_profido.grid(row=1, column=2)
 
 
 # Create TCGUI instance and run mainloop
