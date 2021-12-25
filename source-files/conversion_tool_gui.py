@@ -72,7 +72,8 @@ class TraceConverterGUI:
         username_entry.insert(END, "Dennis Ziebart")
         custom_field_entry = Text(convert_tab, width=40, height=20)
         custom_field_entry.insert(END,
-                                  "Additional information about the Trace: This trace serves as an example for the converter")
+                                  "Additional information about the Trace: "
+                                  "This trace serves as an example for the converter")
         result_filename_entry = Entry(convert_tab, width=53)
         result_filename_entry.insert(END, "oneswarm-timing-attack-trace")
 
@@ -90,8 +91,8 @@ class TraceConverterGUI:
 
         # Generates converted Trace from User Input
         def convert_trace():
-            trace_template["tracebody"]["tracedata"] = get_tracedata_from_file(org_name_entry.get(),
-                                                                               int(columns_entry.get()))
+            col = list(map(int, (columns_entry.get().split(" "))))
+            trace_template["tracebody"]["tracedata"] = get_tracedata_from_file(org_name_entry.get(), col)
             trace_template["tracebody"]["tracedatadescription"] = tracedatadescription_entry.get()
             trace_template["traceheader"]["metainformation"]["name"] = org_name_entry.get()
             trace_template["traceheader"]["metainformation"]["source"] = source_entry.get()
