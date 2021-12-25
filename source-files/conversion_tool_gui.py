@@ -91,9 +91,9 @@ class TraceConverterGUI:
 
         # Generates converted Trace from User Input
         def convert_trace():
-            col = list(map(int, (columns_entry.get().split(" "))))
+            col = list(map(int, (columns_entry.get().split(","))))
             trace_template["tracebody"]["tracedata"] = get_tracedata_from_file(org_name_entry.get(), col)
-            trace_template["tracebody"]["tracedatadescription"] = tracedatadescription_entry.get()
+            trace_template["tracebody"]["tracedatadescription"] = tracedatadescription_entry.get().split("||")
             trace_template["traceheader"]["metainformation"]["name"] = org_name_entry.get()
             trace_template["traceheader"]["metainformation"]["source"] = source_entry.get()
             trace_template["traceheader"]["metainformation"]["description"] = description_entry.get()
@@ -102,7 +102,6 @@ class TraceConverterGUI:
             trace_template["traceheader"]["metainformation"]["customfield"] = custom_field_entry.get('1.0', 'end-1c')
 
             # Generates statistics and adds them into a list. Each list entry represents one column of the raw trace
-            # df = pd.DataFrame(trace_template["tracebody"]["tracedata"][0])
             for i in range(len(trace_template["tracebody"]["tracedata"])):
                 df = pd.DataFrame(trace_template["tracebody"]["tracedata"][i])
                 trace_template["traceheader"]["statistical characteristics"]["mean"].append(df[0].mean())
@@ -173,7 +172,7 @@ class TraceConverterGUI:
             with open(choose_trace_entry_profido.get()) as trace_in:
                 tracedata = json.load(trace_in)["tracebody"]["tracedata"]
                 df = pandas.DataFrame(tracedata)
-                df.transpose().to_csv(result_filename_entry_profido.get() + '_dat.trace', float_format="%e",
+                df.transpose().to_csv(result_filename_entry_profido.get() + '_dat.trace', sep='\t', float_format="%e",
                                       index=False, header=False)
 
         choose_trace_button_profido = Button(profido_format_tab, text="Browse Trace",
