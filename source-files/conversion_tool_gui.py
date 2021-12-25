@@ -1,8 +1,7 @@
-import csv
 import json
+import tkinter.filedialog as fd
 from tkinter import *
 from tkinter import ttk
-import tkinter.filedialog as fd
 
 import pandas
 import pandas as pd
@@ -30,15 +29,32 @@ class TraceConverterGUI:
 
         # === Converting Tab Widgets
         # Labels
-        Label(convert_tab, text="Trace").grid(row=0)
-        Label(convert_tab, text="Columns to remove").grid(row=1)
-        Label(convert_tab, text="Tracesource").grid(row=2)
-        Label(convert_tab, text="Tracedescription").grid(row=3)
-        Label(convert_tab, text="Tracedatadescription").grid(row=4)
-        Label(convert_tab, text="Date").grid(row=5)
-        Label(convert_tab, text="Username").grid(row=6)
-        Label(convert_tab, text="Custom Field").grid(row=7)
-        Label(convert_tab, text="Result Filename").grid(row=8)
+        Label(convert_tab, text="Field", font='TkDefaultFont 10 bold').grid(row=0)
+        Label(convert_tab, text="Trace").grid(row=1)
+        Label(convert_tab, text="Columns to remove").grid(row=2)
+        Label(convert_tab, text="Tracesource").grid(row=3)
+        Label(convert_tab, text="Tracedescription").grid(row=4)
+        Label(convert_tab, text="Tracedatadescription").grid(row=5)
+        Label(convert_tab, text="Date").grid(row=6)
+        Label(convert_tab, text="Username").grid(row=7)
+        Label(convert_tab, text="Custom Field").grid(row=8)
+        Label(convert_tab, text="Result Filename").grid(row=9)
+
+        Label(convert_tab, text="Input", font='TkDefaultFont 10 bold').grid(row=0, column=1)
+
+        # Hints
+        Label(convert_tab, text="Hints", font='TkDefaultFont 10 bold').grid(row=0, column=3)
+        Label(convert_tab, text="Choose the trace you want to convert").grid(row=1, column=3)
+        Label(convert_tab, text="Which columns of the original trace that shall be ignored for the conversion."
+                                " Delimit multiple numbers with a ',' ").grid(row=2, column=3)
+        Label(convert_tab, text="From which source (repository/archive) does the trace originate").grid(row=3, column=3)
+        Label(convert_tab, text="Description of the whole trace").grid(row=4, column=3)
+        Label(convert_tab, text="Description of the tracedata. If the tracedata consists of multiple columns use '||' "
+                                "between describing different columns.  ").grid(row=5, column=3)
+        Label(convert_tab, text="Date of the conversion").grid(row=6, column=3)
+        Label(convert_tab, text="Who is using the tool").grid(row=7, column=3)
+        Label(convert_tab, text="Additional information").grid(row=8, column=3)
+        Label(convert_tab, text="Filename for the converted trace").grid(row=9, column=3)
 
         org_name_entry = Entry(convert_tab, width=53)
 
@@ -52,7 +68,7 @@ class TraceConverterGUI:
                                           filetypes=(("CSV files", "*.csv*"),))
 
             org_name_entry.insert(END, sel_file)
-            org_name_entry.grid(row=0, column=1)
+            org_name_entry.grid(row=1, column=1)
 
         # Entries
         org_name_button = Button(convert_tab, text="Browse Files", command=browse_file)
@@ -78,16 +94,16 @@ class TraceConverterGUI:
         result_filename_entry.insert(END, "oneswarm-timing-attack-trace")
 
         # Place Entries
-        org_name_button.grid(row=0, column=2)
+        org_name_button.grid(row=1, column=2)
 
-        columns_entry.grid(row=1, column=1)
-        source_entry.grid(row=2, column=1)
-        description_entry.grid(row=3, column=1)
-        tracedatadescription_entry.grid(row=4, column=1)
-        date_entry.grid(row=5, column=1)
-        username_entry.grid(row=6, column=1)
-        custom_field_entry.grid(row=7, column=1)
-        result_filename_entry.grid(row=8, column=1)
+        columns_entry.grid(row=2, column=1)
+        source_entry.grid(row=3, column=1)
+        description_entry.grid(row=4, column=1)
+        tracedatadescription_entry.grid(row=5, column=1)
+        date_entry.grid(row=6, column=1)
+        username_entry.grid(row=7, column=1)
+        custom_field_entry.grid(row=8, column=1)
+        result_filename_entry.grid(row=9, column=1)
 
         # Generates converted Trace from User Input
         def convert_trace():
@@ -121,8 +137,8 @@ class TraceConverterGUI:
             trace_template["traceheader"]["statistical characteristics"]["kurtosis"].clear()
             trace_template["traceheader"]["statistical characteristics"]["autocorrelation"].clear()
 
-        Button(convert_tab, text='Exit', command=master.destroy).grid(row=9, column=8, sticky=W, pady=4)
-        Button(convert_tab, text='Convert', command=convert_trace).grid(row=9, column=1, sticky=W, pady=4)
+        Button(convert_tab, text='Exit', command=master.destroy).grid(row=10, column=8, sticky=W, pady=4)
+        Button(convert_tab, text='Convert', command=convert_trace).grid(row=10, column=1, sticky=W, pady=4)
 
         # === Filter Tab Widgets
         selected_traces = []
