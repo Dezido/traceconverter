@@ -18,7 +18,8 @@ trace_template = {"traceheader": {
         "source": "",
         "description": "",
         "date": "",
-        "user": ""
+        "user": "",
+        "customfield": ""
     },
     "statistical characteristics": {
         "mean": [],
@@ -29,7 +30,7 @@ trace_template = {"traceheader": {
     }
 },
     "tracebody": {
-        "tracedatadescription": "",
+        "tracedatadescription": [],
         "tracedata": []
     }
 }

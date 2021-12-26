@@ -115,7 +115,11 @@ class TraceConverterGUI:
             trace_template["traceheader"]["metainformation"]["description"] = description_entry.get()
             trace_template["traceheader"]["metainformation"]["date"] = date_entry.get()
             trace_template["traceheader"]["metainformation"]["user"] = username_entry.get()
-            trace_template["traceheader"]["metainformation"]["customfield"] = custom_field_entry.get('1.0', 'end-1c')
+            if len(custom_field_entry.get('1.0', 'end-1c')) != 0:
+                trace_template["traceheader"]["metainformation"]["customfield"] = custom_field_entry.get('1.0',
+                                                                                                         'end-1c')
+            else:
+                trace_template["traceheader"]["metainformation"].pop("customfield")
 
             # Generates statistics and adds them into a list. Each list entry represents one column of the raw trace
             for i in range(len(trace_template["tracebody"]["tracedata"])):
