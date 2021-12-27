@@ -1,5 +1,6 @@
 import json
 import tkinter.filedialog as fd
+import os
 from tkinter import *
 from tkinter import ttk
 
@@ -37,7 +38,7 @@ class TraceConverterGUI:
         Label(convert_tab, text="Tracedatadescription").grid(row=5)
         Label(convert_tab, text="Date").grid(row=6)
         Label(convert_tab, text="Username").grid(row=7)
-        Label(convert_tab, text="Custom Field").grid(row=8)
+        Label(convert_tab, text="Additional Information").grid(row=8)
         Label(convert_tab, text="Result Filename").grid(row=9)
 
         Label(convert_tab, text="Input", font='TkDefaultFont 10 bold').grid(row=0, column=1)
@@ -53,7 +54,7 @@ class TraceConverterGUI:
                                 "between describing different columns.  ").grid(row=5, column=3)
         Label(convert_tab, text="Date of the conversion").grid(row=6, column=3)
         Label(convert_tab, text="Who is using the tool").grid(row=7, column=3)
-        Label(convert_tab, text="Additional information").grid(row=8, column=3)
+        Label(convert_tab, text="Additional information about the trace (optional)").grid(row=8, column=3)
         Label(convert_tab, text="Filename for the converted trace").grid(row=9, column=3)
 
         org_name_entry = Entry(convert_tab, width=53)
@@ -76,22 +77,22 @@ class TraceConverterGUI:
         columns_entry = Entry(convert_tab, width=53)
         columns_entry.insert(END, ['0'])
         source_entry = Entry(convert_tab, width=53)
-        source_entry.insert(END, "UMass Tracerepository")
+        source_entry.insert(END, "Example Tracerepository")
         description_entry = Entry(convert_tab, width=53)
         description_entry.insert(END,
-                                 "Result of a simple timing attack on the OneSwarm peer-to-peer data sharing network")
+                                 "Exampledescription")
         tracedatadescription_entry = Entry(convert_tab, width=53)
-        tracedatadescription_entry.insert(END, "Shows the delay during the resulting from the timing-attack")
+        tracedatadescription_entry.insert(END, "Exampledatadescription")
         date_entry = Entry(convert_tab, width=53)
-        date_entry.insert(END, "21.12.2021")
+        date_entry.insert(END, "27.12.2021")
         username_entry = Entry(convert_tab, width=53)
         username_entry.insert(END, "Dennis Ziebart")
         custom_field_entry = Text(convert_tab, width=40, height=20)
         custom_field_entry.insert(END,
                                   "Additional information about the Trace: "
-                                  "This trace serves as an example for the converter")
+                                  "Exampleinformation")
         result_filename_entry = Entry(convert_tab, width=53)
-        result_filename_entry.insert(END, "oneswarm-timing-attack-trace")
+        result_filename_entry.insert(END, "exampleresult")
 
         # Place Entries
         org_name_button.grid(row=1, column=2)
@@ -116,10 +117,10 @@ class TraceConverterGUI:
             trace_template["traceheader"]["metainformation"]["date"] = date_entry.get()
             trace_template["traceheader"]["metainformation"]["user"] = username_entry.get()
             if len(custom_field_entry.get('1.0', 'end-1c')) != 0:
-                trace_template["traceheader"]["metainformation"]["customfield"] = custom_field_entry.get('1.0',
-                                                                                                         'end-1c')
+                trace_template["traceheader"]["metainformation"]["additional information"] = custom_field_entry. \
+                    get('1.0', 'end-1c')
             else:
-                trace_template["traceheader"]["metainformation"].pop("customfield")
+                trace_template["traceheader"]["metainformation"].pop("additional information")
 
             # Generates statistics and adds them into a list. Each list entry represents one column of the raw trace
             for i in range(len(trace_template["tracebody"]["tracedata"])):
@@ -154,15 +155,20 @@ class TraceConverterGUI:
                                              title="Select a File",
                                              filetypes=(("JSON files", "*.json*"),))
             trace_list = []
+            tracename_list = []
             for i in file_tuple:
                 with open(str(i)) as json_file:
                     trace_list.append(json.load(json_file))
+                    tracename_list.append(os.path.basename(i))
             selected_traces.clear()
             selected_traces.append(trace_list)
-            print(selected_traces)
+            label_selected_tracenames = Label(filter_tab, text="Selected files: " + str(tracename_list), width=100,
+                                              height=4)
+            label_selected_tracenames.grid(column=1, row=2)
+            # print(selected_traces)
 
         # Label and Buttons
-        label_file_explorer = Label(filter_tab, text="File Explorer using Tkinter", width=100, height=4, fg="blue")
+        label_file_explorer = Label(filter_tab, text="Selected files: " + str(selected_traces), width=100, height=4)
         label_file_explorer.grid(column=1, row=1)
 
         button_explore = Button(filter_tab, text="Browse Files", command=browse_files)
@@ -186,7 +192,6 @@ class TraceConverterGUI:
                                                         filetypes=(("JSON files", "*.json*"),))
             choose_trace_entry_profido.insert(END, selected_trace_profido)
             choose_trace_entry_profido.grid(row=0, column=1)
-            print(selected_trace_profido)
 
         def extract_columns():
             with open(choose_trace_entry_profido.get()) as trace_in:
