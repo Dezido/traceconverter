@@ -32,7 +32,7 @@ class TraceConverterGUI:
         # Labels
         Label(convert_tab, text="Field", font='TkDefaultFont 10 bold').grid(row=0)
         Label(convert_tab, text="Trace").grid(row=1)
-        Label(convert_tab, text="Columns to remove").grid(row=2)
+        Label(convert_tab, text="Columns to keep").grid(row=2)
         Label(convert_tab, text="Tracesource").grid(row=3)
         Label(convert_tab, text="Tracedescription").grid(row=4)
         Label(convert_tab, text="Tracedatadescription").grid(row=5)
@@ -46,7 +46,7 @@ class TraceConverterGUI:
         # Hints
         Label(convert_tab, text="Hints", font='TkDefaultFont 10 bold').grid(row=0, column=3)
         Label(convert_tab, text="Choose the trace you want to convert").grid(row=1, column=3)
-        Label(convert_tab, text="Which columns of the original trace that shall be ignored for the conversion."
+        Label(convert_tab, text="Which columns of the original trace contain the relevant tracedata."
                                 " Delimit multiple numbers with a ',' ").grid(row=2, column=3)
         Label(convert_tab, text="From which source (repository/archive) does the trace originate").grid(row=3, column=3)
         Label(convert_tab, text="Description of the whole trace").grid(row=4, column=3)
