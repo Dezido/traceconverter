@@ -168,9 +168,6 @@ class TraceConverterGUI:
             # print(selected_traces)
 
         # Label and Buttons
-        label_file_explorer = Label(filter_tab, text="Selected files: " + str(selected_traces), width=100, height=4)
-        label_file_explorer.grid(column=1, row=1)
-
         button_explore = Button(filter_tab, text="Browse Files", command=browse_files)
         button_explore.grid(column=1, row=2)
 

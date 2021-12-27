@@ -6,7 +6,6 @@ def get_tracedata_from_file(file, cols):
     df = pd.read_csv(file, header=0, delimiter=',')
     res_list = []
     df.drop(df.columns[cols], axis=1, inplace=True)
-    print(df)
     for column in df:
         res_list.append(df[column].values.reshape(1, -1).ravel().tolist())
     return res_list
@@ -19,7 +18,7 @@ trace_template = {"traceheader": {
         "description": "",
         "date": "",
         "user": "",
-        "customfield": ""
+        "additional information": ""
     },
     "statistical characteristics": {
         "mean": [],
