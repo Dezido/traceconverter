@@ -1,4 +1,5 @@
 import json
+import tkinter
 import tkinter.filedialog as fd
 import os
 from tkinter import *
@@ -47,11 +48,10 @@ class TraceConverterGUI:
         Label(convert_tab, text="Hints", font='TkDefaultFont 10 bold').grid(row=0, column=3)
         Label(convert_tab, text="Choose the trace you want to convert").grid(row=1, column=3)
         Label(convert_tab, text="Which columns of the original trace contain the relevant tracedata."
-                                " Delimit multiple numbers with a ',' ").grid(row=2, column=3)
+                                " Delimiter: , ").grid(row=2, column=3)
         Label(convert_tab, text="From which source (repository/archive) does the trace originate").grid(row=3, column=3)
         Label(convert_tab, text="Description of the whole trace").grid(row=4, column=3)
-        Label(convert_tab, text="Description of the tracedata. If the tracedata consists of multiple columns use '||' "
-                                "between describing different columns.  ").grid(row=5, column=3)
+        Label(convert_tab, text="Description of the tracedata. Delimiter: ||").grid(row=5, column=3)
         Label(convert_tab, text="Date of the conversion").grid(row=6, column=3)
         Label(convert_tab, text="Who is using the tool").grid(row=7, column=3)
         Label(convert_tab, text="Additional information about the trace (optional)").grid(row=8, column=3)
@@ -166,6 +166,32 @@ class TraceConverterGUI:
                                               height=4)
             label_selected_tracenames.grid(column=1, row=2)
             # print(selected_traces)
+
+        statistic_options = ["mean",
+                             "median",
+                             "skew",
+                             "kurtosis",
+                             "autocorrelation"]
+
+        operator_options = ["equal: =",
+                            "not equal: !=",
+                            "less than: <",
+                            "less than or equal to: <=",
+                            "greater than: >",
+                            "greater than or equal to: >="
+                            ]
+
+        statistics_variable = tkinter.StringVar(filter_tab)
+        statistics_variable.set(statistic_options[0])
+        statistic_option_menu = tkinter.OptionMenu(filter_tab, statistics_variable, *statistic_options)
+        statistic_option_menu.config(width=12, font=('TkDefaultFont', 10))
+        statistic_option_menu.grid(column=3, row=0)
+
+        operator_variable = tkinter.StringVar(filter_tab)
+        operator_variable.set(operator_options[0])
+        operator_option_menu = tkinter.OptionMenu(filter_tab, operator_variable, *operator_options)
+        operator_option_menu.config(width=12, font=('TkDefaultFont', 10))
+        operator_option_menu.grid(column=3, row=2)
 
         # Label and Buttons
         button_explore = Button(filter_tab, text="Browse Files", command=browse_files)
