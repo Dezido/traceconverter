@@ -1,3 +1,4 @@
+import datetime
 import json
 import tkinter
 import tkinter.filedialog as fd
@@ -42,7 +43,7 @@ class TraceConverterGUI:
         Label(convert_tab, text="Tracesource").grid(row=3)
         Label(convert_tab, text="Tracedescription").grid(row=4)
         Label(convert_tab, text="Tracedatadescription").grid(row=5)
-        Label(convert_tab, text="Date").grid(row=6)
+        # Label(convert_tab, text="Date").grid(row=6)
         Label(convert_tab, text="Username").grid(row=7)
         Label(convert_tab, text="Additional Information").grid(row=8)
         Label(convert_tab, text="Result Filename").grid(row=9)
@@ -57,7 +58,7 @@ class TraceConverterGUI:
         Label(convert_tab, text="From which source (repository/archive) does the trace originate").grid(row=3, column=3)
         Label(convert_tab, text="Description of the whole trace").grid(row=4, column=3)
         Label(convert_tab, text="Description of the tracedata. Delimiter: ||").grid(row=5, column=3)
-        Label(convert_tab, text="Date of the conversion").grid(row=6, column=3)
+        # Label(convert_tab, text="Date of the conversion").grid(row=6, column=3)
         Label(convert_tab, text="Who is using the tool").grid(row=7, column=3)
         Label(convert_tab, text="Additional information about the trace (optional)").grid(row=8, column=3)
         Label(convert_tab, text="Filename for the converted trace").grid(row=9, column=3)
@@ -87,8 +88,8 @@ class TraceConverterGUI:
                                  config.get('default_entries', 'default_description_entry'))
         tracedatadescription_entry = Entry(convert_tab, width=53)
         tracedatadescription_entry.insert(END,  config.get('default_entries', 'default_tracedatadescription_entry'))
-        date_entry = Entry(convert_tab, width=53)
-        date_entry.insert(END, "27.12.2021")
+        # date_entry = Entry(convert_tab, width=53)
+        # date_entry.insert(END, "27.12.2021")
         username_entry = Entry(convert_tab, width=53)
         username_entry.insert(END, config.get('default_entries', 'default_username_entry'))
         custom_field_entry = Text(convert_tab, width=40, height=20)
@@ -104,7 +105,7 @@ class TraceConverterGUI:
         source_entry.grid(row=3, column=1)
         description_entry.grid(row=4, column=1)
         tracedatadescription_entry.grid(row=5, column=1)
-        date_entry.grid(row=6, column=1)
+        # date_entry.grid(row=6, column=1)
         username_entry.grid(row=7, column=1)
         custom_field_entry.grid(row=8, column=1)
         result_filename_entry.grid(row=9, column=1)
@@ -117,7 +118,7 @@ class TraceConverterGUI:
             trace_template["traceheader"]["metainformation"]["name"] = org_name_entry.get()
             trace_template["traceheader"]["metainformation"]["source"] = source_entry.get()
             trace_template["traceheader"]["metainformation"]["description"] = description_entry.get()
-            trace_template["traceheader"]["metainformation"]["date"] = date_entry.get()
+            trace_template["traceheader"]["metainformation"]["date"] = str(datetime.datetime.now())
             trace_template["traceheader"]["metainformation"]["user"] = username_entry.get()
             if len(custom_field_entry.get('1.0', 'end-1c')) != 0:
                 trace_template["traceheader"]["metainformation"]["additional information"] = custom_field_entry. \
