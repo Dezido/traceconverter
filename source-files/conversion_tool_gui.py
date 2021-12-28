@@ -169,9 +169,10 @@ class TraceConverterGUI:
                     tracename_list.append(os.path.basename(i))
             selected_traces.clear()
             selected_traces.append(trace_list)
-            label_selected_tracenames = Label(filter_tab, text=str(tracename_list))
-            label_selected_tracenames.grid(column=1, row=2)
-            # print(selected_traces)
+            trace_lb = Listbox(filter_tab, width=50)
+            for i in range(len(tracename_list)):
+                trace_lb.insert(i, tracename_list[i])
+            trace_lb.grid(column=1, row=2)
 
         statistic_options = [
             "mean",
