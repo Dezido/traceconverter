@@ -80,6 +80,7 @@ class TraceConverterGUI:
         org_name_button = Button(convert_tab, text="Browse Files", command=browse_file)
 
         columns_entry = Entry(convert_tab, width=53)
+        # noinspection PyTypeChecker
         columns_entry.insert(END, ['0'])
         source_entry = Entry(convert_tab, width=53)
         source_entry.insert(END, config.get('default_entries', 'default_source_entry'))
