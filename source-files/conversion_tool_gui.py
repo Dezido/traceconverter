@@ -2,6 +2,7 @@ import json
 import tkinter
 import tkinter.filedialog as fd
 import os
+import configparser
 from tkinter import *
 from tkinter import ttk
 
@@ -29,9 +30,13 @@ class TraceConverterGUI:
 
         tab_parent.pack(expand=1, fill='both')
 
+        # Load config
+        config = configparser.RawConfigParser()
+        config.read('config.properties')
+
         # === Converting Tab Widgets
         # Labels
-        Label(convert_tab, text="Field", font='TkDefaultFont 10 bold').grid(row=0)
+        Label(convert_tab, text="Field", font=config.get('fonts', 'default_font_bold')).grid(row=0)
         Label(convert_tab, text="Trace").grid(row=1)
         Label(convert_tab, text="Columns to keep").grid(row=2)
         Label(convert_tab, text="Tracesource").grid(row=3)
@@ -42,10 +47,10 @@ class TraceConverterGUI:
         Label(convert_tab, text="Additional Information").grid(row=8)
         Label(convert_tab, text="Result Filename").grid(row=9)
 
-        Label(convert_tab, text="Input", font='TkDefaultFont 10 bold').grid(row=0, column=1)
+        Label(convert_tab, text="Input", font=config.get('fonts', 'default_font_bold')).grid(row=0, column=1)
 
         # Hints
-        Label(convert_tab, text="Hints", font='TkDefaultFont 10 bold').grid(row=0, column=3)
+        Label(convert_tab, text="Hints", font=config.get('fonts', 'default_font_bold')).grid(row=0, column=3)
         Label(convert_tab, text="Choose the trace you want to convert").grid(row=1, column=3)
         Label(convert_tab, text="Which columns of the original trace contain the relevant tracedata."
                                 " Delimiter: , ").grid(row=2, column=3)
@@ -63,8 +68,7 @@ class TraceConverterGUI:
             # Clears entry before new filepath is chosen
             org_name_entry.delete(0, END)
             sel_file = fd.askopenfilename(initialdir=
-                                          "C:/Users/Dennis/PycharmProjects/"
-                                          "traceconverter/source-files/raw_traces",
+                                          config.get('directories', 'raw_traces_dir'),
                                           title="Select a File",
                                           filetypes=(("CSV files", "*.csv*"),))
 
@@ -77,22 +81,21 @@ class TraceConverterGUI:
         columns_entry = Entry(convert_tab, width=53)
         columns_entry.insert(END, ['0'])
         source_entry = Entry(convert_tab, width=53)
-        source_entry.insert(END, "Example Tracerepository")
+        source_entry.insert(END, config.get('default_entries', 'default_source_entry'))
         description_entry = Entry(convert_tab, width=53)
         description_entry.insert(END,
-                                 "Exampledescription")
+                                 config.get('default_entries', 'default_description_entry'))
         tracedatadescription_entry = Entry(convert_tab, width=53)
-        tracedatadescription_entry.insert(END, "Exampledatadescription")
+        tracedatadescription_entry.insert(END,  config.get('default_entries', 'default_tracedatadescription_entry'))
         date_entry = Entry(convert_tab, width=53)
         date_entry.insert(END, "27.12.2021")
         username_entry = Entry(convert_tab, width=53)
-        username_entry.insert(END, "Dennis Ziebart")
+        username_entry.insert(END, config.get('default_entries', 'default_username_entry'))
         custom_field_entry = Text(convert_tab, width=40, height=20)
         custom_field_entry.insert(END,
-                                  "Additional information about the Trace: "
-                                  "Exampleinformation")
+                                  config.get('default_entries', 'default_customfield_entry'))
         result_filename_entry = Entry(convert_tab, width=53)
-        result_filename_entry.insert(END, "exampleresult")
+        result_filename_entry.insert(END, config.get('default_entries', 'default_filename_entry'))
 
         # Place Entries
         org_name_button.grid(row=1, column=2)
@@ -150,8 +153,7 @@ class TraceConverterGUI:
 
         def browse_files():
             file_tuple = fd.askopenfilenames(initialdir=
-                                             "C:/Users/Dennis/PycharmProjects/"
-                                             "traceconverter/source-files/converted_traces",
+                                             config.get('directories', 'converted_traces_dir'),
                                              title="Select a File",
                                              filetypes=(("JSON files", "*.json*"),))
             trace_list = []
@@ -184,13 +186,13 @@ class TraceConverterGUI:
         statistics_variable = tkinter.StringVar(filter_tab)
         statistics_variable.set(statistic_options[0])
         statistic_option_menu = tkinter.OptionMenu(filter_tab, statistics_variable, *statistic_options)
-        statistic_option_menu.config(width=12, font=('TkDefaultFont', 10))
+        statistic_option_menu.config(width=12, font=(config.get('fonts', 'default_font'), 10))
         statistic_option_menu.grid(column=3, row=0)
 
         operator_variable = tkinter.StringVar(filter_tab)
         operator_variable.set(operator_options[0])
         operator_option_menu = tkinter.OptionMenu(filter_tab, operator_variable, *operator_options)
-        operator_option_menu.config(width=12, font=('TkDefaultFont', 10))
+        operator_option_menu.config(width=12, font=(config.get('fonts', 'default_font'), 10))
         operator_option_menu.grid(column=3, row=2)
 
         # Label and Buttons
@@ -209,8 +211,7 @@ class TraceConverterGUI:
         def browse_trace():
             choose_trace_entry_profido.delete(0, END)
             selected_trace_profido = fd.askopenfilename(initialdir=
-                                                        "C:/Users/Dennis/PycharmProjects/"
-                                                        "traceconverter/source-files/converted_traces",
+                                                        config.get('directories', 'converted_traces_dir'),
                                                         title="Select a File",
                                                         filetypes=(("JSON files", "*.json*"),))
             choose_trace_entry_profido.insert(END, selected_trace_profido)
