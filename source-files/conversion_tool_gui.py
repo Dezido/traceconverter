@@ -1,9 +1,9 @@
+import configparser
 import datetime
 import json
+import os
 import tkinter
 import tkinter.filedialog as fd
-import os
-import configparser
 from tkinter import *
 from tkinter import ttk
 
@@ -87,7 +87,7 @@ class TraceConverterGUI:
         description_entry.insert(END,
                                  config.get('default_entries', 'default_description_entry'))
         tracedatadescription_entry = Entry(convert_tab, width=53)
-        tracedatadescription_entry.insert(END,  config.get('default_entries', 'default_tracedatadescription_entry'))
+        tracedatadescription_entry.insert(END, config.get('default_entries', 'default_tracedatadescription_entry'))
         # date_entry = Entry(convert_tab, width=53)
         # date_entry.insert(END, "27.12.2021")
         username_entry = Entry(convert_tab, width=53)
@@ -146,8 +146,10 @@ class TraceConverterGUI:
             trace_template["traceheader"]["statistical characteristics"]["kurtosis"].clear()
             trace_template["traceheader"]["statistical characteristics"]["autocorrelation"].clear()
 
-        Button(convert_tab, text='Exit', command=master.destroy).grid(row=10, column=8, sticky=W, pady=4)
-        Button(convert_tab, text='Convert', command=convert_trace).grid(row=10, column=1, sticky=W, pady=4)
+        exit_button_convert_tab = Button(convert_tab, text='Exit', command=master.destroy)
+        exit_button_convert_tab.grid(row=10, column=8, sticky=W, pady=4)
+        convert_button_convert_tab = Button(convert_tab, text='Convert', command=convert_trace)
+        convert_button_convert_tab.grid(row=10, column=1, sticky=W, pady=4)
 
         # === Filter Tab Widgets
         selected_traces = []
@@ -200,8 +202,8 @@ class TraceConverterGUI:
         button_explore = Button(filter_tab, text="Browse Files", command=browse_files)
         button_explore.grid(column=1, row=2)
 
-        button_exit = Button(filter_tab, text="Exit", command=master.destroy)
-        button_exit.grid(column=1, row=3)
+        exit_button_filter_tab = Button(filter_tab, text="Exit", command=master.destroy)
+        exit_button_filter_tab.grid(column=1, row=3)
 
         # ===ProFiDo format Tab
 
@@ -234,7 +236,10 @@ class TraceConverterGUI:
 
         extract_columns_button_profido = Button(profido_format_tab, text="Extract ProFiDo format from trace",
                                                 command=extract_columns)
-        extract_columns_button_profido.grid(row=1, column=2)
+        extract_columns_button_profido.grid(row=3, column=1)
+
+        exit_button_profido_tab = Button(profido_format_tab, text='Exit', command=master.destroy)
+        exit_button_profido_tab.grid(row=3, column=2, sticky=W, pady=4)
 
 
 # Create TCGUI instance and run mainloop
