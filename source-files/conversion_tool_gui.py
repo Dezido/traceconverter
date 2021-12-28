@@ -68,8 +68,7 @@ class TraceConverterGUI:
         def browse_file():
             # Clears entry before new filepath is chosen
             org_name_entry.delete(0, END)
-            sel_file = fd.askopenfilename(initialdir=
-                                          config.get('directories', 'raw_traces_dir'),
+            sel_file = fd.askopenfilename(initialdir=config.get('directories', 'raw_traces_dir'),
                                           title="Select a File",
                                           filetypes=(("CSV files", "*.csv*"),))
 
@@ -153,11 +152,13 @@ class TraceConverterGUI:
         convert_button_convert_tab.grid(row=10, column=1, sticky=W, pady=4)
 
         # === Filter Tab Widgets
+        selected_traces_label = Label(filter_tab, text="Selected traces")
+        selected_traces_label.grid(column=1, row=1)
+
         selected_traces = []
 
         def browse_files():
-            file_tuple = fd.askopenfilenames(initialdir=
-                                             config.get('directories', 'converted_traces_dir'),
+            file_tuple = fd.askopenfilenames(initialdir=config.get('directories', 'converted_traces_dir'),
                                              title="Select a File",
                                              filetypes=(("JSON files", "*.json*"),))
             trace_list = []
@@ -168,54 +169,62 @@ class TraceConverterGUI:
                     tracename_list.append(os.path.basename(i))
             selected_traces.clear()
             selected_traces.append(trace_list)
-            label_selected_tracenames = Label(filter_tab, text="Selected files: " + str(tracename_list), width=100,
-                                              height=4)
+            label_selected_tracenames = Label(filter_tab, text=str(tracename_list))
             label_selected_tracenames.grid(column=1, row=2)
             # print(selected_traces)
 
-        statistic_options = ["mean",
-                             "median",
-                             "skew",
-                             "kurtosis",
-                             "autocorrelation"]
+        statistic_options = [
+            "mean",
+            "median",
+            "skew",
+            "kurtosis",
+            "autocorrelation"
+        ]
 
-        operator_options = ["equal: =",
-                            "not equal: !=",
-                            "less than: <",
-                            "less than or equal to: <=",
-                            "greater than: >",
-                            "greater than or equal to: >="
-                            ]
+        operator_options = [
+            "equal: =",
+            "not equal: !=",
+            "less than: <",
+            "less than or equal to: <=",
+            "greater than: >",
+            "greater than or equal to: >="
+        ]
 
-        statistics_variable = tkinter.StringVar(filter_tab)
-        statistics_variable.set(statistic_options[0])
-        statistic_option_menu = tkinter.OptionMenu(filter_tab, statistics_variable, *statistic_options)
-        statistic_option_menu.config(width=12, font=(config.get('fonts', 'default_font'), 10))
-        statistic_option_menu.grid(column=3, row=0)
+        statistics_label = Label(filter_tab, text="Statistical characteristic")
+        statistics_label.grid(column=2, row=1)
+        statistics_combobox = ttk.Combobox(filter_tab, state="readonly", values=statistic_options)
+        statistics_combobox.grid(column=2, row=2)
+        statistics_combobox.current(0)
 
-        operator_variable = tkinter.StringVar(filter_tab)
-        operator_variable.set(operator_options[0])
-        operator_option_menu = tkinter.OptionMenu(filter_tab, operator_variable, *operator_options)
-        operator_option_menu.config(width=12, font=(config.get('fonts', 'default_font'), 10))
-        operator_option_menu.grid(column=3, row=2)
+        operator_label = Label(filter_tab, text="comparison operator")
+        operator_label.grid(column=3, row=1)
+        operator_combobox = ttk.Combobox(filter_tab, state="readonly", values=operator_options, width=30)
+        operator_combobox.grid(column=3, row=2)
+        operator_combobox.current(0)
+
+        value_label = Label(filter_tab, text="Comparison value")
+        value_label.grid(column=4, row=1)
+        value_entry = Entry(filter_tab, width=25)
+        value_entry.grid(column=4, row=2)
 
         # Label and Buttons
+        filter_button = Button(filter_tab, text="Filter Traces", command=print("Filtering traces"))  # TODO command
+        filter_button.grid(column=5, row=2)
+
         button_explore = Button(filter_tab, text="Browse Files", command=browse_files)
-        button_explore.grid(column=1, row=2)
+        button_explore.grid(column=1, row=3)
 
         exit_button_filter_tab = Button(filter_tab, text="Exit", command=master.destroy)
-        exit_button_filter_tab.grid(column=1, row=3)
+        exit_button_filter_tab.grid(column=2, row=3)
 
         # ===ProFiDo format Tab
-
         Label(profido_format_tab, text="Trace").grid(row=0)
         Label(profido_format_tab, text="Result filename").grid(row=1)
         choose_trace_entry_profido = Entry(profido_format_tab, width=53)
 
         def browse_trace():
             choose_trace_entry_profido.delete(0, END)
-            selected_trace_profido = fd.askopenfilename(initialdir=
-                                                        config.get('directories', 'converted_traces_dir'),
+            selected_trace_profido = fd.askopenfilename(initialdir=config.get('directories', 'converted_traces_dir'),
                                                         title="Select a File",
                                                         filetypes=(("JSON files", "*.json*"),))
             choose_trace_entry_profido.insert(END, selected_trace_profido)
