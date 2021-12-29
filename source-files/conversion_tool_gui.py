@@ -77,6 +77,7 @@ class TraceConverterGUI:
 
             org_name_entry.insert(END, sel_file)
             org_name_entry.grid(row=1, column=1)
+            org_name_button.grid(row=1, column=2)
 
         # Entries
         org_name_button = Button(convert_tab, text="Browse Files", command=browse_file)
@@ -103,7 +104,7 @@ class TraceConverterGUI:
         result_filename_entry.insert(END, config.get('default_entries', 'default_filename_entry'))
 
         # Place Entries
-        org_name_button.grid(row=1, column=2)
+        org_name_button.grid(row=1, column=1)
 
         columns_entry.grid(row=2, column=1)
         source_entry.grid(row=3, column=1)
@@ -140,8 +141,13 @@ class TraceConverterGUI:
                 trace_template["traceheader"]["statistical characteristics"]["autocorrelation"].append(df[0].autocorr())
 
             # Saves trace to file
-            with open('converted_traces/' + result_filename_entry.get() + '_converted.json', 'w') as fp:
-                json.dump(trace_template, fp, indent=4)
+            try:
+                with open('converted_traces/' + result_filename_entry.get() + '_converted.json', 'w') as fp:
+                    json.dump(trace_template, fp, indent=4)
+            except BaseException as e:
+                print("Error while converting trace: " + str(e))
+                Label(profido_format_tab, bg="red", text="An error occurred. Are all inputs valid?").grid(column=0,
+                                                                                                          row=4)
 
             # Clear statistic lists so the next trace won't have old values
             trace_template["traceheader"]["statistical characteristics"]["mean"].clear()
@@ -150,33 +156,42 @@ class TraceConverterGUI:
             trace_template["traceheader"]["statistical characteristics"]["kurtosis"].clear()
             trace_template["traceheader"]["statistical characteristics"]["autocorrelation"].clear()
 
-        exit_button_convert_tab = Button(convert_tab, text='Exit', command=master.destroy)
-        exit_button_convert_tab.grid(row=10, column=8, sticky=W, pady=4)
-        convert_button_convert_tab = Button(convert_tab, text='Convert', command=convert_trace)
-        convert_button_convert_tab.grid(row=10, column=1, sticky=W, pady=4)
+        exit_button_ct = Button(convert_tab, text='Exit', command=master.destroy)
+        exit_button_ct.grid(row=10, column=8, sticky=W, pady=4)
+        convert_button_ct = Button(convert_tab, text='Convert', command=convert_trace)
+        convert_button_ct.grid(row=10, column=1, sticky=W, pady=4)
 
         # === Filter Tab Widgets
         selected_traces_label = Label(filter_tab, text="Selected traces")
         selected_traces_label.grid(column=1, row=1)
 
-        selected_traces = []
+        trace_lb = Listbox(filter_tab, width=50)
+        result_lb = Listbox(filter_tab, width=50)
+
+        sel_names_ft = []
+        sel_files_ft = []
 
         def browse_files():
             file_tuple = fd.askopenfilenames(initialdir=config.get('directories', 'converted_traces_dir'),
                                              title="Select a File",
                                              filetypes=(("JSON files", "*.json*"),))
-            trace_list = []
-            tracename_list = []
+            trace_lb.delete(0, 'end')
+            sel_files_ft.clear()
+            sel_names_ft.clear()
             for i in file_tuple:
                 with open(str(i)) as json_file:
-                    trace_list.append(json.load(json_file))
-                    tracename_list.append(os.path.basename(i))
-            selected_traces.clear()
-            selected_traces.append(trace_list)
-            trace_lb = Listbox(filter_tab, width=50)
-            for i in range(len(tracename_list)):
-                trace_lb.insert(i, tracename_list[i])
+                    sel_files_ft.append(json.load(json_file))
+                    sel_names_ft.append(os.path.basename(i))
+            for i in range(len(sel_names_ft)):
+                trace_lb.insert(i, sel_names_ft[i])
             trace_lb.grid(column=1, row=2)
+            browse_button_ft.grid(column=1, row=3)
+
+        def filter_traces():
+            print(sel_names_ft)
+            result_lb.delete(0, 'end')
+            Label(filter_tab, text="Results").grid(column=1, row=4)
+            result_lb.grid(column=1, row=5)
 
         statistic_options = [
             "mean",
@@ -213,14 +228,14 @@ class TraceConverterGUI:
         value_entry.grid(column=4, row=2)
 
         # Label and Buttons
-        filter_button = Button(filter_tab, text="Filter Traces", command=logging.info(""))  # TODO command
+        filter_button = Button(filter_tab, text="Filter Traces", command=filter_traces)  # TODO command
         filter_button.grid(column=5, row=2)
 
-        button_explore = Button(filter_tab, text="Browse Files", command=browse_files)
-        button_explore.grid(column=1, row=3)
+        browse_button_ft = Button(filter_tab, text="Browse Files", command=browse_files)
+        browse_button_ft.grid(column=1, row=2)
 
-        exit_button_filter_tab = Button(filter_tab, text="Exit", command=master.destroy)
-        exit_button_filter_tab.grid(column=2, row=3)
+        exit_button_ft = Button(filter_tab, text="Exit", command=master.destroy)
+        exit_button_ft.grid(column=2, row=3)
 
         # ===ProFiDo format Tab
         Label(profido_format_tab, text="Trace").grid(row=0)
@@ -234,27 +249,34 @@ class TraceConverterGUI:
                                                         filetypes=(("JSON files", "*.json*"),))
             choose_trace_entry_profido.insert(END, selected_trace_profido)
             choose_trace_entry_profido.grid(row=0, column=1)
+            choose_trace_button_pt.grid(row=0, column=2)
 
         def extract_columns():
-            with open(choose_trace_entry_profido.get()) as trace_in:
-                tracedata = json.load(trace_in)["tracebody"]["tracedata"]
-                df = pandas.DataFrame(tracedata)
-                df.transpose().to_csv(result_filename_entry_profido.get() + '_dat.trace', sep='\t', float_format="%e",
-                                      index=False, header=False)
 
-        choose_trace_button_profido = Button(profido_format_tab, text="Browse Trace",
-                                             command=browse_trace)
-        choose_trace_button_profido.grid(row=0, column=2)
+            try:
+                with open(choose_trace_entry_profido.get()) as trace_in:
+                    tracedata = json.load(trace_in)["tracebody"]["tracedata"]
+                    df = pandas.DataFrame(tracedata)
+                    df.transpose().to_csv(result_filename_entry_pt.get() + '_dat.trace', sep='\t',
+                                          float_format="%e",
+                                          index=False, header=False)
+            except BaseException as e:
+                print("Error while extracting columns: " + str(e))
+                Label(profido_format_tab, bg="red", text="An error occurred. Are all inputs valid?").grid(column=0,
+                                                                                                          row=4)
 
-        result_filename_entry_profido = Entry(profido_format_tab, width=config.get('entries', 'entry_width'))
-        result_filename_entry_profido.grid(row=1, column=1)
+        choose_trace_button_pt = Button(profido_format_tab, text="Browse Trace", command=browse_trace)
+        choose_trace_button_pt.grid(row=0, column=1)
 
-        extract_columns_button_profido = Button(profido_format_tab, text="Extract ProFiDo format from trace",
-                                                command=extract_columns)
-        extract_columns_button_profido.grid(row=3, column=1)
+        result_filename_entry_pt = Entry(profido_format_tab, width=config.get('entries', 'entry_width'))
+        result_filename_entry_pt.grid(row=1, column=1)
 
-        exit_button_profido_tab = Button(profido_format_tab, text='Exit', command=master.destroy)
-        exit_button_profido_tab.grid(row=3, column=2, sticky=W, pady=4)
+        extract_columns_button_pt = Button(profido_format_tab, text="Extract ProFiDo format from trace",
+                                           command=extract_columns)
+        extract_columns_button_pt.grid(row=3, column=1)
+
+        exit_button_pt = Button(profido_format_tab, text='Exit', command=master.destroy)
+        exit_button_pt.grid(row=3, column=2, sticky=W, pady=4)
 
 
 # Create TCGUI instance and run mainloop
