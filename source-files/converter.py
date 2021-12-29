@@ -1,8 +1,16 @@
+import configparser
 import json
+import logging
 import os
 
 import pandas as pd
 
+# Load config
+config = configparser.RawConfigParser()
+config.read('config.properties')
+
+# Logging
+logging.basicConfig(format=config.get('logging', 'logging_format'), level=logging.INFO)
 
 # Gets the relevant columns and adds each column as a separate list into the result list
 def get_tracedata_from_file(file, cols):
@@ -14,7 +22,8 @@ def get_tracedata_from_file(file, cols):
     df.drop(df.columns[relevant_column_numbers], axis=1, inplace=True)
     for column in df:
         tracedata_list.append(df[column].values.reshape(1, -1).ravel().tolist())
-    print("Tracedata from " + os.path.basename(file) + " successfully retrieved")
+    # print("Tracedata from " + os.path.basename(file) + " successfully retrieved")
+    logging.info("Tracedata from " + os.path.basename(file) + " successfully retrieved")
     return tracedata_list
 
 

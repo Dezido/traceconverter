@@ -1,8 +1,8 @@
 import configparser
 import datetime
 import json
+import logging
 import os
-import tkinter
 import tkinter.filedialog as fd
 from tkinter import *
 from tkinter import ttk
@@ -12,6 +12,12 @@ import pandas as pd
 
 from converter import trace_template, get_tracedata_from_file
 
+# Load config
+config = configparser.RawConfigParser()
+config.read('config.properties')
+
+# Logging
+logging.basicConfig(format=config.get('logging', 'logging_format'), level=logging.INFO)
 
 class TraceConverterGUI:
     def __init__(self, master):
@@ -31,9 +37,7 @@ class TraceConverterGUI:
 
         tab_parent.pack(expand=1, fill='both')
 
-        # Load config
-        config = configparser.RawConfigParser()
-        config.read('config.properties')
+
 
         # === Converting Tab Widgets
         # Labels
@@ -63,7 +67,7 @@ class TraceConverterGUI:
         Label(convert_tab, text="Additional information about the trace (optional)").grid(row=8, column=3)
         Label(convert_tab, text="Filename for the converted trace").grid(row=9, column=3)
 
-        org_name_entry = Entry(convert_tab, width=53)
+        org_name_entry = Entry(convert_tab, width=config.get('entries', 'entry_width'))
 
         def browse_file():
             # Clears entry before new filepath is chosen
@@ -78,24 +82,24 @@ class TraceConverterGUI:
         # Entries
         org_name_button = Button(convert_tab, text="Browse Files", command=browse_file)
 
-        columns_entry = Entry(convert_tab, width=53)
+        columns_entry = Entry(convert_tab, width=config.get('entries', 'entry_width'))
         # noinspection PyTypeChecker
         columns_entry.insert(END, ['0'])
-        source_entry = Entry(convert_tab, width=53)
+        source_entry = Entry(convert_tab, width=config.get('entries', 'entry_width'))
         source_entry.insert(END, config.get('default_entries', 'default_source_entry'))
-        description_entry = Entry(convert_tab, width=53)
+        description_entry = Entry(convert_tab, width=config.get('entries', 'entry_width'))
         description_entry.insert(END,
                                  config.get('default_entries', 'default_description_entry'))
-        tracedatadescription_entry = Entry(convert_tab, width=53)
+        tracedatadescription_entry = Entry(convert_tab, width=config.get('entries', 'entry_width'))
         tracedatadescription_entry.insert(END, config.get('default_entries', 'default_tracedatadescription_entry'))
-        # date_entry = Entry(convert_tab, width=53)
+        # date_entry = Entry(convert_tab, width=config.get('entries', 'entry_width'))
         # date_entry.insert(END, "27.12.2021")
-        username_entry = Entry(convert_tab, width=53)
+        username_entry = Entry(convert_tab, width=config.get('entries', 'entry_width'))
         username_entry.insert(END, config.get('default_entries', 'default_username_entry'))
-        custom_field_entry = Text(convert_tab, width=40, height=20)
+        custom_field_entry = Text(convert_tab, width=config.get('entries', 'entry_width'), height=20, font=config.get('fonts', 'default_font'))
         custom_field_entry.insert(END,
                                   config.get('default_entries', 'default_customfield_entry'))
-        result_filename_entry = Entry(convert_tab, width=53)
+        result_filename_entry = Entry(convert_tab, width=config.get('entries', 'entry_width'))
         result_filename_entry.insert(END, config.get('default_entries', 'default_filename_entry'))
 
         # Place Entries
@@ -209,7 +213,7 @@ class TraceConverterGUI:
         value_entry.grid(column=4, row=2)
 
         # Label and Buttons
-        filter_button = Button(filter_tab, text="Filter Traces", command=print("Filtering traces"))  # TODO command
+        filter_button = Button(filter_tab, text="Filter Traces", command=logging.info(""))  # TODO command
         filter_button.grid(column=5, row=2)
 
         button_explore = Button(filter_tab, text="Browse Files", command=browse_files)
@@ -221,7 +225,7 @@ class TraceConverterGUI:
         # ===ProFiDo format Tab
         Label(profido_format_tab, text="Trace").grid(row=0)
         Label(profido_format_tab, text="Result filename").grid(row=1)
-        choose_trace_entry_profido = Entry(profido_format_tab, width=53)
+        choose_trace_entry_profido = Entry(profido_format_tab, width=config.get('entries', 'entry_width'))
 
         def browse_trace():
             choose_trace_entry_profido.delete(0, END)
@@ -242,7 +246,7 @@ class TraceConverterGUI:
                                              command=browse_trace)
         choose_trace_button_profido.grid(row=0, column=2)
 
-        result_filename_entry_profido = Entry(profido_format_tab, width=53)
+        result_filename_entry_profido = Entry(profido_format_tab, width=config.get('entries', 'entry_width'))
         result_filename_entry_profido.grid(row=1, column=1)
 
         extract_columns_button_profido = Button(profido_format_tab, text="Extract ProFiDo format from trace",
