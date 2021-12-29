@@ -12,6 +12,7 @@ config.read('config.properties')
 # Logging
 logging.basicConfig(format=config.get('logging', 'logging_format'), level=logging.INFO)
 
+
 # Gets the relevant columns and adds each column as a separate list into the result list
 def get_tracedata_from_file(file, cols):
     df = pd.read_csv(file, header=0, delimiter=',')

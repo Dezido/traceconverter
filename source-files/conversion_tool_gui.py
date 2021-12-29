@@ -19,6 +19,7 @@ config.read('config.properties')
 # Logging
 logging.basicConfig(format=config.get('logging', 'logging_format'), level=logging.INFO)
 
+
 class TraceConverterGUI:
     def __init__(self, master):
         self.master = master
@@ -36,8 +37,6 @@ class TraceConverterGUI:
         tab_parent.add(profido_format_tab, text="ProFiDo Format from Trace")
 
         tab_parent.pack(expand=1, fill='both')
-
-
 
         # === Converting Tab Widgets
         # Labels
@@ -96,7 +95,8 @@ class TraceConverterGUI:
         # date_entry.insert(END, "27.12.2021")
         username_entry = Entry(convert_tab, width=config.get('entries', 'entry_width'))
         username_entry.insert(END, config.get('default_entries', 'default_username_entry'))
-        custom_field_entry = Text(convert_tab, width=config.get('entries', 'entry_width'), height=20, font=config.get('fonts', 'default_font'))
+        custom_field_entry = Text(convert_tab, width=config.get('entries', 'entry_width'), height=20,
+                                  font=config.get('fonts', 'default_font'))
         custom_field_entry.insert(END,
                                   config.get('default_entries', 'default_customfield_entry'))
         result_filename_entry = Entry(convert_tab, width=config.get('entries', 'entry_width'))
