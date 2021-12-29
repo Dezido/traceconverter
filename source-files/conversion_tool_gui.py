@@ -3,6 +3,7 @@ import datetime
 import json
 import logging
 import os
+import tkinter
 import tkinter.filedialog as fd
 from tkinter import *
 from tkinter import ttk
@@ -10,7 +11,7 @@ from tkinter import ttk
 import pandas
 import pandas as pd
 
-from converter import trace_template, get_tracedata_from_file, get_all_traces_from
+from converter import trace_template, get_tracedata_from_file
 
 # Load config
 config = configparser.RawConfigParser()
@@ -51,6 +52,25 @@ class TraceConverterGUI:
         Label(convert_tab, text="Result Filename").grid(row=9)
 
         Label(convert_tab, text="Input", font=config.get('fonts', 'default_font_bold')).grid(row=0, column=1)
+
+        ######
+        profido_name_entry_ct = Entry(convert_tab)
+
+        def show_name_entry():
+            if gen_profido.get() == 0:
+                profido_name_entry_ct.grid_forget()
+            if gen_profido.get() == 1:
+                profido_name_label_ct.grid(column=4, row=4)
+                profido_name_entry_ct.grid(column=4, row=5)
+
+        gen_profido = tkinter.IntVar()
+        gen_profido_checkbutton_ct = Checkbutton(convert_tab, text="extract ProFiDo format after conversion",
+                                                 variable=gen_profido, onvalue=1, offvalue=0, command=show_name_entry)
+        gen_profido_checkbutton_ct.grid(column=4, row=3)
+
+        profido_name_label_ct = Label(convert_tab, text="ProFiDo filename:")
+
+        ######
 
         # Hints
         # Label(convert_tab, text="Hints", font=config.get('fonts', 'default_font_bold')).grid(row=0, column=3)
@@ -163,11 +183,19 @@ class TraceConverterGUI:
                 trace_view_ct.delete("1.0", "end")
                 trace_view_ct.insert(INSERT, f.read())
                 trace_view_ct.config(state=DISABLED)
-                trace_view_ct.grid(column=4, row=1, columnspan=12, rowspan=10)
-                trace_view_label_ct.grid(column=4, row=0)
+                trace_view_ct.grid(column=5, row=1, columnspan=12, rowspan=10)
+                trace_view_label_ct.grid(column=5, row=0)
 
-            print(custom_field_entry.winfo_height())
-            print(org_name_entry.winfo_height())
+            if gen_profido.get() == 1:
+                extract_after_conversion('converted_traces/' + result_filename_entry.get() + '_converted.json')
+
+        def extract_after_conversion(filename):
+            with open(filename) as tr:
+                tracedata = json.load(tr)["tracebody"]["tracedata"]
+                df = pandas.DataFrame(tracedata)
+                df.transpose().to_csv(profido_name_entry_ct.get() + '_dat.trace', sep='\t',
+                                      float_format="%e",
+                                      index=False, header=False)
 
         exit_button_ct = Button(convert_tab, text='Exit', command=master.destroy)
         exit_button_ct.grid(row=12, column=8, sticky=W, pady=4)
@@ -198,8 +226,8 @@ class TraceConverterGUI:
                     sel_names_ft.append(os.path.basename(i))
             for i in range(len(sel_names_ft)):
                 trace_lb.insert(i, sel_names_ft[i])
-            trace_lb.grid(column=1, row=2)
-            browse_button_ft.grid(column=1, row=3)
+            trace_lb.grid(column=1, row=2, rowspan=5)
+            browse_button_ft.grid(column=1, row=8)
 
         def filter_traces():
             sel_filtered_ft.clear()
@@ -216,8 +244,8 @@ class TraceConverterGUI:
             sel_filtered_ft_unique = list(set(sel_filtered_ft))
             for i in range(len(sel_filtered_ft_unique)):
                 result_lb.insert(i, sel_filtered_ft_unique[i])
-            Label(filter_tab, text="Results").grid(column=1, row=4)
-            result_lb.grid(column=1, row=5)
+            Label(filter_tab, text="Results").grid(column=1, row=10)
+            result_lb.grid(column=1, row=11)
 
         statistic_options = [
             "mean",
@@ -257,10 +285,39 @@ class TraceConverterGUI:
         operator_combobox.grid(column=3, row=2)
         operator_combobox.current(0)
 
+        compare_statistics_label = Label(filter_tab, text="Statistical characteristic to compare")
+        compare_statistics_combobox = ttk.Combobox(filter_tab, state="readonly", values=statistic_options)
+        compare_statistics_combobox.current(0)
+
+        factor_label = Label(filter_tab, text="Factor:")
+        factor_entry = Entry(filter_tab, width=25)
+
         value_label = Label(filter_tab, text="Comparison value")
         value_label.grid(column=4, row=1)
         value_entry = Entry(filter_tab, width=25)
         value_entry.grid(column=4, row=2)
+
+        def check_self():
+            if comp_slf.get() == 1:
+                value_label.grid_forget()
+                value_entry.grid_forget()
+                compare_statistics_combobox.grid(column=4, row=2)
+                compare_statistics_label.grid(column=4, row=1)
+                factor_label.grid(column=5, row=1)
+                factor_entry.grid(column=5, row=2)
+                filter_button.grid(column=6, row=2)
+            if comp_slf.get() == 0:
+                factor_label.grid_forget()
+                factor_entry.grid_forget()
+                compare_statistics_label.grid_forget()
+                compare_statistics_combobox.grid_forget()
+                value_label.grid(column=4, row=1)
+                value_entry.grid(column=4, row=2)
+
+        comp_slf = tkinter.IntVar()
+        gen_profido_checkbutton_ct = Checkbutton(filter_tab, text="compare to own statistic", variable=comp_slf,
+                                                 onvalue=1, offvalue=0, command=check_self)
+        gen_profido_checkbutton_ct.grid(column=4, row=3)
 
         # Label and Buttons
         filter_button = Button(filter_tab, text="Filter Traces", command=filter_traces)
