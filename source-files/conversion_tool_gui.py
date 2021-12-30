@@ -234,13 +234,28 @@ class TraceConverterGUI:
             sel_filtered_ft.clear()
             statistic = statistics_combobox.get()
             operator = operator_combobox.get()
-            value = float(value_entry.get())
             comp = comp_ops[operator]
-            for i in range(len(sel_files_ft)):
-                trace_stat = sel_files_ft[i]["traceheader"]["statistical characteristics"][statistic]
-                for j in range(len(trace_stat)):
-                    if comp(trace_stat[j], value):
-                        sel_filtered_ft.append(os.path.basename(sel_names_ft[i]))
+            if comp_slf.get() == 0:
+                value = float(value_entry.get())
+                for i in range(len(sel_files_ft)):
+                    trace_stat = sel_files_ft[i]["traceheader"]["statistical characteristics"][statistic]
+                    for j in range(len(trace_stat)):
+                        if comp(trace_stat[j], value):
+                            sel_filtered_ft.append(os.path.basename(sel_names_ft[i]))
+
+            if comp_slf.get() == 1:
+                nbr = float(factor_entry.get())
+                comp_statistic = compare_statistics_combobox.get()
+                base_operator = base_op_combobox.get()
+                base_operate = base_ops[base_operator]
+                for i in range(len(sel_files_ft)):
+                    trace_stat = sel_files_ft[i]["traceheader"]["statistical characteristics"][statistic]
+                    comp_stat = sel_files_ft[i]["traceheader"]["statistical characteristics"][comp_statistic]
+                    for j in range(len(trace_stat)):
+                        value = base_operate(comp_stat[j], nbr)
+                        if comp(trace_stat[j], value):
+                            sel_filtered_ft.append(os.path.basename(sel_names_ft[i]))
+
             result_lb.delete(0, 'end')
             sel_filtered_ft_unique = list(set(sel_filtered_ft))
             for i in range(len(sel_filtered_ft_unique)):
@@ -256,13 +271,20 @@ class TraceConverterGUI:
             "autocorrelation"
         ]
 
-        operator_options = [
+        comp_operator_options = [
             "equal: ==",
             "not equal: !=",
             "less than: <",
             "less than or equal to: <=",
             "greater than: >",
             "greater than or equal to: >="
+        ]
+
+        base_operator_options = [
+            "plus: +",
+            "minus: -",
+            "multiplied by: *",
+            "divided by: /"
         ]
 
         comp_ops = {
@@ -274,23 +296,34 @@ class TraceConverterGUI:
             "greater than or equal to: >=": lambda x, y: x >= y
         }
 
+        base_ops = {
+            "plus: +": lambda x, y: x + y,
+            "minus: -": lambda x, y: x - y,
+            "multiplied by: *": lambda x, y: x * y,
+            "divided by: /": lambda x, y: x / y
+        }
+
         statistics_label = Label(filter_tab, text="Statistical characteristic")
         statistics_label.grid(column=2, row=1)
         statistics_combobox = ttk.Combobox(filter_tab, state="readonly", values=statistic_options)
         statistics_combobox.grid(column=2, row=2)
         statistics_combobox.current(0)
 
-        operator_label = Label(filter_tab, text="comparison operator")
+        operator_label = Label(filter_tab, text="Comparison operator")
         operator_label.grid(column=3, row=1)
-        operator_combobox = ttk.Combobox(filter_tab, state="readonly", values=operator_options, width=30)
+        operator_combobox = ttk.Combobox(filter_tab, state="readonly", values=comp_operator_options, width=30)
         operator_combobox.grid(column=3, row=2)
         operator_combobox.current(0)
 
-        compare_statistics_label = Label(filter_tab, text="Statistical characteristic to compare")
+        base_op_label = Label(filter_tab, text="Operation")
+        base_op_combobox = ttk.Combobox(filter_tab, state="readonly", values=base_operator_options)
+        base_op_combobox.current(0)
+
+        compare_statistics_label = Label(filter_tab, text="Comparison statistic")
         compare_statistics_combobox = ttk.Combobox(filter_tab, state="readonly", values=statistic_options)
         compare_statistics_combobox.current(0)
 
-        factor_label = Label(filter_tab, text="Factor:")
+        factor_label = Label(filter_tab, text="Number")
         factor_entry = Entry(filter_tab, width=25)
 
         value_label = Label(filter_tab, text="Comparison value")
@@ -298,16 +331,20 @@ class TraceConverterGUI:
         value_entry = Entry(filter_tab, width=25)
         value_entry.grid(column=4, row=2)
 
-        def check_self():
+        def self_comparison_check():
             if comp_slf.get() == 1:
                 value_label.grid_forget()
                 value_entry.grid_forget()
-                compare_statistics_combobox.grid(column=4, row=2)
-                compare_statistics_label.grid(column=4, row=1)
-                factor_label.grid(column=5, row=1)
-                factor_entry.grid(column=5, row=2)
-                filter_button.grid(column=6, row=2)
+                base_op_label.grid(column=5, row=1)
+                base_op_combobox.grid(column=5, row=2)
+                compare_statistics_label.grid(column=6, row=1)
+                compare_statistics_combobox.grid(column=6, row=2)
+                factor_label.grid(column=4, row=1)
+                factor_entry.grid(column=4, row=2)
+                filter_button.grid(column=7, row=2)
             if comp_slf.get() == 0:
+                base_op_label.grid_forget()
+                base_op_combobox.grid_forget()
                 factor_label.grid_forget()
                 factor_entry.grid_forget()
                 compare_statistics_label.grid_forget()
@@ -317,7 +354,7 @@ class TraceConverterGUI:
 
         comp_slf = tkinter.IntVar()
         gen_profido_checkbutton_ct = Checkbutton(filter_tab, text="compare to own statistic", variable=comp_slf,
-                                                 onvalue=1, offvalue=0, command=check_self)
+                                                 onvalue=1, offvalue=0, command=self_comparison_check)
         gen_profido_checkbutton_ct.grid(column=4, row=3)
 
         # Label and Buttons
