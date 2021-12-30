@@ -13,8 +13,13 @@ config.read('config.properties')
 logging.basicConfig(format=config.get('logging', 'logging_format'), level=logging.INFO)
 
 
-# Gets the relevant columns and adds each column as a separate list into the result list
 def get_tracedata_from_file(file, cols):
+    """
+    Gets the relevant columns and adds each column as a separate list into the result list
+    :param file: Tracefile the data shall be extracted from
+    :param cols: List of column numbers that shall be kept
+    :return: Columns of the original trace as lists
+    """
     df = pd.read_csv(file, header=0, delimiter=',')
     tracedata_list = []
     relevant_column_numbers = list(range(0, len(df.columns)))
@@ -23,28 +28,16 @@ def get_tracedata_from_file(file, cols):
     df.drop(df.columns[relevant_column_numbers], axis=1, inplace=True)
     for column in df:
         tracedata_list.append(df[column].values.reshape(1, -1).ravel().tolist())
-    # print("Tracedata from " + os.path.basename(file) + " successfully retrieved")
     logging.info("Tracedata from " + os.path.basename(file) + " successfully retrieved")
     return tracedata_list
 
 
-def filter_tracedata_by_statistic(trace_list, statistic, value):
-    result_list = []
-    for i in range(len(trace_list)):
-        if trace_list[i]["traceheader"]["statistical characteristics"][str(statistic)][0] > value:
-            result_list.append(trace_list[i])
-    return result_list
-
-
-def get_all_traces_from(file_tuple):
-    trace_list = []
-    for i in file_tuple:
-        with open(str(i)) as json_file:
-            trace_list.append(json.load(json_file))
-    return trace_list
-
-
 def verify_statistics(converted_trace_file):
+    """
+    Checks if the statistics are valid for the tracedata
+    :param converted_trace_file: A tracefile in standard format
+    :return:
+    """
     with open(converted_trace_file) as trace_file:
         trace = json.load(trace_file)
         statistics = trace["traceheader"]["statistical characteristics"]

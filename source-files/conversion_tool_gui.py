@@ -13,16 +13,20 @@ import pandas as pd
 
 from converter import trace_template, get_tracedata_from_file
 
-# Load config
+# Load config file
 config = configparser.RawConfigParser()
 config.read('config.properties')
 
-# Logging
+# Logging configuration
 logging.basicConfig(format=config.get('logging', 'logging_format'), level=logging.INFO)
 
 
 class TraceConverterGUI:
     def __init__(self, master):
+        """
+        Creates a GUI for the traceconverter
+        :param master:
+        """
         self.master = master
         master.title("Traceconverting Tool")
         # Notebook and Tabs
@@ -32,15 +36,16 @@ class TraceConverterGUI:
         filter_tab = ttk.Frame(tab_parent)
         profido_format_tab = ttk.Frame(tab_parent)
 
+        # Add tabs to master
         tab_parent.add(convert_tab, text="Convert Trace")
         tab_parent.add(filter_tab, text="Filter Traces")
         tab_parent.add(profido_format_tab, text="ProFiDo Format from Trace")
-
         tab_parent.pack(expand=1, fill='both')
 
-        # === Converting Tab Widgets
+        # Converting Tab
         # Labels
         Label(convert_tab, text="Field", font=config.get('fonts', 'default_font_bold')).grid(row=0)
+        Label(convert_tab, text="Input", font=config.get('fonts', 'default_font_bold')).grid(row=0, column=1)
         Label(convert_tab, text="Trace").grid(row=1)
         Label(convert_tab, text="Columns to keep").grid(row=2)
         Label(convert_tab, text="Tracesource").grid(row=3)
@@ -51,9 +56,6 @@ class TraceConverterGUI:
         Label(convert_tab, text="Additional Information").grid(row=8)
         Label(convert_tab, text="Result Filename").grid(row=9)
 
-        Label(convert_tab, text="Input", font=config.get('fonts', 'default_font_bold')).grid(row=0, column=1)
-
-        ######
         profido_name_entry_ct = Entry(convert_tab)
 
         def show_name_entry():
@@ -71,26 +73,14 @@ class TraceConverterGUI:
 
         profido_name_label_ct = Label(convert_tab, text="ProFiDo filename:")
 
-        ######
-
-        # Hints
-        # Label(convert_tab, text="Hints", font=config.get('fonts', 'default_font_bold')).grid(row=0, column=3)
-        # Label(convert_tab, text="Choose the trace you want to convert").grid(row=1, column=3)
-        # Label(convert_tab, text="Which columns of the original trace contain the relevant tracedata."
-        #                       " Delimiter: , ").grid(row=2, column=3)
-        # Label(convert_tab, text="From which source (repository/archive) does the trace originate").grid(row=3, column=3)
-        # Label(convert_tab, text="Description of the whole trace").grid(row=4, column=3)
-        # Label(convert_tab, text="Description of the tracedata. Delimiter: ||").grid(row=5, column=3)
-        # Label(convert_tab, text="Date of the conversion").grid(row=6, column=3)
-        # Label(convert_tab, text="Who is using the tool").grid(row=7, column=3)
-        # Label(convert_tab, text="Additional information about the trace (optional)").grid(row=8, column=3)
-        # Label(convert_tab, text="Filename for the converted trace").grid(row=9, column=3)
-
         org_name_entry = Entry(convert_tab, width=config.get('entries', 'entry_width'))
 
         def browse_file():
-            # Clears entry before new filepath is chosen
-            org_name_entry.delete(0, END)
+            """
+            opens a file explorer to select a raw trace
+            :return:
+            """
+            org_name_entry.delete(0, END)  # removes previously selected file
             sel_file = fd.askopenfilename(initialdir=config.get('directories', 'raw_traces_dir'),
                                           title="Select a File",
                                           filetypes=(("CSV files", "*.csv*"),))
@@ -99,33 +89,36 @@ class TraceConverterGUI:
             org_name_entry.grid(row=1, column=1)
             org_name_button.grid(row=1, column=2)
 
-        # Entries
+        # Create entries and set default values
         org_name_button = Button(convert_tab, text="Browse Files", command=browse_file)
 
         columns_entry = Entry(convert_tab, width=config.get('entries', 'entry_width'))
-        # noinspection PyTypeChecker
         columns_entry.insert(END, ['0'])
+
         source_entry = Entry(convert_tab, width=config.get('entries', 'entry_width'))
         source_entry.insert(END, config.get('default_entries', 'default_source_entry'))
+
         description_entry = Entry(convert_tab, width=config.get('entries', 'entry_width'))
-        description_entry.insert(END,
-                                 config.get('default_entries', 'default_description_entry'))
+        description_entry.insert(END, config.get('default_entries', 'default_description_entry'))
+
         tracedatadescription_entry = Entry(convert_tab, width=config.get('entries', 'entry_width'))
         tracedatadescription_entry.insert(END, config.get('default_entries', 'default_tracedatadescription_entry'))
+
         # date_entry = Entry(convert_tab, width=config.get('entries', 'entry_width'))
         # date_entry.insert(END, "27.12.2021")
+
         username_entry = Entry(convert_tab, width=config.get('entries', 'entry_width'))
         username_entry.insert(END, config.get('default_entries', 'default_username_entry'))
+
         custom_field_entry = Text(convert_tab, width=config.get('entries', 'entry_width'), height=25,
                                   font=config.get('fonts', 'default_font'))
-        custom_field_entry.insert(END,
-                                  config.get('default_entries', 'default_customfield_entry'))
+        custom_field_entry.insert(END, config.get('default_entries', 'default_customfield_entry'))
+
         result_filename_entry = Entry(convert_tab, width=config.get('entries', 'entry_width'))
         result_filename_entry.insert(END, config.get('default_entries', 'default_filename_entry'))
 
         # Place Entries
         org_name_button.grid(row=1, column=1)
-
         columns_entry.grid(row=2, column=1)
         source_entry.grid(row=3, column=1)
         description_entry.grid(row=4, column=1)
@@ -135,11 +128,15 @@ class TraceConverterGUI:
         custom_field_entry.grid(row=8, column=1)
         result_filename_entry.grid(row=9, column=1)
 
+        # Text widget to display the converted trace
         trace_view_ct = Text(convert_tab, width=100, height=33)
         trace_view_label_ct = Label(convert_tab, text="Converted Trace:")
 
-        # Generates converted Trace from User Input
         def convert_trace():
+            """
+            Takes the user input from the entry fields and converts the selected trace to the predefined standard format
+            :return:
+            """
             col = list(map(int, (columns_entry.get().split(","))))
             trace_template["tracebody"]["tracedata"] = get_tracedata_from_file(org_name_entry.get(), col)
             trace_template["tracebody"]["tracedatadescription"] = tracedatadescription_entry.get().split("||")
@@ -154,7 +151,7 @@ class TraceConverterGUI:
             else:
                 trace_template["traceheader"]["metainformation"].pop("additional information")
 
-            # Generates statistics and adds them into a list. Each list entry represents one column of the raw trace
+            #  Generate statistics and adds them into a list. Each list entry represents one column of the raw trace
             for i in range(len(trace_template["tracebody"]["tracedata"])):
                 df = pd.DataFrame(trace_template["tracebody"]["tracedata"][i])
                 trace_template["traceheader"]["statistical characteristics"]["mean"].append(df[0].mean())
@@ -163,7 +160,7 @@ class TraceConverterGUI:
                 trace_template["traceheader"]["statistical characteristics"]["kurtosis"].append(df[0].kurtosis())
                 trace_template["traceheader"]["statistical characteristics"]["autocorrelation"].append(df[0].autocorr())
 
-            # Saves trace to file
+            # Save trace to file
             try:
                 with open('converted_traces/' + result_filename_entry.get() + '_converted.json', 'w') as fp:
                     json.dump(trace_template, fp, indent=4)
@@ -179,6 +176,7 @@ class TraceConverterGUI:
             trace_template["traceheader"]["statistical characteristics"]["kurtosis"].clear()
             trace_template["traceheader"]["statistical characteristics"]["autocorrelation"].clear()
 
+            # Display the created traces
             with open('converted_traces/' + result_filename_entry.get() + '_converted.json', 'r') as f:
                 trace_view_ct.config(state=NORMAL)
                 trace_view_ct.delete("1.0", "end")
@@ -187,23 +185,32 @@ class TraceConverterGUI:
                 trace_view_ct.grid(column=5, row=1, columnspan=12, rowspan=10)
                 trace_view_label_ct.grid(column=5, row=0)
 
+            # If profido checkbox is selected the columns will also be extracted for profido use
             if gen_profido.get() == 1:
                 extract_after_conversion('converted_traces/' + result_filename_entry.get() + '_converted.json')
 
         def extract_after_conversion(filename):
+            """
+            Extracts columns for ProFiDo usage from the input trace
+            :param filename: Name of the converted tracefile
+            :return:
+            """
             with open(filename) as tr:
                 tracedata = json.load(tr)["tracebody"]["tracedata"]
                 df = pandas.DataFrame(tracedata)
-                df.transpose().to_csv(profido_name_entry_ct.get() + '_dat.trace', sep='\t',
+                df.transpose().to_csv(config.get('directories', 'profido_traces_dir') +
+                                      profido_name_entry_ct.get() + '_dat.trace',
+                                      sep='\t',
                                       float_format="%e",
                                       index=False, header=False)
 
         exit_button_ct = Button(convert_tab, text='Exit', command=master.destroy)
-        exit_button_ct.grid(row=12, column=8, sticky=W, pady=4)
+        exit_button_ct.grid(row=12, column=16, sticky=SE, padx=4, pady=4)
         convert_button_ct = Button(convert_tab, text='Convert', command=convert_trace)
-        convert_button_ct.grid(row=12, column=1, sticky=W, pady=4)
+        convert_button_ct.grid(row=12, column=1)
 
-        # === Filter Tab Widgets
+        # Filter Tab
+        # Labels
         selected_traces_label = Label(filter_tab, text="Selected traces")
         selected_traces_label.grid(column=1, row=1)
 
@@ -215,6 +222,10 @@ class TraceConverterGUI:
         sel_filtered_ft = []
 
         def browse_files():
+            """
+            Select converted traces for filtering
+            :return:
+            """
             file_tuple = fd.askopenfilenames(initialdir=config.get('directories', 'converted_traces_dir'),
                                              title="Select a File",
                                              filetypes=(("JSON files", "*.json*"),))
@@ -231,11 +242,15 @@ class TraceConverterGUI:
             browse_button_ft.grid(column=1, row=8)
 
         def filter_traces():
+            """
+            Filters selected traces by the specified condition (via combo boxes)
+            :return:
+            """
             sel_filtered_ft.clear()
             statistic = statistics_combobox.get()
             operator = operator_combobox.get()
             comp = comp_ops[operator]
-            if comp_slf.get() == 0:
+            if comp_slf.get() == 0:  # Compare trace statistic to value
                 value = float(value_entry.get())
                 for i in range(len(sel_files_ft)):
                     trace_stat = sel_files_ft[i]["traceheader"]["statistical characteristics"][statistic]
@@ -243,7 +258,7 @@ class TraceConverterGUI:
                         if comp(trace_stat[j], value):
                             sel_filtered_ft.append(os.path.basename(sel_names_ft[i]))
 
-            if comp_slf.get() == 1:
+            if comp_slf.get() == 1:  # Compare trace statistic other statistic of the same trace(column)
                 nbr = float(factor_entry.get())
                 comp_statistic = compare_statistics_combobox.get()
                 base_operator = base_op_combobox.get()
@@ -332,15 +347,19 @@ class TraceConverterGUI:
         value_entry.grid(column=4, row=2)
 
         def self_comparison_check():
+            """
+            Place and remove relevant labels and entries for the selected case
+            :return:
+            """
             if comp_slf.get() == 1:
                 value_label.grid_forget()
                 value_entry.grid_forget()
                 base_op_label.grid(column=5, row=1)
                 base_op_combobox.grid(column=5, row=2)
-                compare_statistics_label.grid(column=6, row=1)
-                compare_statistics_combobox.grid(column=6, row=2)
-                factor_label.grid(column=4, row=1)
-                factor_entry.grid(column=4, row=2)
+                compare_statistics_label.grid(column=4, row=1)
+                compare_statistics_combobox.grid(column=4, row=2)
+                factor_label.grid(column=6, row=1)
+                factor_entry.grid(column=6, row=2)
                 filter_button.grid(column=7, row=2)
             if comp_slf.get() == 0:
                 base_op_label.grid_forget()
@@ -376,6 +395,10 @@ class TraceConverterGUI:
         profido_format_label_pt = Label(profido_format_tab, text="Extracted data")
 
         def browse_trace():
+            """
+            Select trace the columns shall be extracted from
+            :return:
+            """
             choose_trace_entry_profido.delete(0, END)
             selected_trace_profido = fd.askopenfilename(initialdir=config.get('directories', 'converted_traces_dir'),
                                                         title="Select a File",
@@ -387,18 +410,24 @@ class TraceConverterGUI:
         error_label = Label(profido_format_tab, bg="red", text="An error occurred. Are all inputs valid?")
 
         def extract_columns():
-            error_label.destroy()
+            """
+            Extracts the tracedata as columns so the trace can be used in PoFiDo
+            :return:
+            """
+            error_label.grid_forget()
             try:
                 with open(choose_trace_entry_profido.get()) as trace_in:
                     tracedata = json.load(trace_in)["tracebody"]["tracedata"]
                     df = pandas.DataFrame(tracedata)
-                    df.transpose().to_csv(result_filename_entry_pt.get() + '_dat.trace', sep='\t',
+                    df.transpose().to_csv(config.get('directories', 'profido_traces_dir') +
+                                          result_filename_entry_pt.get() + '_dat.trace', sep='\t',
                                           float_format="%e",
                                           index=False, header=False)
             except BaseException as e:
                 print("Error while extracting columns: " + str(e))
                 error_label.grid(column=0, row=4)
-            with open(result_filename_entry_pt.get() + '_dat.trace', 'r') as f:
+            with open(config.get('directories', 'profido_traces_dir') +
+                      result_filename_entry_pt.get() + '_dat.trace', 'r') as f:
                 trace_col_pt.config(state=NORMAL)
                 trace_col_pt.delete("1.0", "end")
                 trace_col_pt.insert(INSERT, f.read())
