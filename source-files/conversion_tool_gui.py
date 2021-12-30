@@ -58,6 +58,7 @@ class TraceConverterGUI:
 
         def show_name_entry():
             if gen_profido.get() == 0:
+                profido_name_label_ct.grid_forget()
                 profido_name_entry_ct.grid_forget()
             if gen_profido.get() == 1:
                 profido_name_label_ct.grid(column=4, row=4)
