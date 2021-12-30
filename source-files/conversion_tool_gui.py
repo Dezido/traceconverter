@@ -131,6 +131,9 @@ class TraceConverterGUI:
         # Text widget to display the converted trace
         trace_view_ct = Text(convert_tab, width=100, height=33)
         trace_view_label_ct = Label(convert_tab, text="Converted Trace:")
+        trace_exists_label_view_ct = Label(convert_tab, text="Existing Trace:")
+
+        trace_exists_label_ct = Label(convert_tab, text="File already exists", bg='red')
 
         def convert_trace():
             """
@@ -161,13 +164,26 @@ class TraceConverterGUI:
                 trace_template["traceheader"]["statistical characteristics"]["autocorrelation"].append(df[0].autocorr())
 
             # Save trace to file
-            try:
-                with open('converted_traces/' + result_filename_entry.get() + '_converted.json', 'w') as fp:
-                    json.dump(trace_template, fp, indent=4)
-            except BaseException as e:
-                print("Error while converting trace: " + str(e))
-                Label(profido_format_tab, bg="red", text="An error occurred. Are all inputs valid?").grid(column=0,
-                                                                                                          row=4)
+            filename = 'converted_traces/' + result_filename_entry.get() + '_converted.json'
+            if not os.path.exists(filename):
+                try:
+                    with open(filename, 'w') as fp:
+                        json.dump(trace_template, fp, indent=4)
+                        result_filename_entry.configure(bg='white')
+                        trace_exists_label_ct.grid_forget()
+                        trace_exists_label_view_ct.grid_forget()
+                        trace_view_label_ct.grid(column=5, row=0)
+                except BaseException as e:
+                    print("Error while converting trace: " + str(e))
+                    Label(profido_format_tab, bg="red", text="An error occurred. Are all inputs valid?").grid(column=0,
+                                                                                                              row=4)
+
+            else:
+                print("File already exists!")
+                result_filename_entry.configure(bg='red')
+                trace_exists_label_ct.grid(column=3, row=9)
+                trace_view_label_ct.grid_forget()
+                trace_exists_label_view_ct.grid(column=5, row=0)
 
             # Clear statistic lists so the next trace won't have old values
             trace_template["traceheader"]["statistical characteristics"]["mean"].clear()
@@ -177,13 +193,12 @@ class TraceConverterGUI:
             trace_template["traceheader"]["statistical characteristics"]["autocorrelation"].clear()
 
             # Display the created traces
-            with open('converted_traces/' + result_filename_entry.get() + '_converted.json', 'r') as f:
+            with open(filename, 'r') as f:
                 trace_view_ct.config(state=NORMAL)
                 trace_view_ct.delete("1.0", "end")
                 trace_view_ct.insert(INSERT, f.read())
                 trace_view_ct.config(state=DISABLED)
                 trace_view_ct.grid(column=5, row=1, columnspan=12, rowspan=10)
-                trace_view_label_ct.grid(column=5, row=0)
 
             # If profido checkbox is selected the columns will also be extracted for profido use
             if gen_profido.get() == 1:
