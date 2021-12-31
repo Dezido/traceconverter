@@ -131,7 +131,7 @@ class TraceConverterGUI:
         trace_display_label_ct = Label(convert_tab, text="Converted Trace:")
 
         trace_exists_display_label_ct = Label(convert_tab, text="Existing Trace:")
-        trace_exists_notification_label_ct = Label(convert_tab, text="File already exists", bg='red')
+        # trace_exists_notification_label_ct = Label(convert_tab, text="File already exists", bg='red')
 
         def convert_trace():
             """
@@ -167,8 +167,8 @@ class TraceConverterGUI:
                 try:
                     with open(filename, 'w') as fp:
                         json.dump(trace_template, fp, indent=4)
-                        result_filename_entry.configure(bg='white')
-                        trace_exists_notification_label_ct.grid_forget()
+                        # result_filename_entry.configure(bg='white')
+                        # trace_exists_notification_label_ct.grid_forget()
                         trace_exists_display_label_ct.grid_forget()
                         trace_display_label_ct.grid(column=5, row=0)
                 except BaseException as e:
@@ -178,9 +178,9 @@ class TraceConverterGUI:
 
             else:
                 print("File already exists!")
-                result_filename_entry.configure(bg='red')
-                trace_exists_notification_label_ct.grid(column=3, row=9)
-                trace_display_label_ct.grid_forget()
+                # result_filename_entry.configure(bg='red')
+                # trace_exists_notification_label_ct.grid(column=3, row=9)
+                # trace_display_label_ct.grid_forget()
                 trace_exists_display_label_ct.grid(column=5, row=0)
 
             # Clear statistic lists so the next trace won't have old values
@@ -229,7 +229,7 @@ class TraceConverterGUI:
         selected_traces_label_ft = Label(filter_tab, text="Selected traces")
         selected_traces_label_ft.grid(column=1, row=1)
 
-        selected_traces_lb = Listbox(filter_tab, width=config.get('listbox', 'listbox_width'), 
+        selected_traces_lb = Listbox(filter_tab, width=config.get('listbox', 'listbox_width'),
                                      height=config.get('listbox', 'listbox_height'))
         filter_result_lb = Listbox(filter_tab, width=config.get('listbox', 'listbox_width'),
                                    height=config.get('listbox', 'listbox_height'))
@@ -408,7 +408,7 @@ class TraceConverterGUI:
         # ===ProFiDo format Tab
         Label(profido_format_tab, text="Trace").grid(row=0)
         Label(profido_format_tab, text="Result filename").grid(row=1)
-        choose_trace_entry_pt = Entry(profido_format_tab, width=config.get('entries', 'entry_width'))
+        input_trace_entry_pt = Entry(profido_format_tab, width=config.get('entries', 'entry_width'))
 
         trace_column_display_pt = Text(profido_format_tab, width=45, height=20)
         profido_format_label_pt = Label(profido_format_tab, text="Extracted data")
@@ -417,12 +417,12 @@ class TraceConverterGUI:
             """
             Select trace the columns shall be extracted from
             """
-            choose_trace_entry_pt.delete(0, END)
+            input_trace_entry_pt.delete(0, END)
             selected_trace = fd.askopenfilename(initialdir=config.get('directories', 'converted_traces_dir'),
                                                 title="Select a File",
                                                 filetypes=(("JSON files", "*.json*"),))
-            choose_trace_entry_pt.insert(END, selected_trace)
-            choose_trace_entry_pt.grid(row=0, column=1)
+            input_trace_entry_pt.insert(END, selected_trace)
+            input_trace_entry_pt.grid(row=0, column=1)
             choose_trace_button_pt.grid(row=0, column=2)
 
         error_label_pt = Label(profido_format_tab, bg="red", text="An error occurred. Are all inputs valid?")
@@ -436,7 +436,7 @@ class TraceConverterGUI:
 
                 # TODO filecheck
 
-                with open(choose_trace_entry_pt.get()) as trace_in:
+                with open(input_trace_entry_pt.get()) as trace_in:
                     tracedata = json.load(trace_in)["tracebody"]["tracedata"]
                     df = pd.DataFrame(tracedata)
                     df.transpose().to_csv(config.get('directories', 'profido_traces_dir') +
