@@ -229,8 +229,10 @@ class TraceConverterGUI:
         selected_traces_label_ft = Label(filter_tab, text="Selected traces")
         selected_traces_label_ft.grid(column=1, row=1)
 
-        selected_traces_lb = Listbox(filter_tab, width=50)
-        filter_result_lb = Listbox(filter_tab, width=50)
+        selected_traces_lb = Listbox(filter_tab, width=config.get('listbox', 'listbox_width'), 
+                                     height=config.get('listbox', 'listbox_height'))
+        filter_result_lb = Listbox(filter_tab, width=config.get('listbox', 'listbox_width'),
+                                   height=config.get('listbox', 'listbox_height'))
 
         selected_filenames = []
         selected_files = []
