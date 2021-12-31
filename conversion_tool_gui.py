@@ -75,9 +75,9 @@ class TraceConverterGUI:
 
         original_tracefile_entry_ct = Entry(convert_tab, width=config.get('entries', 'entry_width'))
 
-        def browse_file():
+        def browse_file_ct():
             """
-            opens a file explorer to select a raw trace
+            Opens a file explorer to select a raw trace
             """
             original_tracefile_entry_ct.delete(0, END)  # removes previously selected file
             selected_file = fd.askopenfilename(initialdir=config.get('directories', 'raw_traces_dir'),
@@ -89,7 +89,7 @@ class TraceConverterGUI:
             original_tracefile_button_ct.grid(row=1, column=2)
 
         # Create entries and set default values
-        original_tracefile_button_ct = Button(convert_tab, text="Browse Files", command=browse_file)
+        original_tracefile_button_ct = Button(convert_tab, text="Browse Files", command=browse_file_ct)
 
         columns_entry = Entry(convert_tab, width=config.get('entries', 'entry_width'))
         columns_entry.insert(END, ['0'])
@@ -237,7 +237,7 @@ class TraceConverterGUI:
         selected_files = []
         filter_result = []
 
-        def browse_files():
+        def browse_files_ft():
             """
             Select converted traces for filtering
             """
@@ -398,7 +398,7 @@ class TraceConverterGUI:
         filter_button_ft = Button(filter_tab, text="Filter Traces", command=filter_traces)
         filter_button_ft.grid(column=5, row=2)
 
-        browse_button_ft = Button(filter_tab, text="Browse Files", command=browse_files)
+        browse_button_ft = Button(filter_tab, text="Browse Files", command=browse_files_ft)
         browse_button_ft.grid(column=1, row=2)
 
         exit_button_ft = Button(filter_tab, text="Exit", command=master.destroy)
@@ -412,7 +412,7 @@ class TraceConverterGUI:
         trace_column_display_pt = Text(profido_format_tab, width=45, height=20)
         profido_format_label_pt = Label(profido_format_tab, text="Extracted data")
 
-        def browse_trace():
+        def browse_file_pt():
             """
             Select trace the columns shall be extracted from
             """
@@ -454,7 +454,7 @@ class TraceConverterGUI:
                 trace_column_display_pt.grid(column=0, row=6)
                 profido_format_label_pt.grid(column=0, row=5)
 
-        choose_trace_button_pt = Button(profido_format_tab, text="Browse Trace", command=browse_trace)
+        choose_trace_button_pt = Button(profido_format_tab, text="Browse Trace", command=browse_file_pt)
         choose_trace_button_pt.grid(row=0, column=1)
 
         profido_filename_entry_pt = Entry(profido_format_tab, width=config.get('entries', 'entry_width'))
