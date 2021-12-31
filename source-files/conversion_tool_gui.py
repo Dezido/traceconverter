@@ -210,6 +210,9 @@ class TraceConverterGUI:
             :param filename: Name of the converted tracefile
             :return:
             """
+
+            ## TODO filecheck
+
             with open(filename) as tr:
                 tracedata = json.load(tr)["tracebody"]["tracedata"]
                 df = pandas.DataFrame(tracedata)
@@ -431,6 +434,9 @@ class TraceConverterGUI:
             """
             error_label.grid_forget()
             try:
+
+                ## TODO filecheck
+
                 with open(choose_trace_entry_profido.get()) as trace_in:
                     tracedata = json.load(trace_in)["tracebody"]["tracedata"]
                     df = pandas.DataFrame(tracedata)
