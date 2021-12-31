@@ -56,41 +56,40 @@ class TraceConverterGUI:
         Label(convert_tab, text="Additional Information").grid(row=8)
         Label(convert_tab, text="Result Filename").grid(row=9)
 
-        profido_name_entry_ct = Entry(convert_tab)
+        profido_filename_label_ct = Label(convert_tab, text="ProFiDo filename:")
+        profido_filename_entry_ct = Entry(convert_tab)
 
         def show_name_entry():
-            if gen_profido.get() == 0:
-                profido_name_label_ct.grid_forget()
-                profido_name_entry_ct.grid_forget()
-            if gen_profido.get() == 1:
-                profido_name_label_ct.grid(column=4, row=4)
-                profido_name_entry_ct.grid(column=4, row=5)
+            if extract_profido_checkbutton_var_ct.get() == 0:
+                profido_filename_label_ct.grid_forget()
+                profido_filename_entry_ct.grid_forget()
+            if extract_profido_checkbutton_var_ct.get() == 1:
+                profido_filename_label_ct.grid(column=4, row=4)
+                profido_filename_entry_ct.grid(column=4, row=5)
 
-        gen_profido = tkinter.IntVar()
-        gen_profido_checkbutton_ct = Checkbutton(convert_tab, text="extract ProFiDo format after conversion",
-                                                 variable=gen_profido, onvalue=1, offvalue=0, command=show_name_entry)
-        gen_profido_checkbutton_ct.grid(column=4, row=3)
+        extract_profido_checkbutton_var_ct = tkinter.IntVar()
+        extract_profido_checkbutton_ct = Checkbutton(convert_tab, text="extract ProFiDo format after conversion",
+                                                     variable=extract_profido_checkbutton_var_ct, onvalue=1,
+                                                     offvalue=0, command=show_name_entry)
+        extract_profido_checkbutton_ct.grid(column=4, row=3)
 
-        profido_name_label_ct = Label(convert_tab, text="ProFiDo filename:")
-
-        org_name_entry = Entry(convert_tab, width=config.get('entries', 'entry_width'))
+        original_tracefile_entry_ct = Entry(convert_tab, width=config.get('entries', 'entry_width'))
 
         def browse_file():
             """
             opens a file explorer to select a raw trace
-            :return:
             """
-            org_name_entry.delete(0, END)  # removes previously selected file
-            sel_file = fd.askopenfilename(initialdir=config.get('directories', 'raw_traces_dir'),
-                                          title="Select a File",
-                                          filetypes=(("CSV files", "*.csv*"),))
+            original_tracefile_entry_ct.delete(0, END)  # removes previously selected file
+            selected_file = fd.askopenfilename(initialdir=config.get('directories', 'raw_traces_dir'),
+                                               title="Select a File",
+                                               filetypes=(("CSV files", "*.csv*"),))
 
-            org_name_entry.insert(END, sel_file)
-            org_name_entry.grid(row=1, column=1)
-            org_name_button.grid(row=1, column=2)
+            original_tracefile_entry_ct.insert(END, selected_file)
+            original_tracefile_entry_ct.grid(row=1, column=1)
+            original_tracefile_button_ct.grid(row=1, column=2)
 
         # Create entries and set default values
-        org_name_button = Button(convert_tab, text="Browse Files", command=browse_file)
+        original_tracefile_button_ct = Button(convert_tab, text="Browse Files", command=browse_file)
 
         columns_entry = Entry(convert_tab, width=config.get('entries', 'entry_width'))
         columns_entry.insert(END, ['0'])
@@ -118,7 +117,7 @@ class TraceConverterGUI:
         result_filename_entry.insert(END, config.get('default_entries', 'default_filename_entry'))
 
         # Place Entries
-        org_name_button.grid(row=1, column=1)
+        original_tracefile_button_ct.grid(row=1, column=1)
         columns_entry.grid(row=2, column=1)
         source_entry.grid(row=3, column=1)
         description_entry.grid(row=4, column=1)
@@ -129,21 +128,21 @@ class TraceConverterGUI:
         result_filename_entry.grid(row=9, column=1)
 
         # Text widget to display the converted trace
-        trace_view_ct = Text(convert_tab, width=100, height=33)
-        trace_view_label_ct = Label(convert_tab, text="Converted Trace:")
-        trace_exists_label_view_ct = Label(convert_tab, text="Existing Trace:")
+        trace_display_ct = Text(convert_tab, width=100, height=33)
+        trace_display_label_ct = Label(convert_tab, text="Converted Trace:")
 
-        trace_exists_label_ct = Label(convert_tab, text="File already exists", bg='red')
+        trace_exists_display_label_ct = Label(convert_tab, text="Existing Trace:")
+        trace_exists_notification_label_ct = Label(convert_tab, text="File already exists", bg='red')
 
         def convert_trace():
             """
             Takes the user input from the entry fields and converts the selected trace to the predefined standard format
-            :return:
             """
             col = list(map(int, (columns_entry.get().split(","))))
-            trace_template["tracebody"]["tracedata"] = get_tracedata_from_file(org_name_entry.get(), col)
+            trace_template["tracebody"]["tracedata"] = get_tracedata_from_file(original_tracefile_entry_ct.get(), col)
             trace_template["tracebody"]["tracedatadescription"] = tracedatadescription_entry.get().split("||")
-            trace_template["traceheader"]["metainformation"]["name"] = os.path.basename(org_name_entry.get())
+            trace_template["traceheader"]["metainformation"]["name"] = os.path.basename(
+                original_tracefile_entry_ct.get())
             trace_template["traceheader"]["metainformation"]["source"] = source_entry.get()
             trace_template["traceheader"]["metainformation"]["description"] = description_entry.get()
             trace_template["traceheader"]["metainformation"]["date"] = str(datetime.datetime.now())
@@ -170,9 +169,9 @@ class TraceConverterGUI:
                     with open(filename, 'w') as fp:
                         json.dump(trace_template, fp, indent=4)
                         result_filename_entry.configure(bg='white')
-                        trace_exists_label_ct.grid_forget()
-                        trace_exists_label_view_ct.grid_forget()
-                        trace_view_label_ct.grid(column=5, row=0)
+                        trace_exists_notification_label_ct.grid_forget()
+                        trace_exists_display_label_ct.grid_forget()
+                        trace_display_label_ct.grid(column=5, row=0)
                 except BaseException as e:
                     print("Error while converting trace: " + str(e))
                     Label(profido_format_tab, bg="red", text="An error occurred. Are all inputs valid?").grid(column=0,
@@ -181,9 +180,9 @@ class TraceConverterGUI:
             else:
                 print("File already exists!")
                 result_filename_entry.configure(bg='red')
-                trace_exists_label_ct.grid(column=3, row=9)
-                trace_view_label_ct.grid_forget()
-                trace_exists_label_view_ct.grid(column=5, row=0)
+                trace_exists_notification_label_ct.grid(column=3, row=9)
+                trace_display_label_ct.grid_forget()
+                trace_exists_display_label_ct.grid(column=5, row=0)
 
             # Clear statistic lists so the next trace won't have old values
             trace_template["traceheader"]["statistical characteristics"]["mean"].clear()
@@ -194,30 +193,29 @@ class TraceConverterGUI:
 
             # Display the created traces
             with open(filename, 'r') as f:
-                trace_view_ct.config(state=NORMAL)
-                trace_view_ct.delete("1.0", "end")
-                trace_view_ct.insert(INSERT, f.read())
-                trace_view_ct.config(state=DISABLED)
-                trace_view_ct.grid(column=5, row=1, columnspan=12, rowspan=10)
+                trace_display_ct.config(state=NORMAL)
+                trace_display_ct.delete("1.0", "end")
+                trace_display_ct.insert(INSERT, f.read())
+                trace_display_ct.config(state=DISABLED)
+                trace_display_ct.grid(column=5, row=1, columnspan=12, rowspan=10)
 
             # If profido checkbox is selected the columns will also be extracted for profido use
-            if gen_profido.get() == 1:
+            if extract_profido_checkbutton_var_ct.get() == 1:
                 extract_after_conversion('converted_traces/' + result_filename_entry.get() + '_converted.json')
 
         def extract_after_conversion(filename):
             """
             Extracts columns for ProFiDo usage from the input trace
             :param filename: Name of the converted tracefile
-            :return:
             """
 
-            ## TODO filecheck
+            # TODO filecheck
 
             with open(filename) as tr:
                 tracedata = json.load(tr)["tracebody"]["tracedata"]
                 df = pandas.DataFrame(tracedata)
                 df.transpose().to_csv(config.get('directories', 'profido_traces_dir') +
-                                      profido_name_entry_ct.get() + '_dat.trace',
+                                      profido_filename_entry_ct.get() + '_dat.trace',
                                       sep='\t',
                                       float_format="%e",
                                       index=False, header=False)
@@ -229,74 +227,73 @@ class TraceConverterGUI:
 
         # Filter Tab
         # Labels
-        selected_traces_label = Label(filter_tab, text="Selected traces")
-        selected_traces_label.grid(column=1, row=1)
+        selected_traces_label_ft = Label(filter_tab, text="Selected traces")
+        selected_traces_label_ft.grid(column=1, row=1)
 
-        trace_lb = Listbox(filter_tab, width=50)
-        result_lb = Listbox(filter_tab, width=50)
+        selected_traces_lb = Listbox(filter_tab, width=50)
+        filter_result_lb = Listbox(filter_tab, width=50)
 
-        sel_names_ft = []
-        sel_files_ft = []
-        sel_filtered_ft = []
+        selected_filenames = []
+        selected_files = []
+        filter_result = []
 
         def browse_files():
             """
             Select converted traces for filtering
-            :return:
             """
             file_tuple = fd.askopenfilenames(initialdir=config.get('directories', 'converted_traces_dir'),
                                              title="Select a File",
                                              filetypes=(("JSON files", "*.json*"),))
-            trace_lb.delete(0, 'end')
-            sel_files_ft.clear()
-            sel_names_ft.clear()
+            selected_traces_lb.delete(0, 'end')
+            selected_files.clear()
+            selected_filenames.clear()
             for i in file_tuple:
                 with open(str(i)) as json_file:
-                    sel_files_ft.append(json.load(json_file))
-                    sel_names_ft.append(os.path.basename(i))
-            for i in range(len(sel_names_ft)):
-                trace_lb.insert(i, sel_names_ft[i])
-            trace_lb.grid(column=1, row=2, rowspan=5)
+                    selected_files.append(json.load(json_file))
+                    selected_filenames.append(os.path.basename(i))
+            for i in range(len(selected_filenames)):
+                selected_traces_lb.insert(i, selected_filenames[i])
+            selected_traces_lb.grid(column=1, row=2, rowspan=5)
             browse_button_ft.grid(column=1, row=8)
 
         def filter_traces():
             """
             Filters selected traces by the specified condition (via combo boxes)
-            :return:
             """
-            sel_filtered_ft.clear()
-            statistic = statistics_combobox.get()
-            operator = operator_combobox.get()
-            comp = comp_ops[operator]
-            if comp_slf.get() == 0:  # Compare trace statistic to value
-                value = float(value_entry.get())
-                for i in range(len(sel_files_ft)):
-                    trace_stat = sel_files_ft[i]["traceheader"]["statistical characteristics"][statistic]
-                    for j in range(len(trace_stat)):
-                        if comp(trace_stat[j], value):
-                            sel_filtered_ft.append(os.path.basename(sel_names_ft[i]))
+            filter_result.clear()
+            statistic = statistics_combobox_ft.get()
+            comparison_operator_cb = comparison_operator_combobox_ft.get()
+            comparison_operator = comparison_operator_functions[comparison_operator_cb]
+            if compare_to_own_statistic_checkbutton_var_ft.get() == 0:  # Compare trace statistic to value
+                comparison_value = float(comparison_value_entry_ft.get())
+                for i in range(len(selected_files)):
+                    trace_statistic = selected_files[i]["traceheader"]["statistical characteristics"][statistic]
+                    for j in range(len(trace_statistic)):
+                        if comparison_operator(trace_statistic[j], comparison_value):
+                            filter_result.append(os.path.basename(selected_filenames[i]))
 
-            if comp_slf.get() == 1:  # Compare trace statistic other statistic of the same trace(column)
-                nbr = float(factor_entry.get())
-                comp_statistic = compare_statistics_combobox.get()
-                base_operator = base_op_combobox.get()
-                base_operate = base_ops[base_operator]
-                for i in range(len(sel_files_ft)):
-                    trace_stat = sel_files_ft[i]["traceheader"]["statistical characteristics"][statistic]
-                    comp_stat = sel_files_ft[i]["traceheader"]["statistical characteristics"][comp_statistic]
-                    for j in range(len(trace_stat)):
-                        value = base_operate(comp_stat[j], nbr)
-                        if comp(trace_stat[j], value):
-                            sel_filtered_ft.append(os.path.basename(sel_names_ft[i]))
+            if compare_to_own_statistic_checkbutton_var_ft.get() == 1:  # Compare to other statistic in same column
+                operand = float(operand_entry_ft.get())
+                comparison_statistic = compare_to_own_statistic_combobox_ft.get()
+                arithmetic_operator = arithmetic_operator_combobox_ft.get()
+                base_operator = basic_arithmetic_operator_functions[arithmetic_operator]
+                for i in range(len(selected_files)):
+                    trace_statistic = selected_files[i]["traceheader"]["statistical characteristics"][statistic]
+                    comparison_statistic_value = \
+                        selected_files[i]["traceheader"]["statistical characteristics"][comparison_statistic]
+                    for j in range(len(trace_statistic)):
+                        comparison_value = base_operator(comparison_statistic_value[j], operand)
+                        if comparison_operator(trace_statistic[j], comparison_value):
+                            filter_result.append(os.path.basename(selected_filenames[i]))
 
-            result_lb.delete(0, 'end')
-            sel_filtered_ft_unique = list(set(sel_filtered_ft))
-            for i in range(len(sel_filtered_ft_unique)):
-                result_lb.insert(i, sel_filtered_ft_unique[i])
+            filter_result_lb.delete(0, 'end')
+            unique_filter_result = list(set(filter_result))
+            for i in range(len(unique_filter_result)):
+                filter_result_lb.insert(i, unique_filter_result[i])
             Label(filter_tab, text="Results").grid(column=1, row=10)
-            result_lb.grid(column=1, row=11)
+            filter_result_lb.grid(column=1, row=11)
 
-        statistic_options = [
+        statistical_characteristics_options = [
             "mean",
             "median",
             "skew",
@@ -304,7 +301,7 @@ class TraceConverterGUI:
             "autocorrelation"
         ]
 
-        comp_operator_options = [
+        comparison_operator_options = [
             "equal: ==",
             "not equal: !=",
             "less than: <",
@@ -313,14 +310,14 @@ class TraceConverterGUI:
             "greater than or equal to: >="
         ]
 
-        base_operator_options = [
+        basic_arithmetic_operator_options = [
             "plus: +",
             "minus: -",
             "multiplied by: *",
             "divided by: /"
         ]
 
-        comp_ops = {
+        comparison_operator_functions = {
             "equal: ==": lambda x, y: x == y,
             "not equal: !=": lambda x, y: x != y,
             "less than: <": lambda x, y: x < y,
@@ -329,74 +326,77 @@ class TraceConverterGUI:
             "greater than or equal to: >=": lambda x, y: x >= y
         }
 
-        base_ops = {
+        basic_arithmetic_operator_functions = {
             "plus: +": lambda x, y: x + y,
             "minus: -": lambda x, y: x - y,
             "multiplied by: *": lambda x, y: x * y,
             "divided by: /": lambda x, y: x / y
         }
 
-        statistics_label = Label(filter_tab, text="Statistical characteristic")
-        statistics_label.grid(column=2, row=1)
-        statistics_combobox = ttk.Combobox(filter_tab, state="readonly", values=statistic_options)
-        statistics_combobox.grid(column=2, row=2)
-        statistics_combobox.current(0)
+        statistics_label_ft = Label(filter_tab, text="Statistical characteristic")
+        statistics_label_ft.grid(column=2, row=1)
+        statistics_combobox_ft = ttk.Combobox(filter_tab, state="readonly", values=statistical_characteristics_options)
+        statistics_combobox_ft.grid(column=2, row=2)
+        statistics_combobox_ft.current(0)
 
-        operator_label = Label(filter_tab, text="Comparison operator")
-        operator_label.grid(column=3, row=1)
-        operator_combobox = ttk.Combobox(filter_tab, state="readonly", values=comp_operator_options, width=30)
-        operator_combobox.grid(column=3, row=2)
-        operator_combobox.current(0)
+        comparison_operator_label_ft = Label(filter_tab, text="Comparison operator")
+        comparison_operator_label_ft.grid(column=3, row=1)
+        comparison_operator_combobox_ft = ttk.Combobox(filter_tab, state="readonly", values=comparison_operator_options,
+                                                       width=30)
+        comparison_operator_combobox_ft.grid(column=3, row=2)
+        comparison_operator_combobox_ft.current(0)
 
-        base_op_label = Label(filter_tab, text="Operation")
-        base_op_combobox = ttk.Combobox(filter_tab, state="readonly", values=base_operator_options)
-        base_op_combobox.current(0)
+        arithmetic_operator_label_ft = Label(filter_tab, text="Operation")
+        arithmetic_operator_combobox_ft = ttk.Combobox(filter_tab, state="readonly",
+                                                       values=basic_arithmetic_operator_options)
+        arithmetic_operator_combobox_ft.current(0)
 
-        compare_statistics_label = Label(filter_tab, text="Comparison statistic")
-        compare_statistics_combobox = ttk.Combobox(filter_tab, state="readonly", values=statistic_options)
-        compare_statistics_combobox.current(0)
+        compare_to_own_statistic_label_ft = Label(filter_tab, text="Comparison statistic")
+        compare_to_own_statistic_combobox_ft = ttk.Combobox(filter_tab, state="readonly",
+                                                            values=statistical_characteristics_options)
+        compare_to_own_statistic_combobox_ft.current(0)
 
-        factor_label = Label(filter_tab, text="Number")
-        factor_entry = Entry(filter_tab, width=25)
+        factor_label_ft = Label(filter_tab, text="Operand")
+        operand_entry_ft = Entry(filter_tab, width=25)
 
-        value_label = Label(filter_tab, text="Comparison value")
-        value_label.grid(column=4, row=1)
-        value_entry = Entry(filter_tab, width=25)
-        value_entry.grid(column=4, row=2)
+        comparison_value_label_ft = Label(filter_tab, text="Comparison value")
+        comparison_value_label_ft.grid(column=4, row=1)
+        comparison_value_entry_ft = Entry(filter_tab, width=25)
+        comparison_value_entry_ft.grid(column=4, row=2)
 
         def self_comparison_check():
             """
             Place and remove relevant labels and entries for the selected case
-            :return:
             """
-            if comp_slf.get() == 1:
-                value_label.grid_forget()
-                value_entry.grid_forget()
-                base_op_label.grid(column=5, row=1)
-                base_op_combobox.grid(column=5, row=2)
-                compare_statistics_label.grid(column=4, row=1)
-                compare_statistics_combobox.grid(column=4, row=2)
-                factor_label.grid(column=6, row=1)
-                factor_entry.grid(column=6, row=2)
-                filter_button.grid(column=7, row=2)
-            if comp_slf.get() == 0:
-                base_op_label.grid_forget()
-                base_op_combobox.grid_forget()
-                factor_label.grid_forget()
-                factor_entry.grid_forget()
-                compare_statistics_label.grid_forget()
-                compare_statistics_combobox.grid_forget()
-                value_label.grid(column=4, row=1)
-                value_entry.grid(column=4, row=2)
+            if compare_to_own_statistic_checkbutton_var_ft.get() == 1:
+                comparison_value_label_ft.grid_forget()
+                comparison_value_entry_ft.grid_forget()
+                arithmetic_operator_label_ft.grid(column=5, row=1)
+                arithmetic_operator_combobox_ft.grid(column=5, row=2)
+                compare_to_own_statistic_label_ft.grid(column=4, row=1)
+                compare_to_own_statistic_combobox_ft.grid(column=4, row=2)
+                factor_label_ft.grid(column=6, row=1)
+                operand_entry_ft.grid(column=6, row=2)
+                filter_button_ft.grid(column=7, row=2)
+            if compare_to_own_statistic_checkbutton_var_ft.get() == 0:
+                arithmetic_operator_label_ft.grid_forget()
+                arithmetic_operator_combobox_ft.grid_forget()
+                factor_label_ft.grid_forget()
+                operand_entry_ft.grid_forget()
+                compare_to_own_statistic_label_ft.grid_forget()
+                compare_to_own_statistic_combobox_ft.grid_forget()
+                comparison_value_label_ft.grid(column=4, row=1)
+                comparison_value_entry_ft.grid(column=4, row=2)
 
-        comp_slf = tkinter.IntVar()
-        gen_profido_checkbutton_ct = Checkbutton(filter_tab, text="compare to own statistic", variable=comp_slf,
-                                                 onvalue=1, offvalue=0, command=self_comparison_check)
-        gen_profido_checkbutton_ct.grid(column=4, row=3)
+        compare_to_own_statistic_checkbutton_var_ft = tkinter.IntVar()
+        compare_to_own_statistic_checkbutton_ft = Checkbutton(filter_tab, text="compare to own statistic",
+                                                              variable=compare_to_own_statistic_checkbutton_var_ft,
+                                                              onvalue=1, offvalue=0, command=self_comparison_check)
+        compare_to_own_statistic_checkbutton_ft.grid(column=4, row=3)
 
         # Label and Buttons
-        filter_button = Button(filter_tab, text="Filter Traces", command=filter_traces)
-        filter_button.grid(column=5, row=2)
+        filter_button_ft = Button(filter_tab, text="Filter Traces", command=filter_traces)
+        filter_button_ft.grid(column=5, row=2)
 
         browse_button_ft = Button(filter_tab, text="Browse Files", command=browse_files)
         browse_button_ft.grid(column=1, row=2)
@@ -407,60 +407,58 @@ class TraceConverterGUI:
         # ===ProFiDo format Tab
         Label(profido_format_tab, text="Trace").grid(row=0)
         Label(profido_format_tab, text="Result filename").grid(row=1)
-        choose_trace_entry_profido = Entry(profido_format_tab, width=config.get('entries', 'entry_width'))
+        choose_trace_entry_pt = Entry(profido_format_tab, width=config.get('entries', 'entry_width'))
 
-        trace_col_pt = Text(profido_format_tab, width=45, height=20)
+        trace_column_display_pt = Text(profido_format_tab, width=45, height=20)
         profido_format_label_pt = Label(profido_format_tab, text="Extracted data")
 
         def browse_trace():
             """
             Select trace the columns shall be extracted from
-            :return:
             """
-            choose_trace_entry_profido.delete(0, END)
-            selected_trace_profido = fd.askopenfilename(initialdir=config.get('directories', 'converted_traces_dir'),
-                                                        title="Select a File",
-                                                        filetypes=(("JSON files", "*.json*"),))
-            choose_trace_entry_profido.insert(END, selected_trace_profido)
-            choose_trace_entry_profido.grid(row=0, column=1)
+            choose_trace_entry_pt.delete(0, END)
+            selected_trace = fd.askopenfilename(initialdir=config.get('directories', 'converted_traces_dir'),
+                                                title="Select a File",
+                                                filetypes=(("JSON files", "*.json*"),))
+            choose_trace_entry_pt.insert(END, selected_trace)
+            choose_trace_entry_pt.grid(row=0, column=1)
             choose_trace_button_pt.grid(row=0, column=2)
 
-        error_label = Label(profido_format_tab, bg="red", text="An error occurred. Are all inputs valid?")
+        error_label_pt = Label(profido_format_tab, bg="red", text="An error occurred. Are all inputs valid?")
 
         def extract_columns():
             """
-            Extracts the tracedata as columns so the trace can be used in PoFiDo
-            :return:
+            Extracts the tracedata as columns so the trace can be used in ProFiDo
             """
-            error_label.grid_forget()
+            error_label_pt.grid_forget()
             try:
 
-                ## TODO filecheck
+                # TODO filecheck
 
-                with open(choose_trace_entry_profido.get()) as trace_in:
+                with open(choose_trace_entry_pt.get()) as trace_in:
                     tracedata = json.load(trace_in)["tracebody"]["tracedata"]
                     df = pandas.DataFrame(tracedata)
                     df.transpose().to_csv(config.get('directories', 'profido_traces_dir') +
-                                          result_filename_entry_pt.get() + '_dat.trace', sep='\t',
+                                          profido_filename_entry_pt.get() + '_dat.trace', sep='\t',
                                           float_format="%e",
                                           index=False, header=False)
             except BaseException as e:
                 print("Error while extracting columns: " + str(e))
-                error_label.grid(column=0, row=4)
+                error_label_pt.grid(column=0, row=4)
             with open(config.get('directories', 'profido_traces_dir') +
-                      result_filename_entry_pt.get() + '_dat.trace', 'r') as f:
-                trace_col_pt.config(state=NORMAL)
-                trace_col_pt.delete("1.0", "end")
-                trace_col_pt.insert(INSERT, f.read())
-                trace_col_pt.config(state=DISABLED)
-                trace_col_pt.grid(column=0, row=6)
+                      profido_filename_entry_pt.get() + '_dat.trace', 'r') as f:
+                trace_column_display_pt.config(state=NORMAL)
+                trace_column_display_pt.delete("1.0", "end")
+                trace_column_display_pt.insert(INSERT, f.read())
+                trace_column_display_pt.config(state=DISABLED)
+                trace_column_display_pt.grid(column=0, row=6)
                 profido_format_label_pt.grid(column=0, row=5)
 
         choose_trace_button_pt = Button(profido_format_tab, text="Browse Trace", command=browse_trace)
         choose_trace_button_pt.grid(row=0, column=1)
 
-        result_filename_entry_pt = Entry(profido_format_tab, width=config.get('entries', 'entry_width'))
-        result_filename_entry_pt.grid(row=1, column=1)
+        profido_filename_entry_pt = Entry(profido_format_tab, width=config.get('entries', 'entry_width'))
+        profido_filename_entry_pt.grid(row=1, column=1)
 
         extract_columns_button_pt = Button(profido_format_tab, text="Extract ProFiDo format from trace",
                                            command=extract_columns)
@@ -472,5 +470,5 @@ class TraceConverterGUI:
 
 # Create TCGUI instance and run mainloop
 root = Tk()
-my_gui = TraceConverterGUI(root)
+converting_tool_gui = TraceConverterGUI(root)
 root.mainloop()
