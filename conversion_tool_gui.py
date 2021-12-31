@@ -8,7 +8,6 @@ import tkinter.filedialog as fd
 from tkinter import *
 from tkinter import ttk
 
-import pandas
 import pandas as pd
 
 from converter import trace_template, get_tracedata_from_file
@@ -213,7 +212,7 @@ class TraceConverterGUI:
 
             with open(filename) as tr:
                 tracedata = json.load(tr)["tracebody"]["tracedata"]
-                df = pandas.DataFrame(tracedata)
+                df = pd.DataFrame(tracedata)
                 df.transpose().to_csv(config.get('directories', 'profido_traces_dir') +
                                       profido_filename_entry_ct.get() + '_dat.trace',
                                       sep='\t',
@@ -437,7 +436,7 @@ class TraceConverterGUI:
 
                 with open(choose_trace_entry_pt.get()) as trace_in:
                     tracedata = json.load(trace_in)["tracebody"]["tracedata"]
-                    df = pandas.DataFrame(tracedata)
+                    df = pd.DataFrame(tracedata)
                     df.transpose().to_csv(config.get('directories', 'profido_traces_dir') +
                                           profido_filename_entry_pt.get() + '_dat.trace', sep='\t',
                                           float_format="%e",
