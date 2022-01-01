@@ -120,10 +120,16 @@ class TraceConverterGUI:
                 file_displayer_prt.config(state=DISABLED)
 
         def transform_file_prt(filename, delimiter):
-            df = pd.read_csv(filename, delimiter=delimiter)
+            if delimiter == "tabbed":
+                delimiter = '\t'
+            if delimiter == "space":
+                delimiter = ' '
+            if delimiter == "comma":
+                delimiter = ','
+            df = pd.read_csv(filename, sep=delimiter)
             result_filename = \
                 config.get('directories', 'raw_traces_dir') + '/' + os.path.basename(filename).split('.')[0] + '.csv'
-            df.to_csv(result_filename, index=False)
+            df.to_csv(result_filename, index=False, sep=',')
             display_file_prt(result_filename)
 
         # Tooltips
