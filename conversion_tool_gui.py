@@ -7,6 +7,7 @@ import tkinter
 import tkinter.filedialog as fd
 from tkinter import *
 from tkinter import ttk
+from idlelib.tooltip import Hovertip
 
 import pandas as pd
 
@@ -45,15 +46,25 @@ class TraceConverterGUI:
         # Labels
         Label(convert_tab, text="Field", font=config.get('fonts', 'default_font_bold')).grid(row=0)
         Label(convert_tab, text="Input", font=config.get('fonts', 'default_font_bold')).grid(row=0, column=1)
-        Label(convert_tab, text="Trace").grid(row=1)
-        Label(convert_tab, text="Columns to keep").grid(row=2)
-        Label(convert_tab, text="Tracesource").grid(row=3)
-        Label(convert_tab, text="Tracedescription").grid(row=4)
-        Label(convert_tab, text="Tracedatadescription").grid(row=5)
-        # Label(convert_tab, text="Date").grid(row=6)
-        Label(convert_tab, text="Username").grid(row=7)
-        Label(convert_tab, text="Additional Information").grid(row=8)
-        Label(convert_tab, text="Result Filename").grid(row=9)
+
+        original_tracefile_label_ct = Label(convert_tab, text="Trace")
+        original_tracefile_label_ct.grid(row=1)
+        columns_label_ct = Label(convert_tab, text="Columns to keep")
+        columns_label_ct.grid(row=2)
+        source_label_ct = Label(convert_tab, text="Tracesource")
+        source_label_ct.grid(row=3)
+        tracedescription_label_ct = Label(convert_tab, text="Tracedescription")
+        tracedescription_label_ct.grid(row=4)
+        tracedatadescription_label_ct = Label(convert_tab, text="Tracedatadescription")
+        tracedatadescription_label_ct.grid(row=5)
+        # date_label_ct = Label(convert_tab, text="Date")
+        # date_label_ct.grid(row=6)
+        username_label_ct = Label(convert_tab, text="Username")
+        username_label_ct.grid(row=7)
+        custom_field_label_ct = Label(convert_tab, text="Additional Information")
+        custom_field_label_ct.grid(row=8)
+        result_filename_label_ct = Label(convert_tab, text="Result Filename")
+        result_filename_label_ct.grid(row=9)
 
         profido_filename_label_ct = Label(convert_tab, text="ProFiDo filename:")
         profido_filename_entry_ct = Entry(convert_tab)
@@ -90,64 +101,65 @@ class TraceConverterGUI:
         # Create entries and set default values
         original_tracefile_button_ct = Button(convert_tab, text="Browse Files", command=browse_file_ct)
 
-        columns_entry = Entry(convert_tab, width=config.get('entries', 'entry_width'))
-        columns_entry.insert(END, ['0'])
+        columns_entry_ct = Entry(convert_tab, width=config.get('entries', 'entry_width'))
+        columns_entry_ct.insert(END, ['0'])
 
-        source_entry = Entry(convert_tab, width=config.get('entries', 'entry_width'))
-        source_entry.insert(END, config.get('default_entries', 'default_source_entry'))
+        source_entry_ct = Entry(convert_tab, width=config.get('entries', 'entry_width'))
+        source_entry_ct.insert(END, config.get('default_entries', 'default_source_entry'))
 
-        description_entry = Entry(convert_tab, width=config.get('entries', 'entry_width'))
-        description_entry.insert(END, config.get('default_entries', 'default_description_entry'))
+        description_entry_ct = Entry(convert_tab, width=config.get('entries', 'entry_width'))
+        description_entry_ct.insert(END, config.get('default_entries', 'default_description_entry'))
 
-        tracedatadescription_entry = Entry(convert_tab, width=config.get('entries', 'entry_width'))
-        tracedatadescription_entry.insert(END, config.get('default_entries', 'default_tracedatadescription_entry'))
+        tracedatadescription_entry_ct = Entry(convert_tab, width=config.get('entries', 'entry_width'))
+        tracedatadescription_entry_ct.insert(END, config.get('default_entries', 'default_tracedatadescription_entry'))
 
-        # date_entry = Entry(convert_tab, width=config.get('entries', 'entry_width'))
-        # date_entry.insert(END, "27.12.2021")
+        # date_entry_ct = Entry(convert_tab, width=config.get('entries', 'entry_width'))
+        # date_entry_ct.insert(END, "27.12.2021")
 
-        username_entry = Entry(convert_tab, width=config.get('entries', 'entry_width'))
-        username_entry.insert(END, config.get('default_entries', 'default_username_entry'))
+        username_entry_ct = Entry(convert_tab, width=config.get('entries', 'entry_width'))
+        username_entry_ct.insert(END, config.get('default_entries', 'default_username_entry'))
 
-        custom_field_entry = Text(convert_tab, width=config.get('entries', 'entry_width'), height=25,
-                                  font=config.get('fonts', 'default_font'))
-        custom_field_entry.insert(END, config.get('default_entries', 'default_customfield_entry'))
+        custom_field_entry_ct = Text(convert_tab, width=config.get('entries', 'entry_width'), height=25,
+                                     font=config.get('fonts', 'default_font'))
+        custom_field_entry_ct.insert(END, config.get('default_entries', 'default_customfield_entry'))
 
-        result_filename_entry = Entry(convert_tab, width=config.get('entries', 'entry_width'))
-        result_filename_entry.insert(END, config.get('default_entries', 'default_filename_entry'))
+        result_filename_entry_ct = Entry(convert_tab, width=config.get('entries', 'entry_width'))
+        result_filename_entry_ct.insert(END, config.get('default_entries', 'default_filename_entry'))
 
         # Place Entries
         original_tracefile_button_ct.grid(row=1, column=1)
-        columns_entry.grid(row=2, column=1)
-        source_entry.grid(row=3, column=1)
-        description_entry.grid(row=4, column=1)
-        tracedatadescription_entry.grid(row=5, column=1)
+        columns_entry_ct.grid(row=2, column=1)
+        source_entry_ct.grid(row=3, column=1)
+        description_entry_ct.grid(row=4, column=1)
+        tracedatadescription_entry_ct.grid(row=5, column=1)
         # date_entry.grid(row=6, column=1)
-        username_entry.grid(row=7, column=1)
-        custom_field_entry.grid(row=8, column=1)
-        result_filename_entry.grid(row=9, column=1)
+        username_entry_ct.grid(row=7, column=1)
+        custom_field_entry_ct.grid(row=8, column=1)
+        result_filename_entry_ct.grid(row=9, column=1)
 
         # Text widget to display the converted trace
         trace_display_ct = Text(convert_tab, width=100, height=33)
         trace_display_label_ct = Label(convert_tab, text="Converted Trace:")
 
         trace_exists_display_label_ct = Label(convert_tab, text="Existing Trace:")
+
         # trace_exists_notification_label_ct = Label(convert_tab, text="File already exists", bg='red')
 
         def convert_trace():
             """
             Takes the user input from the entry fields and converts the selected trace to the predefined standard format
             """
-            col = list(map(int, (columns_entry.get().split(","))))
+            col = list(map(int, (columns_entry_ct.get().split(","))))
             trace_template["tracebody"]["tracedata"] = get_tracedata_from_file(original_tracefile_entry_ct.get(), col)
-            trace_template["tracebody"]["tracedatadescription"] = tracedatadescription_entry.get().split("||")
+            trace_template["tracebody"]["tracedatadescription"] = tracedatadescription_entry_ct.get().split("||")
             trace_template["traceheader"]["metainformation"]["name"] = os.path.basename(
                 original_tracefile_entry_ct.get())
-            trace_template["traceheader"]["metainformation"]["source"] = source_entry.get()
-            trace_template["traceheader"]["metainformation"]["description"] = description_entry.get()
+            trace_template["traceheader"]["metainformation"]["source"] = source_entry_ct.get()
+            trace_template["traceheader"]["metainformation"]["description"] = description_entry_ct.get()
             trace_template["traceheader"]["metainformation"]["date"] = str(datetime.datetime.now())
-            trace_template["traceheader"]["metainformation"]["user"] = username_entry.get()
-            if len(custom_field_entry.get('1.0', 'end-1c')) != 0:
-                trace_template["traceheader"]["metainformation"]["additional information"] = custom_field_entry. \
+            trace_template["traceheader"]["metainformation"]["user"] = username_entry_ct.get()
+            if len(custom_field_entry_ct.get('1.0', 'end-1c')) != 0:
+                trace_template["traceheader"]["metainformation"]["additional information"] = custom_field_entry_ct. \
                     get('1.0', 'end-1c')
             else:
                 trace_template["traceheader"]["metainformation"].pop("additional information")
@@ -162,7 +174,7 @@ class TraceConverterGUI:
                 trace_template["traceheader"]["statistical characteristics"]["autocorrelation"].append(df[0].autocorr())
 
             # Save trace to file
-            filename = 'converted_traces/' + result_filename_entry.get() + '_converted.json'
+            filename = 'converted_traces/' + result_filename_entry_ct.get() + '_converted.json'
             if not os.path.exists(filename):
                 try:
                     with open(filename, 'w') as fp:
@@ -200,7 +212,7 @@ class TraceConverterGUI:
 
             # If profido checkbox is selected the columns will also be extracted for profido use
             if extract_profido_checkbutton_var_ct.get() == 1:
-                extract_after_conversion('converted_traces/' + result_filename_entry.get() + '_converted.json')
+                extract_after_conversion('converted_traces/' + result_filename_entry_ct.get() + '_converted.json')
 
         def extract_after_conversion(filename):
             """
@@ -223,6 +235,27 @@ class TraceConverterGUI:
         exit_button_ct.grid(row=12, column=16, sticky=SE, padx=4, pady=4)
         convert_button_ct = Button(convert_tab, text='Convert', command=convert_trace)
         convert_button_ct.grid(row=12, column=1)
+
+        # Tooltips
+        original_tracefile_tooltip_ct = Hovertip(original_tracefile_label_ct,
+                                                 config.get('tooltips', 'original_tracefile'))
+        columns_tooltip_ct = Hovertip(columns_label_ct, config.get('tooltips', 'columns'))
+        source_tooltip_ct = Hovertip(source_label_ct, config.get('tooltips', 'source'))
+        description_tooltip_ct = Hovertip(tracedescription_label_ct, config.get('tooltips', 'tracedescription'))
+        tracedatadescription_tooltip_ct = Hovertip(tracedatadescription_label_ct,
+                                                   config.get('tooltips', 'tracedatadescription'))
+        username_tooltip_ct = Hovertip(username_label_ct, config.get('tooltips', 'username'))
+        custom_field_tooltip_ct = Hovertip(custom_field_label_ct, config.get('tooltips', 'custom_field'))
+        result_filename_tooltip_ct = Hovertip(result_filename_label_ct,
+                                              config.get('tooltips', 'result_filename'))
+        profido_checkbutton_tooltip_ct = Hovertip(extract_profido_checkbutton_ct,
+                                                  config.get('tooltips', 'profido_checkbutton'))
+        profido_filename_tooltip_ct = Hovertip(profido_filename_label_ct,
+                                               config.get('tooltips', 'profido_filename'))
+        browse_file_button_tooltip_ct = Hovertip(original_tracefile_button_ct,
+                                                 config.get('tooltips', 'browse_file_button'))
+        convert_button_tooltip_ct = Hovertip(convert_button_ct,
+                                             config.get('tooltips', 'browse_file_button'))
 
         # Filter Tab
         # Labels
@@ -276,7 +309,7 @@ class TraceConverterGUI:
             if compare_to_own_statistic_checkbutton_var_ft.get() == 1:  # Compare to other statistic in same column
                 operand = float(operand_entry_ft.get())
                 comparison_statistic = compare_to_own_statistic_combobox_ft.get()
-                arithmetic_operator = arithmetic_operator_combobox_ft.get()
+                arithmetic_operator = arithmetic_operation_combobox_ft.get()
                 base_operator = basic_arithmetic_operator_functions[arithmetic_operator]
                 for i in range(len(selected_files)):
                     trace_statistic = selected_files[i]["traceheader"]["statistical characteristics"][statistic]
@@ -347,17 +380,17 @@ class TraceConverterGUI:
         comparison_operator_combobox_ft.grid(column=3, row=2)
         comparison_operator_combobox_ft.current(0)
 
-        arithmetic_operator_label_ft = Label(filter_tab, text="Operation")
-        arithmetic_operator_combobox_ft = ttk.Combobox(filter_tab, state="readonly",
-                                                       values=basic_arithmetic_operator_options)
-        arithmetic_operator_combobox_ft.current(0)
+        arithmetic_operation_label_ft = Label(filter_tab, text="Operation")
+        arithmetic_operation_combobox_ft = ttk.Combobox(filter_tab, state="readonly",
+                                                        values=basic_arithmetic_operator_options)
+        arithmetic_operation_combobox_ft.current(0)
 
         compare_to_own_statistic_label_ft = Label(filter_tab, text="Comparison statistic")
         compare_to_own_statistic_combobox_ft = ttk.Combobox(filter_tab, state="readonly",
                                                             values=statistical_characteristics_options)
         compare_to_own_statistic_combobox_ft.current(0)
 
-        factor_label_ft = Label(filter_tab, text="Operand")
+        operand_label_ft = Label(filter_tab, text="Operand")
         operand_entry_ft = Entry(filter_tab, width=25)
 
         comparison_value_label_ft = Label(filter_tab, text="Comparison value")
@@ -372,17 +405,17 @@ class TraceConverterGUI:
             if compare_to_own_statistic_checkbutton_var_ft.get() == 1:
                 comparison_value_label_ft.grid_forget()
                 comparison_value_entry_ft.grid_forget()
-                arithmetic_operator_label_ft.grid(column=5, row=1)
-                arithmetic_operator_combobox_ft.grid(column=5, row=2)
+                arithmetic_operation_label_ft.grid(column=5, row=1)
+                arithmetic_operation_combobox_ft.grid(column=5, row=2)
                 compare_to_own_statistic_label_ft.grid(column=4, row=1)
                 compare_to_own_statistic_combobox_ft.grid(column=4, row=2)
-                factor_label_ft.grid(column=6, row=1)
+                operand_label_ft.grid(column=6, row=1)
                 operand_entry_ft.grid(column=6, row=2)
                 filter_button_ft.grid(column=7, row=2)
             if compare_to_own_statistic_checkbutton_var_ft.get() == 0:
-                arithmetic_operator_label_ft.grid_forget()
-                arithmetic_operator_combobox_ft.grid_forget()
-                factor_label_ft.grid_forget()
+                arithmetic_operation_label_ft.grid_forget()
+                arithmetic_operation_combobox_ft.grid_forget()
+                operand_label_ft.grid_forget()
                 operand_entry_ft.grid_forget()
                 compare_to_own_statistic_label_ft.grid_forget()
                 compare_to_own_statistic_combobox_ft.grid_forget()
@@ -405,9 +438,30 @@ class TraceConverterGUI:
         exit_button_ft = Button(filter_tab, text="Exit", command=master.destroy)
         exit_button_ft.grid(column=2, row=3)
 
+        # Tooltips
+        selected_traces_tooltip_ft = Hovertip(selected_traces_label_ft, config.get('tooltips', 'selected_traces'))
+        statistical_characteristic_tooltip_ft = Hovertip(statistics_label_ft,
+                                                         config.get('tooltips', 'statistical_characteristic'))
+        comparison_operator_tooltip_ft = Hovertip(comparison_operator_label_ft,
+                                                  config.get('tooltips', 'comparison_operator'))
+        comparison_statistic_tooltip_ft = Hovertip(compare_to_own_statistic_label_ft,
+                                                   config.get('tooltips', 'comparison_statistic'))
+        comparison_value_tooltip_ft = Hovertip(comparison_value_label_ft,
+                                               config.get('tooltips', 'comparison_value'))
+        operation_tooltip_ft = Hovertip(arithmetic_operation_label_ft,
+                                        config.get('tooltips', 'operation'))
+        operand_tooltip_ft = Hovertip(operand_label_ft,
+                                      config.get('tooltips', 'operand'))
+        statistic_checkbutton_tooltip_ft = Hovertip(compare_to_own_statistic_checkbutton_ft,
+                                                    config.get('tooltips', 'statistic_checkbutton'))
+        browse_files_button_tooltip_ft = Hovertip(browse_button_ft, config.get('tooltips', 'browse_files_button'))
+        filter_button_tooltip_ft = Hovertip(filter_button_ft, config.get('tooltips', 'filter_button'))
+
         # ===ProFiDo format Tab
-        Label(profido_format_tab, text="Trace").grid(row=0)
-        Label(profido_format_tab, text="Result filename").grid(row=1)
+        converted_trace_label_pt = Label(profido_format_tab, text="Trace")
+        converted_trace_label_pt.grid(row=0)
+        profido_filename_label_pt = Label(profido_format_tab, text="Result filename")
+        profido_filename_label_pt.grid(row=1)
         input_trace_entry_pt = Entry(profido_format_tab, width=config.get('entries', 'entry_width'))
 
         trace_column_display_pt = Text(profido_format_tab, width=45, height=20)
@@ -467,6 +521,16 @@ class TraceConverterGUI:
 
         exit_button_pt = Button(profido_format_tab, text='Exit', command=master.destroy)
         exit_button_pt.grid(row=3, column=2, sticky=W, pady=4)
+
+        # Tooltips
+        converted_trace_label_tooltip_pt = Hovertip(converted_trace_label_pt,
+                                                    config.get('tooltips', 'converted_trace'))
+        profido_filename_entry_tooltip_pt = Hovertip(profido_filename_label_pt,
+                                                     config.get('tooltips', 'profido_filename'))
+        browse_trace_button_tooltip_pt = Hovertip(choose_trace_button_pt,
+                                                  config.get('tooltips', 'browse_trace_button'))
+        extract_button_tooltip_pt = Hovertip(extract_columns_button_pt,
+                                             config.get('tooltips', 'extract_button'))
 
 
 # Create TCGUI instance and run mainloop
