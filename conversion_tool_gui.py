@@ -251,7 +251,7 @@ class TraceConverterGUI:
         profido_checkbutton_tooltip_ct = Hovertip(extract_profido_checkbutton_ct,
                                                   config.get('tooltips', 'profido_checkbutton'))
         profido_filename_tooltip_ct = Hovertip(profido_filename_label_ct,
-                                               config.get('tooltips', 'profido_filename'))
+                                               config.get('tooltips', 'profido_filename_ct'))
         browse_file_button_tooltip_ct = Hovertip(original_tracefile_button_ct,
                                                  config.get('tooltips', 'browse_file_button'))
         convert_button_tooltip_ct = Hovertip(convert_button_ct,
