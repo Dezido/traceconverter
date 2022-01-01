@@ -2,6 +2,7 @@ import configparser
 import json
 import logging
 import os
+import hashlib
 
 import pandas as pd
 
@@ -78,6 +79,37 @@ def verify_statistics(converted_trace_file):
             return invalid_statistics
 
 
+def remove_rows_from_csv(filename, number_of_rows):
+    # df = pd.read_csv(filename)
+    df = pd.read_csv(filename, header=1, skiprows=list(range(0, number_of_rows)))
+    # df.drop(df.head(number_of_rows).index, inplace=True)
+    df.to_csv(filename, index=False, header="Header")
+
+
+def add_header_to_csv(filename, header):
+    df = pd.read_csv(filename, delimiter=',', header=None)
+    if len(header) != len(df.columns):
+        print('The passed header has ' + str(len(header)) + ' elements. \nBut ' + str(len(df.columns)) +
+              ' elements are required!')
+    else:
+        df.to_csv(filename, header=header, index=False)
+
+
+def hash_from_trace(filename):
+    sha256_hash = hashlib.sha256()
+    with open(filename, "rb") as f:
+        for byte_block in iter(lambda: f.read(4096), b""):
+            sha256_hash.update(byte_block)
+        return sha256_hash.hexdigest()
+
+
+def write_hash(fp):
+    sha256_hash = hashlib.sha256()
+    for byte_block in iter(lambda: fp.read(4096), b""):
+        sha256_hash.update(byte_block)
+    return sha256_hash.hexdigest()
+
+
 trace_template = {"traceheader": {
     "metainformation": {
         "name": "",
@@ -85,7 +117,8 @@ trace_template = {"traceheader": {
         "description": "",
         "date": "",
         "user": "",
-        "additional information": ""
+        "additional information": "",
+        "hash": ""
     },
     "statistical characteristics": {
         "mean": [],

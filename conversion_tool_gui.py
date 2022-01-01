@@ -5,13 +5,15 @@ import logging
 import os
 import tkinter
 import tkinter.filedialog as fd
+from idlelib.tooltip import Hovertip
 from tkinter import *
 from tkinter import ttk
-from idlelib.tooltip import Hovertip
+from tkinter import scrolledtext
 
 import pandas as pd
 
-from converter import trace_template, get_tracedata_from_file
+import converter as c
+from converter import trace_template, get_tracedata_from_file, remove_rows_from_csv
 
 # Load config file
 config = configparser.RawConfigParser()
@@ -32,21 +34,111 @@ class TraceConverterGUI:
         # Notebook and Tabs
         tab_parent = ttk.Notebook(master)
 
+        preparation_tab = ttk.Frame(tab_parent)
         convert_tab = ttk.Frame(tab_parent)
         filter_tab = ttk.Frame(tab_parent)
         profido_format_tab = ttk.Frame(tab_parent)
 
         # Add tabs to master
+        tab_parent.add(preparation_tab, text="Prepare File")
         tab_parent.add(convert_tab, text="Convert Trace")
         tab_parent.add(filter_tab, text="Filter Traces")
         tab_parent.add(profido_format_tab, text="ProFiDo Format from Trace")
         tab_parent.pack(expand=1, fill='both')
 
+        # Preparation Tab
+
+        def browse_file_prt():
+            """
+            Opens a file explorer to select a file
+            """
+            file_entry_prt.delete(0, END)  # removes previously selected file
+            selected_file = fd.askopenfilename(initialdir=config.get('directories', 'raw_traces_dir'),
+                                               title="Select a File",
+                                               filetypes=(("CSV files", "*.csv*"), ("all files",
+                                                                                    "*.*")))
+            file_entry_prt.insert(END, selected_file)
+            file_entry_prt.grid(row=0, column=1)
+            file_button_prt.grid(row=0, column=2)
+            display_file_prt(file_entry_prt.get())
+
+        file_label_prt = Label(preparation_tab, text="File")
+        file_label_prt.grid(column=0, row=0)
+
+        file_entry_prt = Entry(preparation_tab, width=config.get('entries', 'entry_width'))
+
+        file_button_prt = Button(preparation_tab, text="Browse File", command=browse_file_prt)
+        file_button_prt.grid(column=1, row=0)
+
+        remove_rows_label_prt = Label(preparation_tab, text="Number of rows to remove")
+        remove_rows_label_prt.grid(column=0, row=1)
+
+        remove_rows_entry_prt = Entry(preparation_tab, width=config.get('entries', 'entry_width'))
+        remove_rows_entry_prt.grid(column=1, row=1)
+
+        remove_rows_button_prt = Button(preparation_tab, text="Remove rows",
+                                        command=lambda: [remove_rows_from_csv(file_entry_prt.get(),
+                                                                              int(remove_rows_entry_prt.get())),
+                                                         display_file_prt(file_entry_prt.get())])
+        remove_rows_button_prt.grid(column=2, row=1)
+
+        add_header_label_prt = Label(preparation_tab, text="Add header to file")
+        add_header_label_prt.grid(column=0, row=2)
+
+        add_header_entry_prt = Entry(preparation_tab, width=config.get('entries', 'entry_width'))
+        add_header_entry_prt.grid(column=1, row=2)
+
+        add_header_button_prt = Button(preparation_tab, text="Add header",
+                                       command=lambda: [c.add_header_to_csv(file_entry_prt.get(),
+                                                                            list(
+                                                                                add_header_entry_prt.get().split(","))),
+                                                        display_file_prt(file_entry_prt.get())])
+        add_header_button_prt.grid(column=2, row=2)
+
+        file_displayer_label_prt = Label(preparation_tab)
+        file_displayer_label_prt.grid(column=0, row=4)
+        file_displayer_prt = scrolledtext.ScrolledText(preparation_tab, width=200, height=33)
+
+        delimiter_label_prt = Label(preparation_tab, text="Delimiter")
+        delimiter_label_prt.grid(column=0, row=3)
+        # target_type_entry_prt = Entry(preparation_tab)
+        # target_type_entry_prt.grid(column=1, row=4)
+        delimiter_entry_prt = Entry(preparation_tab, width=config.get('entries', 'entry_width'))
+        delimiter_entry_prt.grid(column=1, row=3)
+        transform_filetype_button_prt = Button(preparation_tab, text="Transform file",
+                                               command=lambda: transform_file_prt(file_entry_prt.get(),
+                                                                                  delimiter_entry_prt.get()))
+        transform_filetype_button_prt.grid(column=2, row=3)
+
+        def display_file_prt(filename):
+            with open(filename, 'r') as f:
+                file_displayer_label_prt.configure(text=os.path.basename(filename))
+                file_displayer_prt.grid(column=0, row=5, columnspan=12, rowspan=10)
+                file_displayer_prt.config(state=NORMAL)
+                file_displayer_prt.delete("1.0", "end")
+                file_displayer_prt.insert(INSERT, f.read())
+                file_displayer_prt.config(state=DISABLED)
+
+        def transform_file_prt(filename, delimiter):
+            df = pd.read_csv(filename, delimiter=delimiter)
+            result_filename = \
+                config.get('directories', 'raw_traces_dir') + '/' + os.path.basename(filename).split('.')[0] + '.csv'
+            df.to_csv(result_filename, index=False)
+            display_file_prt(result_filename)
+
+        # Tooltips
+        file_tooltip_prt = Hovertip(file_label_prt, config.get('tooltips', 'file'))
+        file_button_tooltip_prt = Hovertip(file_button_prt, config.get('tooltips', 'file_button'))
+        remove_rows_tooltip_prt = Hovertip(remove_rows_label_prt, config.get('tooltips', 'remove_rows'))
+        remove_rows_button_tooltip_prt = Hovertip(remove_rows_button_prt, config.get('tooltips', 'remove_rows_button'))
+        add_header_tooltip_prt = Hovertip(add_header_label_prt, config.get('tooltips', 'add_header'))
+        add_header_button_tooltip_prt = Hovertip(add_header_button_prt, config.get('tooltips', 'add_header_button'))
+        delimiter_tooltip_prt = Hovertip(delimiter_label_prt, config.get('tooltips', 'delimiter'))
+        transform_button_tooltip_prt = Hovertip(transform_filetype_button_prt, config.get('tooltips', 'transform_button'))
+
         # Converting Tab
-        # Labels
         Label(convert_tab, text="Field", font=config.get('fonts', 'default_font_bold')).grid(row=0)
         Label(convert_tab, text="Input", font=config.get('fonts', 'default_font_bold')).grid(row=0, column=1)
-
         original_tracefile_label_ct = Label(convert_tab, text="Trace")
         original_tracefile_label_ct.grid(row=1)
         columns_label_ct = Label(convert_tab, text="Columns to keep")
@@ -70,6 +162,9 @@ class TraceConverterGUI:
         profido_filename_entry_ct = Entry(convert_tab)
 
         def show_name_entry():
+            """
+            Puts the profido_filename_label on the grid if the checkbox is selcted
+            """
             if extract_profido_checkbutton_var_ct.get() == 0:
                 profido_filename_label_ct.grid_forget()
                 profido_filename_entry_ct.grid_forget()
@@ -138,7 +233,7 @@ class TraceConverterGUI:
         result_filename_entry_ct.grid(row=9, column=1)
 
         # Text widget to display the converted trace
-        trace_display_ct = Text(convert_tab, width=100, height=33)
+        trace_display_ct = scrolledtext.ScrolledText(convert_tab, width=100, height=33)
         trace_display_label_ct = Label(convert_tab, text="Converted Trace:")
 
         trace_exists_display_label_ct = Label(convert_tab, text="Existing Trace:")
@@ -178,6 +273,8 @@ class TraceConverterGUI:
             if not os.path.exists(filename):
                 try:
                     with open(filename, 'w') as fp:
+                        # digest = hashlib.sha256(json.dump(trace_template, fp, indent=4)).hexdigest()
+                        # trace_template["traceheader"]["metainformation"]["hash"] = digest
                         json.dump(trace_template, fp, indent=4)
                         # result_filename_entry.configure(bg='white')
                         # trace_exists_notification_label_ct.grid_forget()
@@ -464,7 +561,7 @@ class TraceConverterGUI:
         profido_filename_label_pt.grid(row=1)
         input_trace_entry_pt = Entry(profido_format_tab, width=config.get('entries', 'entry_width'))
 
-        trace_column_display_pt = Text(profido_format_tab, width=45, height=20)
+        trace_column_display_pt = scrolledtext.ScrolledText(profido_format_tab, width=45, height=20)
         profido_format_label_pt = Label(profido_format_tab, text="Extracted data")
 
         def browse_file_pt():
@@ -531,6 +628,8 @@ class TraceConverterGUI:
                                                   config.get('tooltips', 'browse_trace_button'))
         extract_button_tooltip_pt = Hovertip(extract_columns_button_pt,
                                              config.get('tooltips', 'extract_button'))
+
+        # Validation tab
 
 
 # Create TCGUI instance and run mainloop
