@@ -29,7 +29,7 @@ def get_tracedata_from_file(file, cols):
     df.drop(df.columns[relevant_column_numbers], axis=1, inplace=True)
     for column in df:
         tracedata_list.append(df[column].values.reshape(1, -1).ravel().tolist())
-    logging.info("Tracedata from " + os.path.basename(file) + " successfully retrieved")
+    print("Tracedata from " + os.path.basename(file) + " successfully retrieved")
     return tracedata_list
 
 
@@ -80,34 +80,45 @@ def verify_statistics(converted_trace_file):
 
 
 def remove_rows_from_csv(filename, number_of_rows):
-    # df = pd.read_csv(filename)
+    """
+    Removes rows from the beginning of a file
+    :param filename: Input file
+    :param number_of_rows: How many rows shall be removed from the beginning of the file
+    """
     df = pd.read_csv(filename, header=1, skiprows=list(range(0, number_of_rows)))
-    # df.drop(df.head(number_of_rows).index, inplace=True)
     df.to_csv(filename, index=False, header="Header")
+    if number_of_rows == 1:
+        print("Removed the first " + str(number_of_rows) + " row from " + filename)
+    if number_of_rows > 1:
+        print("Removed the first " + str(number_of_rows) + " rows from " + filename)
 
 
 def add_header_to_csv(filename, header):
+    """
+    Add a header to a csv file
+    :param filename: Input file
+    :param header: Header that will be placed on top of the file
+    """
     df = pd.read_csv(filename, delimiter=',', header=None)
     if len(header) != len(df.columns):
         print('The passed header has ' + str(len(header)) + ' elements. \nBut ' + str(len(df.columns)) +
               ' elements are required!')
     else:
         df.to_csv(filename, header=header, index=False)
+        print(str(header) + " was added as header to " + filename)
 
 
 def hash_from_trace(filename):
+    """
+    Computes hash value for a given file
+    :param filename: Input file
+    :return: hash value
+    """
     sha256_hash = hashlib.sha256()
     with open(filename, "rb") as f:
         for byte_block in iter(lambda: f.read(4096), b""):
             sha256_hash.update(byte_block)
         return sha256_hash.hexdigest()
-
-
-def write_hash(fp):
-    sha256_hash = hashlib.sha256()
-    for byte_block in iter(lambda: fp.read(4096), b""):
-        sha256_hash.update(byte_block)
-    return sha256_hash.hexdigest()
 
 
 trace_template = {"traceheader": {
@@ -117,8 +128,7 @@ trace_template = {"traceheader": {
         "description": "",
         "date": "",
         "user": "",
-        "additional information": "",
-        "hash": ""
+        "additional information": ""
     },
     "statistical characteristics": {
         "mean": [],

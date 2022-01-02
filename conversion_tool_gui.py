@@ -7,13 +7,13 @@ import tkinter
 import tkinter.filedialog as fd
 from idlelib.tooltip import Hovertip
 from tkinter import *
-from tkinter import ttk
 from tkinter import scrolledtext
+from tkinter import ttk
 
 import pandas as pd
 
 import converter as c
-from converter import trace_template, get_tracedata_from_file, remove_rows_from_csv
+from converter import trace_template, get_tracedata_from_file, remove_rows_from_csv, hash_from_trace
 
 # Load config file
 config = configparser.RawConfigParser()
@@ -60,6 +60,7 @@ class TraceConverterGUI:
             file_entry_prt.insert(END, selected_file)
             file_entry_prt.grid(row=0, column=1)
             file_button_prt.grid(row=0, column=0)
+            print(selected_file + " was chosen in preparation tab")
             display_file_prt(file_entry_prt.get())
 
         file_entry_prt = Entry(preparation_tab, width=config.get('entries', 'entry_width'))
@@ -68,44 +69,49 @@ class TraceConverterGUI:
         file_button_prt.grid(column=1, row=0)
 
         remove_rows_label_prt = Label(preparation_tab, text="Number of rows to remove")
-        remove_rows_label_prt.grid(column=0, row=1)
+        remove_rows_label_prt.grid(column=0, row=2)
 
         remove_rows_entry_prt = Entry(preparation_tab, width=config.get('entries', 'entry_width'))
-        remove_rows_entry_prt.grid(column=1, row=1)
+        remove_rows_entry_prt.grid(column=1, row=2)
 
         remove_rows_button_prt = Button(preparation_tab, text="Remove rows",
                                         command=lambda: [remove_rows_from_csv(file_entry_prt.get(),
                                                                               int(remove_rows_entry_prt.get())),
                                                          display_file_prt(file_entry_prt.get())])
-        remove_rows_button_prt.grid(column=2, row=1)
+        remove_rows_button_prt.grid(column=2, row=2)
 
         add_header_label_prt = Label(preparation_tab, text="Add header to file")
-        add_header_label_prt.grid(column=0, row=2)
+        add_header_label_prt.grid(column=0, row=3)
 
         add_header_entry_prt = Entry(preparation_tab, width=config.get('entries', 'entry_width'))
-        add_header_entry_prt.grid(column=1, row=2)
+        add_header_entry_prt.grid(column=1, row=3)
 
         add_header_button_prt = Button(preparation_tab, text="Add header",
                                        command=lambda: [c.add_header_to_csv(file_entry_prt.get(),
                                                                             list(
                                                                                 add_header_entry_prt.get().split(","))),
                                                         display_file_prt(file_entry_prt.get())])
-        add_header_button_prt.grid(column=2, row=2)
+        add_header_button_prt.grid(column=2, row=3)
 
         file_displayer_label_prt = Label(preparation_tab)
-        file_displayer_label_prt.grid(column=0, row=4)
+        file_displayer_label_prt.grid(column=0, row=5)
         file_displayer_prt = scrolledtext.ScrolledText(preparation_tab, width=200, height=33)
 
         delimiter_label_prt = Label(preparation_tab, text="Delimiter")
-        delimiter_label_prt.grid(column=0, row=3)
+        delimiter_label_prt.grid(column=0, row=4)
         delimiter_entry_prt = Entry(preparation_tab, width=config.get('entries', 'entry_width'))
-        delimiter_entry_prt.grid(column=1, row=3)
+        delimiter_entry_prt.grid(column=1, row=4)
         transform_filetype_button_prt = Button(preparation_tab, text="Transform file",
                                                command=lambda: transform_file_prt(file_entry_prt.get(),
                                                                                   delimiter_entry_prt.get()))
-        transform_filetype_button_prt.grid(column=2, row=3)
+        transform_filetype_button_prt.grid(column=2, row=4)
 
         def display_file_prt(filename):
+            """
+            Displays the selected file in the preparation tab
+            :param filename: File that will be displayed
+            :return:
+            """
             with open(filename, 'r') as f:
                 file_displayer_label_prt.configure(text=os.path.basename(filename))
                 file_displayer_prt.grid(column=0, row=5, columnspan=12, rowspan=10)
@@ -113,6 +119,7 @@ class TraceConverterGUI:
                 file_displayer_prt.delete("1.0", "end")
                 file_displayer_prt.insert(INSERT, f.read())
                 file_displayer_prt.config(state=DISABLED)
+                print(filename + " displayed in preparation tab")
 
         def transform_file_prt(filename, delimiter):
             if delimiter == "tabbed":
@@ -126,6 +133,7 @@ class TraceConverterGUI:
                 config.get('directories', 'raw_traces_dir') + '/' + os.path.basename(filename).split('.')[0] + '.csv'
             df.to_csv(result_filename, index=False, sep=',')
             display_file_prt(result_filename)
+            print(filename + " was transformed into csv file")
 
         # Tooltips
         file_button_tooltip_prt = Hovertip(file_button_prt, config.get('tooltips', 'file_button'))
@@ -163,9 +171,11 @@ class TraceConverterGUI:
             if extract_profido_checkbutton_var_ct.get() == 0:
                 profido_filename_label_ct.grid_forget()
                 profido_filename_entry_ct.grid_forget()
+                print("Extract columns for PoFiDo option was unselected in the convert tab")
             if extract_profido_checkbutton_var_ct.get() == 1:
                 profido_filename_label_ct.grid(column=4, row=4)
                 profido_filename_entry_ct.grid(column=4, row=5)
+                print("Extract columns for PoFiDo option was selected in the convert tab")
 
         extract_profido_checkbutton_var_ct = tkinter.IntVar()
         extract_profido_checkbutton_ct = Checkbutton(convert_tab, text="extract ProFiDo format after conversion",
@@ -185,6 +195,7 @@ class TraceConverterGUI:
                                                filetypes=(("CSV files", "*.csv*"),))
             original_tracefile_entry_ct.insert(END, selected_file)
             original_tracefile_entry_ct.grid(row=1, column=1)
+            print(selected_file + "was chosen in convert tab")
 
         # Create entries and set default values
         original_tracefile_button_ct = Button(convert_tab, text="Browse Files", command=browse_file_ct)
@@ -259,13 +270,10 @@ class TraceConverterGUI:
             if not os.path.exists(filename):
                 try:
                     with open(filename, 'w') as fp:
-                        # digest = hashlib.sha256(json.dump(trace_template, fp, indent=4)).hexdigest()
-                        # trace_template["traceheader"]["metainformation"]["hash"] = digest
                         json.dump(trace_template, fp, indent=4)
-                        # result_filename_entry.configure(bg='white')
-                        # trace_exists_notification_label_ct.grid_forget()
                         trace_exists_display_label_ct.grid_forget()
                         trace_display_label_ct.grid(column=5, row=0)
+                        print("Trace was converted successfully!")
                 except BaseException as e:
                     print("Error while converting trace: " + str(e))
                     Label(profido_format_tab, bg="red", text="An error occurred. Are all inputs valid?").grid(column=0,
@@ -275,6 +283,7 @@ class TraceConverterGUI:
                 print("File already exists!")
                 trace_exists_display_label_ct.grid(column=5, row=0)
 
+            print("Hash of converted file: " + hash_from_trace(filename))
             # Clear statistic lists so the next trace won't have old values
             trace_template["traceheader"]["statistical characteristics"]["mean"].clear()
             trace_template["traceheader"]["statistical characteristics"]["median"].clear()
@@ -282,6 +291,9 @@ class TraceConverterGUI:
             trace_template["traceheader"]["statistical characteristics"]["kurtosis"].clear()
             trace_template["traceheader"]["statistical characteristics"]["autocorrelation"].clear()
 
+            # If profido checkbox is selected the columns will also be extracted for profido use
+            if extract_profido_checkbutton_var_ct.get() == 1:
+                extract_after_conversion('converted_traces/' + result_filename_entry_ct.get() + '_converted.json')
             # Display the created traces
             with open(filename, 'r') as f:
                 trace_display_ct.config(state=NORMAL)
@@ -289,10 +301,7 @@ class TraceConverterGUI:
                 trace_display_ct.insert(INSERT, f.read())
                 trace_display_ct.config(state=DISABLED)
                 trace_display_ct.grid(column=5, row=1, columnspan=12, rowspan=10)
-
-            # If profido checkbox is selected the columns will also be extracted for profido use
-            if extract_profido_checkbutton_var_ct.get() == 1:
-                extract_after_conversion('converted_traces/' + result_filename_entry_ct.get() + '_converted.json')
+                print("Displaying creating trace")
 
         def extract_after_conversion(filename):
             """
@@ -310,6 +319,7 @@ class TraceConverterGUI:
                                       sep='\t',
                                       float_format="%e",
                                       index=False, header=False)
+                print("Columns were extracted after conversion")
 
         convert_button_ct = Button(convert_tab, text='Convert', command=convert_trace)
         convert_button_ct.grid(row=12, column=1)
@@ -364,6 +374,7 @@ class TraceConverterGUI:
                 selected_traces_lb.insert(i, selected_filenames[i])
             selected_traces_lb.grid(column=1, row=2, rowspan=5)
             browse_button_ft.grid(column=1, row=8)
+            print("Traces for filtering were selected")
 
         def filter_traces():
             """
@@ -380,7 +391,8 @@ class TraceConverterGUI:
                     for j in range(len(trace_statistic)):
                         if comparison_operator(trace_statistic[j], comparison_value):
                             filter_result.append(os.path.basename(selected_filenames[i]))
-
+                print("Filtered traces that satisfy: " + statistic + " " + str(comparison_operator_cb) + " " +
+                      str(comparison_value))
             if compare_to_own_statistic_checkbutton_var_ft.get() == 1:  # Compare to other statistic in same column
                 operand = float(operand_entry_ft.get())
                 comparison_statistic = compare_to_own_statistic_combobox_ft.get()
@@ -394,6 +406,8 @@ class TraceConverterGUI:
                         comparison_value = base_operator(comparison_statistic_value[j], operand)
                         if comparison_operator(trace_statistic[j], comparison_value):
                             filter_result.append(os.path.basename(selected_filenames[i]))
+                print("Filtered traces that satisfy: " + statistic + " " + str(comparison_operator_cb) + " " +
+                      str(comparison_value))
 
             filter_result_lb.delete(0, 'end')
             unique_filter_result = list(set(filter_result))
@@ -487,9 +501,11 @@ class TraceConverterGUI:
                 operand_label_ft.grid(column=6, row=1)
                 operand_entry_ft.grid(column=6, row=2)
                 filter_button_ft.grid(column=7, row=2)
+
             if compare_to_own_statistic_checkbutton_var_ft.get() == 0:
                 arithmetic_operation_label_ft.grid_forget()
                 arithmetic_operation_combobox_ft.grid_forget()
+                operand_label_ft.grid_forget()
                 operand_label_ft.grid_forget()
                 operand_entry_ft.grid_forget()
                 compare_to_own_statistic_label_ft.grid_forget()
@@ -575,6 +591,8 @@ class TraceConverterGUI:
                 trace_column_display_pt.config(state=DISABLED)
                 trace_column_display_pt.grid(column=0, row=6)
                 profido_format_label_pt.grid(column=0, row=5)
+                print("Columns were extracted from " + str(os.path.basename(input_trace_entry_pt.get())) +
+                      "result was saved to " + profido_filename_entry_pt.get() + '_dat.trace')
 
         choose_trace_button_pt = Button(profido_format_tab, text="Browse Trace", command=browse_file_pt)
         choose_trace_button_pt.grid(row=0, column=0)
