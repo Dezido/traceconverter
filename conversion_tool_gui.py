@@ -98,8 +98,6 @@ class TraceConverterGUI:
 
         delimiter_label_prt = Label(preparation_tab, text="Delimiter")
         delimiter_label_prt.grid(column=0, row=3)
-        # target_type_entry_prt = Entry(preparation_tab)
-        # target_type_entry_prt.grid(column=1, row=4)
         delimiter_entry_prt = Entry(preparation_tab, width=config.get('entries', 'entry_width'))
         delimiter_entry_prt.grid(column=1, row=3)
         transform_filetype_button_prt = Button(preparation_tab, text="Transform file",
@@ -136,13 +134,10 @@ class TraceConverterGUI:
         add_header_tooltip_prt = Hovertip(add_header_label_prt, config.get('tooltips', 'add_header'))
         add_header_button_tooltip_prt = Hovertip(add_header_button_prt, config.get('tooltips', 'add_header_button'))
         delimiter_tooltip_prt = Hovertip(delimiter_label_prt, config.get('tooltips', 'delimiter'))
-        transform_button_tooltip_prt = Hovertip(transform_filetype_button_prt, config.get('tooltips', 'transform_button'))
+        transform_button_tooltip_prt = Hovertip(transform_filetype_button_prt,
+                                                config.get('tooltips', 'transform_button'))
 
         # Converting Tab
-        Label(convert_tab, text="Field", font=config.get('fonts', 'default_font_bold')).grid(row=0)
-        Label(convert_tab, text="Input", font=config.get('fonts', 'default_font_bold')).grid(row=0, column=1)
-        original_tracefile_label_ct = Label(convert_tab, text="Trace")
-        original_tracefile_label_ct.grid(row=1)
         columns_label_ct = Label(convert_tab, text="Columns to keep")
         columns_label_ct.grid(row=2)
         source_label_ct = Label(convert_tab, text="Tracesource")
@@ -151,14 +146,12 @@ class TraceConverterGUI:
         tracedescription_label_ct.grid(row=4)
         tracedatadescription_label_ct = Label(convert_tab, text="Tracedatadescription")
         tracedatadescription_label_ct.grid(row=5)
-        # date_label_ct = Label(convert_tab, text="Date")
-        # date_label_ct.grid(row=6)
         username_label_ct = Label(convert_tab, text="Username")
-        username_label_ct.grid(row=7)
+        username_label_ct.grid(row=6)
         custom_field_label_ct = Label(convert_tab, text="Additional Information")
-        custom_field_label_ct.grid(row=8)
+        custom_field_label_ct.grid(row=7)
         result_filename_label_ct = Label(convert_tab, text="Result Filename")
-        result_filename_label_ct.grid(row=9)
+        result_filename_label_ct.grid(row=8)
 
         profido_filename_label_ct = Label(convert_tab, text="ProFiDo filename:")
         profido_filename_entry_ct = Entry(convert_tab)
@@ -192,7 +185,6 @@ class TraceConverterGUI:
                                                filetypes=(("CSV files", "*.csv*"),))
             original_tracefile_entry_ct.insert(END, selected_file)
             original_tracefile_entry_ct.grid(row=1, column=1)
-            original_tracefile_button_ct.grid(row=1, column=2)
 
         # Create entries and set default values
         original_tracefile_button_ct = Button(convert_tab, text="Browse Files", command=browse_file_ct)
@@ -209,9 +201,6 @@ class TraceConverterGUI:
         tracedatadescription_entry_ct = Entry(convert_tab, width=config.get('entries', 'entry_width'))
         tracedatadescription_entry_ct.insert(END, config.get('default_entries', 'default_tracedatadescription_entry'))
 
-        # date_entry_ct = Entry(convert_tab, width=config.get('entries', 'entry_width'))
-        # date_entry_ct.insert(END, "27.12.2021")
-
         username_entry_ct = Entry(convert_tab, width=config.get('entries', 'entry_width'))
         username_entry_ct.insert(END, config.get('default_entries', 'default_username_entry'))
 
@@ -223,23 +212,19 @@ class TraceConverterGUI:
         result_filename_entry_ct.insert(END, config.get('default_entries', 'default_filename_entry'))
 
         # Place Entries
-        original_tracefile_button_ct.grid(row=1, column=1)
+        original_tracefile_button_ct.grid(row=1, column=0)
         columns_entry_ct.grid(row=2, column=1)
         source_entry_ct.grid(row=3, column=1)
         description_entry_ct.grid(row=4, column=1)
         tracedatadescription_entry_ct.grid(row=5, column=1)
-        # date_entry.grid(row=6, column=1)
-        username_entry_ct.grid(row=7, column=1)
-        custom_field_entry_ct.grid(row=8, column=1)
-        result_filename_entry_ct.grid(row=9, column=1)
+        username_entry_ct.grid(row=6, column=1)
+        custom_field_entry_ct.grid(row=7, column=1)
+        result_filename_entry_ct.grid(row=8, column=1)
 
         # Text widget to display the converted trace
         trace_display_ct = scrolledtext.ScrolledText(convert_tab, width=100, height=33)
         trace_display_label_ct = Label(convert_tab, text="Converted Trace:")
-
         trace_exists_display_label_ct = Label(convert_tab, text="Existing Trace:")
-
-        # trace_exists_notification_label_ct = Label(convert_tab, text="File already exists", bg='red')
 
         def convert_trace():
             """
@@ -288,9 +273,6 @@ class TraceConverterGUI:
 
             else:
                 print("File already exists!")
-                # result_filename_entry.configure(bg='red')
-                # trace_exists_notification_label_ct.grid(column=3, row=9)
-                # trace_display_label_ct.grid_forget()
                 trace_exists_display_label_ct.grid(column=5, row=0)
 
             # Clear statistic lists so the next trace won't have old values
@@ -333,8 +315,6 @@ class TraceConverterGUI:
         convert_button_ct.grid(row=12, column=1)
 
         # Tooltips
-        original_tracefile_tooltip_ct = Hovertip(original_tracefile_label_ct,
-                                                 config.get('tooltips', 'original_tracefile'))
         columns_tooltip_ct = Hovertip(columns_label_ct, config.get('tooltips', 'columns'))
         source_tooltip_ct = Hovertip(source_label_ct, config.get('tooltips', 'source'))
         description_tooltip_ct = Hovertip(tracedescription_label_ct, config.get('tooltips', 'tracedescription'))
@@ -354,7 +334,6 @@ class TraceConverterGUI:
                                              config.get('tooltips', 'browse_file_button'))
 
         # Filter Tab
-        # Labels
         selected_traces_label_ft = Label(filter_tab, text="Selected traces")
         selected_traces_label_ft.grid(column=1, row=1)
 
@@ -531,7 +510,6 @@ class TraceConverterGUI:
         browse_button_ft = Button(filter_tab, text="Browse Files", command=browse_files_ft)
         browse_button_ft.grid(column=1, row=2)
 
-
         # Tooltips
         selected_traces_tooltip_ft = Hovertip(selected_traces_label_ft, config.get('tooltips', 'selected_traces'))
         statistical_characteristic_tooltip_ft = Hovertip(statistics_label_ft,
@@ -571,15 +549,11 @@ class TraceConverterGUI:
                                                 filetypes=(("JSON files", "*.json*"),))
             input_trace_entry_pt.insert(END, selected_trace)
             input_trace_entry_pt.grid(row=0, column=1)
-            choose_trace_button_pt.grid(row=0, column=2)
-
-        error_label_pt = Label(profido_format_tab, bg="red", text="An error occurred. Are all inputs valid?")
 
         def extract_columns():
             """
             Extracts the tracedata as columns so the trace can be used in ProFiDo
             """
-            error_label_pt.grid_forget()
             try:
 
                 # TODO filecheck
@@ -593,7 +567,6 @@ class TraceConverterGUI:
                                           index=False, header=False)
             except BaseException as e:
                 print("Error while extracting columns: " + str(e))
-                error_label_pt.grid(column=0, row=4)
             with open(config.get('directories', 'profido_traces_dir') +
                       profido_filename_entry_pt.get() + '_dat.trace', 'r') as f:
                 trace_column_display_pt.config(state=NORMAL)
@@ -604,7 +577,7 @@ class TraceConverterGUI:
                 profido_format_label_pt.grid(column=0, row=5)
 
         choose_trace_button_pt = Button(profido_format_tab, text="Browse Trace", command=browse_file_pt)
-        choose_trace_button_pt.grid(row=0, column=1)
+        choose_trace_button_pt.grid(row=0, column=0)
 
         profido_filename_entry_pt = Entry(profido_format_tab, width=config.get('entries', 'entry_width'))
         profido_filename_entry_pt.grid(row=1, column=1)
@@ -612,7 +585,6 @@ class TraceConverterGUI:
         extract_columns_button_pt = Button(profido_format_tab, text="Extract ProFiDo format from trace",
                                            command=extract_columns)
         extract_columns_button_pt.grid(row=3, column=1)
-
 
         # Tooltips
         converted_trace_label_tooltip_pt = Hovertip(converted_trace_label_pt,
