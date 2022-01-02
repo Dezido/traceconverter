@@ -59,11 +59,8 @@ class TraceConverterGUI:
                                                                                     "*.*")))
             file_entry_prt.insert(END, selected_file)
             file_entry_prt.grid(row=0, column=1)
-            file_button_prt.grid(row=0, column=2)
+            file_button_prt.grid(row=0, column=0)
             display_file_prt(file_entry_prt.get())
-
-        file_label_prt = Label(preparation_tab, text="File")
-        file_label_prt.grid(column=0, row=0)
 
         file_entry_prt = Entry(preparation_tab, width=config.get('entries', 'entry_width'))
 
@@ -133,7 +130,6 @@ class TraceConverterGUI:
             display_file_prt(result_filename)
 
         # Tooltips
-        file_tooltip_prt = Hovertip(file_label_prt, config.get('tooltips', 'file'))
         file_button_tooltip_prt = Hovertip(file_button_prt, config.get('tooltips', 'file_button'))
         remove_rows_tooltip_prt = Hovertip(remove_rows_label_prt, config.get('tooltips', 'remove_rows'))
         remove_rows_button_tooltip_prt = Hovertip(remove_rows_button_prt, config.get('tooltips', 'remove_rows_button'))
