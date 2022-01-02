@@ -169,7 +169,7 @@ class TraceConverterGUI:
 
         def show_name_entry():
             """
-            Puts the profido_filename_label on the grid if the checkbox is selcted
+            Puts the profido_filename_label on the grid if the checkbox is selected
             """
             if extract_profido_checkbutton_var_ct.get() == 0:
                 profido_filename_label_ct.grid_forget()
@@ -194,7 +194,6 @@ class TraceConverterGUI:
             selected_file = fd.askopenfilename(initialdir=config.get('directories', 'raw_traces_dir'),
                                                title="Select a File",
                                                filetypes=(("CSV files", "*.csv*"),))
-
             original_tracefile_entry_ct.insert(END, selected_file)
             original_tracefile_entry_ct.grid(row=1, column=1)
             original_tracefile_button_ct.grid(row=1, column=2)
