@@ -333,8 +333,6 @@ class TraceConverterGUI:
                                       float_format="%e",
                                       index=False, header=False)
 
-        exit_button_ct = Button(convert_tab, text='Exit', command=master.destroy)
-        exit_button_ct.grid(row=12, column=16, sticky=SE, padx=4, pady=4)
         convert_button_ct = Button(convert_tab, text='Convert', command=convert_trace)
         convert_button_ct.grid(row=12, column=1)
 
@@ -537,8 +535,6 @@ class TraceConverterGUI:
         browse_button_ft = Button(filter_tab, text="Browse Files", command=browse_files_ft)
         browse_button_ft.grid(column=1, row=2)
 
-        exit_button_ft = Button(filter_tab, text="Exit", command=master.destroy)
-        exit_button_ft.grid(column=2, row=3)
 
         # Tooltips
         selected_traces_tooltip_ft = Hovertip(selected_traces_label_ft, config.get('tooltips', 'selected_traces'))
@@ -621,8 +617,6 @@ class TraceConverterGUI:
                                            command=extract_columns)
         extract_columns_button_pt.grid(row=3, column=1)
 
-        exit_button_pt = Button(profido_format_tab, text='Exit', command=master.destroy)
-        exit_button_pt.grid(row=3, column=2, sticky=W, pady=4)
 
         # Tooltips
         converted_trace_label_tooltip_pt = Hovertip(converted_trace_label_pt,
