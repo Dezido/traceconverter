@@ -136,3 +136,6 @@ dmypy.json
 *dat
 #IDEA folder
 .idea
+
+# unformatted traces
+/unformatted_tracefiles/
