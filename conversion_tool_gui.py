@@ -9,6 +9,7 @@ from idlelib.tooltip import Hovertip
 from tkinter import *
 from tkinter import scrolledtext
 from tkinter import ttk
+import tkinter.messagebox as mb
 
 import pandas as pd
 
@@ -270,20 +271,17 @@ class TraceConverterGUI:
 
             #  Generate statistics and adds them into a list. Each list entry represents one column of the raw trace
             if amount_tracedata > 4:
-                for i in range(len(trace_template["tracebody"]["tracedata"])):
-                    df = pd.DataFrame(trace_template["tracebody"]["tracedata"][i])
-                    trace_template["traceheader"]["statistical characteristics"]["mean"].append(df[0].mean())
-                    trace_template["traceheader"]["statistical characteristics"]["median"].append(df[0].median())
-                    trace_template["traceheader"]["statistical characteristics"]["skew"].append(df[0].skew())
-                    trace_template["traceheader"]["statistical characteristics"]["kurtosis"].append(df[0].kurtosis())
-                    trace_template["traceheader"]["statistical characteristics"]["autocorrelation"].append(
-                        df[0].autocorr())
+                trace = generate_statistic(trace_template)
             # Save trace to file
             filename = 'converted_traces/' + result_filename_entry_ct.get() + '_converted.json'
             if not os.path.exists(filename):
                 try:
+                    #   overwrite = \
+                    #      mb.askyesno("File already exists", "File already exists. \n Would you like to overwrite it?")
+                    #  if overwrite:
                     with open(filename, 'w') as fp:
-                        json.dump(trace_template, fp, indent=4)
+                        print("Yes")
+                        json.dump(trace, fp, indent=4)
                         trace_exists_display_label_ct.grid_forget()
                         trace_display_label_ct.grid(column=5, row=0)
                         print("Trace was converted successfully!")
@@ -293,15 +291,7 @@ class TraceConverterGUI:
                                                                                                               row=4)
 
             else:
-                print("File already exists!")
                 trace_exists_display_label_ct.grid(column=5, row=0)
-
-            # Clear statistic lists so the next trace won't have old values
-            trace_template["traceheader"]["statistical characteristics"]["mean"].clear()
-            trace_template["traceheader"]["statistical characteristics"]["median"].clear()
-            trace_template["traceheader"]["statistical characteristics"]["skew"].clear()
-            trace_template["traceheader"]["statistical characteristics"]["kurtosis"].clear()
-            trace_template["traceheader"]["statistical characteristics"]["autocorrelation"].clear()
 
             # If profido checkbox is selected the columns will also be extracted for profido use
             if extract_profido_checkbutton_var_ct.get() == 1:
@@ -309,6 +299,23 @@ class TraceConverterGUI:
             # Display the created traces
             add_hash_to_trace(filename)
             display_file_ct(filename)
+
+        def generate_statistic(trace):
+            # Clear statistic lists so the next trace won't have old values
+            trace["traceheader"]["statistical characteristics"]["mean"].clear()
+            trace["traceheader"]["statistical characteristics"]["median"].clear()
+            trace["traceheader"]["statistical characteristics"]["skew"].clear()
+            trace["traceheader"]["statistical characteristics"]["kurtosis"].clear()
+            trace["traceheader"]["statistical characteristics"]["autocorrelation"].clear()
+            for i in range(len(trace["tracebody"]["tracedata"])):
+                df = pd.DataFrame(trace["tracebody"]["tracedata"][i])
+                trace["traceheader"]["statistical characteristics"]["mean"].append(df[0].mean())
+                trace["traceheader"]["statistical characteristics"]["median"].append(df[0].median())
+                trace["traceheader"]["statistical characteristics"]["skew"].append(df[0].skew())
+                trace["traceheader"]["statistical characteristics"]["kurtosis"].append(df[0].kurtosis())
+                trace["traceheader"]["statistical characteristics"]["autocorrelation"].append(
+                    df[0].autocorr())
+            return trace
 
         def add_hash_to_trace(filename):
             with open(filename) as tr:
@@ -654,24 +661,43 @@ class TraceConverterGUI:
             file_entry_vt.insert(END, selected_trace)
             file_entry_vt.grid(row=0, column=0)
 
+        def restore_traceheader(filename):
+            """
+            (Re)generates statistics and hash for the input trace
+            :param filename: Input file
+            """
+            with open(filename) as tr:
+                tracedata = json.load(tr)
+                trace = generate_statistic(tracedata)
+            with open(filename, 'w') as fp:
+                json.dump(trace, fp, indent=4)
+            add_hash_to_trace(filename)
+
         file_entry_vt = Entry(validation_tab, width=config.get('entries', 'entry_width'))
 
         browse_file_button_vt = Button(validation_tab, text="Choose File", command=browse_file_vt)
         browse_file_button_vt.grid(row=1, column=0)
 
-        input_hash_label_vt = Label(validation_tab, text="Hash")
-        input_hash_label_vt.grid(row=2, column=0)
-
-        input_hash_entry_vt = Entry(validation_tab, width=config.get('entries', 'entry_width'))
-        input_hash_entry_vt.grid(row=2, column=1)
-
         validate_statistics_button_vt = Button(validation_tab, text="Validate Statistics",
                                                command=lambda: c.verify_statistics(file_entry_vt.get()))
-        validate_statistics_button_vt.grid(row=3, column=1)
+        validate_statistics_button_vt.grid(row=2, column=0)
 
         validate_hash_button_vt = Button(validation_tab, text="Validate Hash",
                                          command=lambda: c.hash_check(file_entry_vt.get()))
-        validate_hash_button_vt.grid(row=2, column=2)
+        validate_hash_button_vt.grid(row=3, column=0)
+
+        restore_traceheader_button_vt = Button(validation_tab, text="Restore Traceheader",
+                                               command=lambda: restore_traceheader(file_entry_vt.get()))
+        restore_traceheader_button_vt.grid(row=4, column=0)
+
+        # Tooltips
+        browse_file_button_tooltip_vt = Hovertip(browse_file_button_vt, config.get('tooltips', 'browse_file_button_vt'))
+        validate_statistics_button_tooltip_vt = Hovertip(validate_statistics_button_vt,
+                                                         config.get('tooltips', 'validate_statistics_button'))
+        validate_hash_button_tooltip_vt = Hovertip(validate_hash_button_vt,
+                                                   config.get('tooltips', 'validate_hash_button'))
+        restore_traceheader_button_tooltip_vt = Hovertip(restore_traceheader_button_vt,
+                                                         config.get('tooltips', 'restore_traceheader_button'))
 
 
 # Create TCGUI instance and run mainloop
