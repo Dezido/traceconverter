@@ -174,4 +174,6 @@ trace_template = {"traceheader": {
         "tracedata": []
     }
 }
-
+mean = 2
+median = 1
+print(eval("mean>median and mean+2>3"))

@@ -133,12 +133,6 @@ class TraceConverterGUI:
                 print(filename + " displayed in preparation tab")
 
         def transform_file_prt(filename, delimiter, header):
-            if delimiter == "tabbed":
-                delimiter = '\t'
-            if delimiter == "space":
-                delimiter = ' '
-            if delimiter == "comma":
-                delimiter = ','
             df = pd.read_csv(filename, sep=delimiter)
             result_filename = \
                 config.get('directories', 'raw_traces_dir') + '/' + os.path.basename(filename).split('.')[0] + '.csv'
@@ -325,16 +319,16 @@ class TraceConverterGUI:
             try:
                 for i in range(len(trace["tracebody"]["tracedata"])):
                     df = pd.DataFrame(trace["tracebody"]["tracedata"][i])
-                    trace["traceheader"]["statistical characteristics"]["mean"].append(
-                        formatstring.format(df[0].mean()))
-                    trace["traceheader"]["statistical characteristics"]["median"].append(
-                        formatstring.format(df[0].median()))
-                    trace["traceheader"]["statistical characteristics"]["skew"].append(
-                        formatstring.format(df[0].skew()))
-                    trace["traceheader"]["statistical characteristics"]["kurtosis"].append(
-                        formatstring.format(df[0].kurtosis()))
-                    trace["traceheader"]["statistical characteristics"]["autocorrelation"].append(
-                        formatstring.format(df[0].autocorr()))
+                    trace["traceheader"]["statistical characteristics"]["mean"].append(float(
+                        formatstring.format(df[0].mean())))
+                    trace["traceheader"]["statistical characteristics"]["median"].append(float(
+                        formatstring.format(df[0].median())))
+                    trace["traceheader"]["statistical characteristics"]["skew"].append(float(
+                        formatstring.format(df[0].skew())))
+                    trace["traceheader"]["statistical characteristics"]["kurtosis"].append(float(
+                        formatstring.format(df[0].kurtosis())))
+                    trace["traceheader"]["statistical characteristics"]["autocorrelation"].append(float(
+                        formatstring.format(df[0].autocorr())))
                 return trace
             except (KeyError, IndexError):
                 mb.showerror("Format Error", "Invalid Statistic Format entered")
@@ -440,39 +434,26 @@ class TraceConverterGUI:
             browse_button_ft.grid(column=1, row=8)
             print("Traces for filtering were selected")
 
-        def filter_traces():
+        def filter_traces(expression):
             """
-            Filters selected traces by the specified condition (via combo boxes)
+            Evaluates the expression on the selected traces
             """
             filter_result.clear()
-            statistic = statistics_combobox_ft.get()
-            comparison_operator_cb = comparison_operator_combobox_ft.get()
-            comparison_operator = comparison_operator_functions[comparison_operator_cb]
-            if compare_to_own_statistic_checkbutton_var_ft.get() == 0:  # Compare trace statistic to value
-                comparison_value = float(comparison_value_entry_ft.get())
-                for i in range(len(selected_files)):
-                    trace_statistic = selected_files[i]["traceheader"]["statistical characteristics"][statistic]
-                    for j in range(len(trace_statistic)):
-                        if comparison_operator(trace_statistic[j], comparison_value):
-                            filter_result.append(os.path.basename(selected_filenames[i]))
-                print("Filtered traces that satisfy: " + statistic + " " + str(comparison_operator_cb) + " " +
-                      str(comparison_value))
-            if compare_to_own_statistic_checkbutton_var_ft.get() == 1:  # Compare to other statistic in same column
-                operand = float(operand_entry_ft.get())
-                comparison_statistic = compare_to_own_statistic_combobox_ft.get()
-                arithmetic_operator = arithmetic_operation_combobox_ft.get()
-                base_operator = basic_arithmetic_operator_functions[arithmetic_operator]
-                for i in range(len(selected_files)):
-                    trace_statistic = selected_files[i]["traceheader"]["statistical characteristics"][statistic]
-                    comparison_statistic_value = \
-                        selected_files[i]["traceheader"]["statistical characteristics"][comparison_statistic]
-                    for j in range(len(trace_statistic)):
-                        comparison_value = base_operator(comparison_statistic_value[j], operand)
-                        if comparison_operator(trace_statistic[j], comparison_value):
-                            filter_result.append(os.path.basename(selected_filenames[i]))
-                print("Filtered traces that satisfy: " + statistic + " " + str(comparison_operator_cb) + " " +
-                      str(comparison_value))
-
+            for i in range(len(selected_files)):
+                mean_list = selected_files[i]["traceheader"]["statistical characteristics"]["mean"]
+                median_list = selected_files[i]["traceheader"]["statistical characteristics"]["median"]
+                skew_list = selected_files[i]["traceheader"]["statistical characteristics"]["skew"]
+                kurtosis_list = selected_files[i]["traceheader"]["statistical characteristics"]["kurtosis"]
+                autocorrelation_list = \
+                    selected_files[i]["traceheader"]["statistical characteristics"]["autocorrelation"]
+                for j in range(len(selected_files[i]["traceheader"]["statistical characteristics"]["mean"])):
+                    mean = mean_list[j]
+                    median = median_list[j]
+                    skew = skew_list[j]
+                    kurtosis = kurtosis_list[j]
+                    autocorrelation = autocorrelation_list[j]
+                    if eval(expression):
+                        filter_result.append(os.path.basename(selected_filenames[i]))
             filter_result_lb.delete(0, 'end')
             unique_filter_result = list(set(filter_result))
             for i in range(len(unique_filter_result)):
@@ -480,111 +461,14 @@ class TraceConverterGUI:
             Label(filter_tab, text="Results").grid(column=1, row=10)
             filter_result_lb.grid(column=1, row=11)
 
-        statistical_characteristics_options = [
-            "mean",
-            "median",
-            "skew",
-            "kurtosis",
-            "autocorrelation"
-        ]
+        expression_label_ft = Label(filter_tab, text="Boolean Expression")
+        expression_label_ft.grid(column=3, row=2)
 
-        comparison_operator_options = [
-            "equal: ==",
-            "not equal: !=",
-            "less than: <",
-            "less than or equal to: <=",
-            "greater than: >",
-            "greater than or equal to: >="
-        ]
-
-        basic_arithmetic_operator_options = [
-            "plus: +",
-            "minus: -",
-            "multiplied by: *",
-            "divided by: /"
-        ]
-
-        comparison_operator_functions = {
-            "equal: ==": lambda x, y: x == y,
-            "not equal: !=": lambda x, y: x != y,
-            "less than: <": lambda x, y: x < y,
-            "less than or equal to: <=": lambda x, y: x <= y,
-            "greater than: >": lambda x, y: x > y,
-            "greater than or equal to: >=": lambda x, y: x >= y
-        }
-
-        basic_arithmetic_operator_functions = {
-            "plus: +": lambda x, y: x + y,
-            "minus: -": lambda x, y: x - y,
-            "multiplied by: *": lambda x, y: x * y,
-            "divided by: /": lambda x, y: x / y
-        }
-
-        statistics_label_ft = Label(filter_tab, text="Statistical characteristic")
-        statistics_label_ft.grid(column=2, row=1)
-        statistics_combobox_ft = ttk.Combobox(filter_tab, state="readonly", values=statistical_characteristics_options)
-        statistics_combobox_ft.grid(column=2, row=2)
-        statistics_combobox_ft.current(0)
-
-        comparison_operator_label_ft = Label(filter_tab, text="Comparison operator")
-        comparison_operator_label_ft.grid(column=3, row=1)
-        comparison_operator_combobox_ft = ttk.Combobox(filter_tab, state="readonly", values=comparison_operator_options,
-                                                       width=30)
-        comparison_operator_combobox_ft.grid(column=3, row=2)
-        comparison_operator_combobox_ft.current(0)
-
-        arithmetic_operation_label_ft = Label(filter_tab, text="Operation")
-        arithmetic_operation_combobox_ft = ttk.Combobox(filter_tab, state="readonly",
-                                                        values=basic_arithmetic_operator_options)
-        arithmetic_operation_combobox_ft.current(0)
-
-        compare_to_own_statistic_label_ft = Label(filter_tab, text="Comparison statistic")
-        compare_to_own_statistic_combobox_ft = ttk.Combobox(filter_tab, state="readonly",
-                                                            values=statistical_characteristics_options)
-        compare_to_own_statistic_combobox_ft.current(0)
-
-        operand_label_ft = Label(filter_tab, text="Operand")
-        operand_entry_ft = Entry(filter_tab, width=25)
-
-        comparison_value_label_ft = Label(filter_tab, text="Comparison value")
-        comparison_value_label_ft.grid(column=4, row=1)
-        comparison_value_entry_ft = Entry(filter_tab, width=25)
-        comparison_value_entry_ft.grid(column=4, row=2)
-
-        def self_comparison_check():
-            """
-            Place and remove relevant labels and entries for the selected case
-            """
-            if compare_to_own_statistic_checkbutton_var_ft.get() == 1:
-                comparison_value_label_ft.grid_forget()
-                comparison_value_entry_ft.grid_forget()
-                arithmetic_operation_label_ft.grid(column=6, row=1)
-                arithmetic_operation_combobox_ft.grid(column=6, row=2)
-                compare_to_own_statistic_label_ft.grid(column=5, row=1)
-                compare_to_own_statistic_combobox_ft.grid(column=5, row=2)
-                operand_label_ft.grid(column=7, row=1)
-                operand_entry_ft.grid(column=7, row=2)
-                filter_button_ft.grid(column=8, row=2)
-
-            if compare_to_own_statistic_checkbutton_var_ft.get() == 0:
-                arithmetic_operation_label_ft.grid_forget()
-                arithmetic_operation_combobox_ft.grid_forget()
-                operand_label_ft.grid_forget()
-                operand_label_ft.grid_forget()
-                operand_entry_ft.grid_forget()
-                compare_to_own_statistic_label_ft.grid_forget()
-                compare_to_own_statistic_combobox_ft.grid_forget()
-                comparison_value_label_ft.grid(column=4, row=1)
-                comparison_value_entry_ft.grid(column=4, row=2)
-
-        compare_to_own_statistic_checkbutton_var_ft = tkinter.IntVar()
-        compare_to_own_statistic_checkbutton_ft = Checkbutton(filter_tab, text="compare to own statistic",
-                                                              variable=compare_to_own_statistic_checkbutton_var_ft,
-                                                              onvalue=1, offvalue=0, command=self_comparison_check)
-        compare_to_own_statistic_checkbutton_ft.grid(column=4, row=3)
+        expression_entry_ft = Entry(filter_tab, width=config.get('entries', 'entry_width'))
+        expression_entry_ft.grid(column=4, row=2)
 
         # Label and Buttons
-        filter_button_ft = Button(filter_tab, text="Filter Traces", command=filter_traces)
+        filter_button_ft = Button(filter_tab, text="Filter Traces", command=lambda: filter_traces(expression_entry_ft.get()))
         filter_button_ft.grid(column=5, row=2)
 
         browse_button_ft = Button(filter_tab, text="Choose Files", command=browse_files_ft)
@@ -592,22 +476,9 @@ class TraceConverterGUI:
 
         # Tooltips
         selected_traces_tooltip_ft = Hovertip(selected_traces_label_ft, config.get('tooltips', 'selected_traces'))
-        statistical_characteristic_tooltip_ft = Hovertip(statistics_label_ft,
-                                                         config.get('tooltips', 'statistical_characteristic'))
-        comparison_operator_tooltip_ft = Hovertip(comparison_operator_label_ft,
-                                                  config.get('tooltips', 'comparison_operator'))
-        comparison_statistic_tooltip_ft = Hovertip(compare_to_own_statistic_label_ft,
-                                                   config.get('tooltips', 'comparison_statistic'))
-        comparison_value_tooltip_ft = Hovertip(comparison_value_label_ft,
-                                               config.get('tooltips', 'comparison_value'))
-        operation_tooltip_ft = Hovertip(arithmetic_operation_label_ft,
-                                        config.get('tooltips', 'operation'))
-        operand_tooltip_ft = Hovertip(operand_label_ft,
-                                      config.get('tooltips', 'operand'))
-        statistic_checkbutton_tooltip_ft = Hovertip(compare_to_own_statistic_checkbutton_ft,
-                                                    config.get('tooltips', 'statistic_checkbutton'))
         browse_files_button_tooltip_ft = Hovertip(browse_button_ft, config.get('tooltips', 'browse_files_button'))
         filter_button_tooltip_ft = Hovertip(filter_button_ft, config.get('tooltips', 'filter_button'))
+        expression_label_tooltip_ft = Hovertip(expression_label_ft, config.get('tooltips', 'expression_label'))
 
         # ===ProFiDo format Tab
         converted_trace_label_pt = Label(profido_format_tab, text="Trace")
@@ -657,7 +528,7 @@ class TraceConverterGUI:
                 trace_column_display_pt.grid(column=0, row=6)
                 mb.showinfo("Data extracted", "Displaying extracted columns")
                 print("Columns were extracted from " + str(os.path.basename(input_trace_entry_pt.get())) +
-                      "result was saved to " + profido_filename_entry_pt.get() + '_dat.trace')
+                      " result was saved to " + profido_filename_entry_pt.get() + '_dat.trace')
 
         choose_trace_button_pt = Button(profido_format_tab, text="Choose File", command=browse_file_pt)
         choose_trace_button_pt.grid(row=0, column=0)
