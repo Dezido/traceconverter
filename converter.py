@@ -175,5 +175,3 @@ trace_template = {"traceheader": {
     }
 }
 
-my_formatter = "{:e}"
-output = my_formatter.format(2)

@@ -142,9 +142,15 @@ class TraceConverterGUI:
             df = pd.read_csv(filename, sep=delimiter)
             result_filename = \
                 config.get('directories', 'raw_traces_dir') + '/' + os.path.basename(filename).split('.')[0] + '.csv'
-            df.to_csv(result_filename, index=False, sep=',', header=header)
-            display_file_prt(result_filename)
-            print(filename + " was transformed into csv file")
+            dont_overwrite = 0
+            if os.path.exists(filename):
+                dont_overwrite = not mb.askyesno("File already exists",
+                                                 os.path.basename(filename) + " already exists. \n "
+                                                                              "Would you like to overwrite it?")
+            if not dont_overwrite:
+                df.to_csv(result_filename, index=False, sep=',', header=header)
+                display_file_prt(result_filename)
+                print(filename + " was transformed into csv file")
 
         # Tooltips
         file_button_tooltip_prt = Hovertip(file_button_prt, config.get('tooltips', 'file_button'))
@@ -193,6 +199,18 @@ class TraceConverterGUI:
                                                      variable=extract_profido_checkbutton_var_ct, onvalue=1,
                                                      offvalue=0, command=show_name_entry)
         extract_profido_checkbutton_ct.grid(column=4, row=3)
+
+        scientific_format_checkbutton_var_ct = tkinter.IntVar()
+        scientific_format_checkbutton_ct = Checkbutton(convert_tab, text="statistics in scientific notation",
+                                                       variable=scientific_format_checkbutton_var_ct, onvalue=1,
+                                                       offvalue=0)
+        # scientific_format_checkbutton_ct.grid(column=4, row=2)
+
+        statistic_format_label_ct = Label(convert_tab, text="Statistic Format")
+        statistic_format_label_ct.grid(row=12, column=0)
+
+        statistic_format_entry_ct = Entry(convert_tab, width=config.get('entries', 'entry_width'))
+        statistic_format_entry_ct.grid(row=12, column=1)
 
         original_tracefile_entry_ct = Entry(convert_tab, width=config.get('entries', 'entry_width'))
 
@@ -246,8 +264,6 @@ class TraceConverterGUI:
 
         # Text widget to display the converted trace
         file_displayer_ct = scrolledtext.ScrolledText(convert_tab, width=100, height=33)
-        trace_display_label_ct = Label(convert_tab, text="Converted Trace:")
-        trace_exists_display_label_ct = Label(convert_tab, text="Existing Trace:")
 
         def convert_trace():
             """
@@ -271,51 +287,58 @@ class TraceConverterGUI:
 
             #  Generate statistics and adds them into a list. Each list entry represents one column of the raw trace
             if amount_tracedata > 4:
-                trace = generate_statistic(trace_template)
+                trace = generate_statistic(trace_template, statistic_format_entry_ct.get())
+            else:
+                trace = trace_template
+                mb.showinfo("Statistics won't be computed", "Tracedata only contains " +
+                            str(amount_tracedata) + " elements per column. Computing statistics requires five or more.")
             # Save trace to file
             filename = 'converted_traces/' + result_filename_entry_ct.get() + '_converted.json'
-            if not os.path.exists(filename):
-                try:
-                    #   overwrite = \
-                    #      mb.askyesno("File already exists", "File already exists. \n Would you like to overwrite it?")
-                    #  if overwrite:
-                    with open(filename, 'w') as fp:
-                        print("Yes")
-                        json.dump(trace, fp, indent=4)
-                        trace_exists_display_label_ct.grid_forget()
-                        trace_display_label_ct.grid(column=5, row=0)
-                        print("Trace was converted successfully!")
-                except BaseException as e:
-                    print("Error while converting trace: " + str(e))
-                    Label(profido_format_tab, bg="red", text="An error occurred. Are all inputs valid?").grid(column=0,
-                                                                                                              row=4)
-
+            dont_overwrite = 0
+            if os.path.exists(filename):
+                dont_overwrite = not mb.askyesno("File already exists",
+                                                 os.path.basename(filename) + " already exists. \n "
+                                                                              "Would you like to overwrite it?")
+            if not dont_overwrite:
+                with open(filename, 'w') as fp:
+                    json.dump(trace, fp, indent=4)
+                    print("Trace was converted successfully!")
+                    # If profido checkbox is selected the columns will also be extracted for profido use
+                add_hash_to_trace(filename)
+                if extract_profido_checkbutton_var_ct.get() == 1:
+                    extract_after_conversion(
+                        filename)
+                mb.showinfo("Trace converted successfully", "Displaying converted Trace")
             else:
-                trace_exists_display_label_ct.grid(column=5, row=0)
-
-            # If profido checkbox is selected the columns will also be extracted for profido use
-            if extract_profido_checkbutton_var_ct.get() == 1:
-                extract_after_conversion('converted_traces/' + result_filename_entry_ct.get() + '_converted.json')
+                mb.showinfo("File already exists", "Displaying existing File")
             # Display the created traces
-            add_hash_to_trace(filename)
             display_file_ct(filename)
 
-        def generate_statistic(trace):
+        def generate_statistic(trace, formatstring):
             # Clear statistic lists so the next trace won't have old values
             trace["traceheader"]["statistical characteristics"]["mean"].clear()
             trace["traceheader"]["statistical characteristics"]["median"].clear()
             trace["traceheader"]["statistical characteristics"]["skew"].clear()
             trace["traceheader"]["statistical characteristics"]["kurtosis"].clear()
             trace["traceheader"]["statistical characteristics"]["autocorrelation"].clear()
-            for i in range(len(trace["tracebody"]["tracedata"])):
-                df = pd.DataFrame(trace["tracebody"]["tracedata"][i])
-                trace["traceheader"]["statistical characteristics"]["mean"].append(df[0].mean())
-                trace["traceheader"]["statistical characteristics"]["median"].append(df[0].median())
-                trace["traceheader"]["statistical characteristics"]["skew"].append(df[0].skew())
-                trace["traceheader"]["statistical characteristics"]["kurtosis"].append(df[0].kurtosis())
-                trace["traceheader"]["statistical characteristics"]["autocorrelation"].append(
-                    df[0].autocorr())
-            return trace
+            formatstring = "{" + formatstring + "}"
+            try:
+                for i in range(len(trace["tracebody"]["tracedata"])):
+                    df = pd.DataFrame(trace["tracebody"]["tracedata"][i])
+                    trace["traceheader"]["statistical characteristics"]["mean"].append(
+                        formatstring.format(df[0].mean()))
+                    trace["traceheader"]["statistical characteristics"]["median"].append(
+                        formatstring.format(df[0].median()))
+                    trace["traceheader"]["statistical characteristics"]["skew"].append(
+                        formatstring.format(df[0].skew()))
+                    trace["traceheader"]["statistical characteristics"]["kurtosis"].append(
+                        formatstring.format(df[0].kurtosis()))
+                    trace["traceheader"]["statistical characteristics"]["autocorrelation"].append(
+                        formatstring.format(df[0].autocorr()))
+                return trace
+            except (KeyError, IndexError):
+                mb.showerror("Format Error", "Invalid Statistic Format entered")
+                raise
 
         def add_hash_to_trace(filename):
             with open(filename) as tr:
@@ -342,21 +365,26 @@ class TraceConverterGUI:
             Extracts columns for ProFiDo usage from the input trace
             :param filename: Name of the converted tracefile
             """
-
-            # TODO filecheck
-
             with open(filename) as tr:
                 tracedata = json.load(tr)["tracebody"]["tracedata"]
                 df = pd.DataFrame(tracedata)
-                df.transpose().to_csv(config.get('directories', 'profido_traces_dir') +
-                                      profido_filename_entry_ct.get() + '_dat.trace',
-                                      sep='\t',
-                                      float_format="%e",
-                                      index=False, header=False)
-                print("Columns were extracted after conversion")
+                dont_overwrite = 0
+                result_filename = config.get('directories', 'profido_traces_dir') + \
+                                  profido_filename_entry_ct.get() + '_dat.trace'
+                if os.path.exists(result_filename):
+                    dont_overwrite = not mb.askyesno("File already exists",
+                                                     os.path.basename(result_filename) +
+                                                     " already exists. "
+                                                     "\n Would you like to overwrite it?")
+                if not dont_overwrite:
+                    df.transpose().to_csv(result_filename,
+                                          sep='\t',
+                                          float_format="%e",
+                                          index=False, header=False)
+                    print("Columns were extracted after conversion")
 
         convert_button_ct = Button(convert_tab, text='Convert Trace', command=convert_trace)
-        convert_button_ct.grid(row=12, column=1)
+        convert_button_ct.grid(row=13, column=1)
 
         # Tooltips
         columns_tooltip_ct = Hovertip(columns_label_ct, config.get('tooltips', 'columns'))
@@ -376,6 +404,8 @@ class TraceConverterGUI:
                                                  config.get('tooltips', 'browse_file_button'))
         convert_button_tooltip_ct = Hovertip(convert_button_ct,
                                              config.get('tooltips', 'browse_file_button'))
+        statistic_format_tooltip_ct = Hovertip(statistic_format_label_ct,
+                                               config.get('tooltips', 'statistic_format'))
 
         # Filter Tab
         selected_traces_label_ft = Label(filter_tab, text="Selected traces")
@@ -587,7 +617,6 @@ class TraceConverterGUI:
         input_trace_entry_pt = Entry(profido_format_tab, width=config.get('entries', 'entry_width'))
 
         trace_column_display_pt = scrolledtext.ScrolledText(profido_format_tab, width=45, height=20)
-        profido_format_label_pt = Label(profido_format_tab, text="Extracted data")
 
         def browse_file_pt():
             """
@@ -604,27 +633,29 @@ class TraceConverterGUI:
             """
             Extracts the tracedata as columns so the trace can be used in ProFiDo
             """
-            try:
 
-                # TODO filecheck
-
-                with open(input_trace_entry_pt.get()) as trace_in:
-                    tracedata = json.load(trace_in)["tracebody"]["tracedata"]
-                    df = pd.DataFrame(tracedata)
-                    df.transpose().to_csv(config.get('directories', 'profido_traces_dir') +
-                                          profido_filename_entry_pt.get() + '_dat.trace', sep='\t',
+            with open(input_trace_entry_pt.get()) as trace_in:
+                tracedata = json.load(trace_in)["tracebody"]["tracedata"]
+                df = pd.DataFrame(tracedata)
+                filename = config.get('directories', 'profido_traces_dir') + profido_filename_entry_pt.get() \
+                           + '_dat.trace'
+                dont_overwrite = 0
+                if os.path.exists(filename):
+                    dont_overwrite = not mb.askyesno("File already exists",
+                                                     os.path.basename(filename) + " already exists. \n "
+                                                                                  "Would you like to overwrite it?")
+                if not dont_overwrite:
+                    df.transpose().to_csv(filename, sep='\t',
                                           float_format="%e",
                                           index=False, header=False)
-            except BaseException as e:
-                print("Error while extracting columns: " + str(e))
-            with open(config.get('directories', 'profido_traces_dir') +
-                      profido_filename_entry_pt.get() + '_dat.trace', 'r') as f:
+
+            with open(filename, 'r') as f:
                 trace_column_display_pt.config(state=NORMAL)
                 trace_column_display_pt.delete("1.0", "end")
                 trace_column_display_pt.insert(INSERT, f.read())
                 trace_column_display_pt.config(state=DISABLED)
                 trace_column_display_pt.grid(column=0, row=6)
-                profido_format_label_pt.grid(column=0, row=5)
+                mb.showinfo("Data extracted", "Displaying extracted columns")
                 print("Columns were extracted from " + str(os.path.basename(input_trace_entry_pt.get())) +
                       "result was saved to " + profido_filename_entry_pt.get() + '_dat.trace')
 
@@ -668,9 +699,15 @@ class TraceConverterGUI:
             """
             with open(filename) as tr:
                 tracedata = json.load(tr)
-                trace = generate_statistic(tracedata)
-            with open(filename, 'w') as fp:
-                json.dump(trace, fp, indent=4)
+                trace = generate_statistic(tracedata, statistic_format_entry_vt.get())
+            dont_overwrite = 0
+            if os.path.exists(filename):
+                dont_overwrite = not mb.askyesno("File already exists",
+                                                 os.path.basename(filename) + " already exists. \n "
+                                                                              "Would you like to overwrite it?")
+            if not dont_overwrite:
+                with open(filename, 'w') as fp:
+                    json.dump(trace, fp, indent=4)
             add_hash_to_trace(filename)
 
         file_entry_vt = Entry(validation_tab, width=config.get('entries', 'entry_width'))
@@ -690,6 +727,12 @@ class TraceConverterGUI:
                                                command=lambda: restore_traceheader(file_entry_vt.get()))
         restore_traceheader_button_vt.grid(row=4, column=0)
 
+        statistic_format_label_vt = Label(validation_tab, text="Statistic Format")
+        statistic_format_label_vt.grid(column=1, row=2)
+
+        statistic_format_entry_vt = Entry(validation_tab, width=config.get('entries', 'entry_width'))
+        statistic_format_entry_vt.grid(column=2, row=2)
+
         # Tooltips
         browse_file_button_tooltip_vt = Hovertip(browse_file_button_vt, config.get('tooltips', 'browse_file_button_vt'))
         validate_statistics_button_tooltip_vt = Hovertip(validate_statistics_button_vt,
@@ -698,6 +741,8 @@ class TraceConverterGUI:
                                                    config.get('tooltips', 'validate_hash_button'))
         restore_traceheader_button_tooltip_vt = Hovertip(restore_traceheader_button_vt,
                                                          config.get('tooltips', 'restore_traceheader_button'))
+        statistic_format_tooltip_vt = Hovertip(statistic_format_label_vt,
+                                               config.get('tooltips', 'statistic_format'))
 
 
 # Create TCGUI instance and run mainloop
