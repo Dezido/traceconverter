@@ -60,11 +60,15 @@ class TraceConverterGUI:
                                                title="Select a File",
                                                filetypes=(("CSV files", "*.csv*"), ("all files",
                                                                                     "*.*")))
+            if not selected_file:
+                mb.showinfo(config.get('browse_file', 'no_file_selected_window'),
+                            config.get('browse_file', 'no_file_selected_message'))
             file_entry_prt.insert(END, selected_file)
             file_entry_prt.grid(row=0, column=1)
             file_button_prt.grid(row=0, column=0)
             print(selected_file + " was chosen in preparation tab")
-            display_file_prt(file_entry_prt.get())
+            if selected_file:
+                display_file_prt(file_entry_prt.get())
             first_line_is_header_checkbutton_prt.grid(row=0, column=2)
 
         first_line_is_header_checkbutton_var_prt = tkinter.IntVar()
@@ -216,11 +220,14 @@ class TraceConverterGUI:
             selected_file = fd.askopenfilename(initialdir=config.get('directories', 'raw_traces_dir'),
                                                title="Select a File",
                                                filetypes=(("CSV files", "*.csv*"),))
+            if not selected_file:
+                mb.showinfo(config.get('browse_file', 'no_file_selected_window'),
+                            config.get('browse_file', 'no_file_selected_message'))
             original_tracefile_entry_ct.insert(END, selected_file)
             original_tracefile_entry_ct.grid(row=1, column=1)
             print(selected_file + " was chosen in convert tab")
-            display_file_ct(selected_file)
-
+            if selected_file:
+                display_file_ct(selected_file)
         # Create entries and set default values
         original_tracefile_button_ct = Button(convert_tab, text="Choose File", command=browse_file_ct)
 
@@ -421,6 +428,9 @@ class TraceConverterGUI:
             file_tuple = fd.askopenfilenames(initialdir=config.get('directories', 'converted_traces_dir'),
                                              title="Select a File",
                                              filetypes=(("JSON files", "*.json*"),))
+            if not file_tuple:
+                mb.showinfo(config.get('browse_file', 'no_files_selected_window'),
+                            config.get('browse_file', 'no_files_selected_message'))
             selected_traces_lb.delete(0, 'end')
             selected_files.clear()
             selected_filenames.clear()
@@ -497,6 +507,9 @@ class TraceConverterGUI:
             selected_trace = fd.askopenfilename(initialdir=config.get('directories', 'converted_traces_dir'),
                                                 title="Select a File",
                                                 filetypes=(("JSON files", "*.json*"),))
+            if not selected_trace:
+                mb.showinfo(config.get('browse_file', 'no_file_selected_window'),
+                            config.get('browse_file', 'no_file_selected_message'))
             input_trace_entry_pt.insert(END, selected_trace)
             input_trace_entry_pt.grid(row=0, column=1)
 
@@ -560,6 +573,9 @@ class TraceConverterGUI:
             selected_trace = fd.askopenfilename(initialdir=config.get('directories', 'converted_traces_dir'),
                                                 title="Select a File",
                                                 filetypes=(("JSON files", "*.json*"),))
+            if not selected_trace:
+                mb.showinfo(config.get('browse_file', 'no_file_selected_window'),
+                            config.get('browse_file', 'no_file_selected_message'))
             file_entry_vt.insert(END, selected_trace)
             file_entry_vt.grid(row=0, column=0)
 
