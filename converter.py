@@ -4,6 +4,7 @@ import json
 import json.decoder
 import logging
 import os
+import pathlib
 import tkinter
 import tkinter.messagebox as mb
 
@@ -55,51 +56,58 @@ def verify_statistics(converted_trace_file):
     :param converted_trace_file: A tracefile in standard format
     :return:
     """
-    with open(converted_trace_file) as trace_file:
-        trace = json.load(trace_file)
-        statistics = trace["traceheader"]["statistical characteristics"]
-        tracedata = trace["tracebody"]["tracedata"]
-        statistics_valid = True
-        invalid_statistics = ""
-        current_mean = []
-        current_median = []
-        current_skew = []
-        current_kurtosis = []
-        current_autocorr = []
-        for i in range(len(tracedata)):
-            df = pd.DataFrame(tracedata[i])
-            current_mean.append(df[0].mean())
-            current_median.append(df[0].median())
-            current_skew.append(df[0].skew())
-            current_kurtosis.append(df[0].kurtosis())
-            current_autocorr.append(df[0].autocorr())
+    if os.path.isfile(converted_trace_file) and pathlib.Path(converted_trace_file).suffix == ".json":
+        try:
+            with open(converted_trace_file) as trace_file:
+                trace = json.load(trace_file)
+                statistics = trace["traceheader"]["statistical characteristics"]
+                tracedata = trace["tracebody"]["tracedata"]
+                statistics_valid = True
+                invalid_statistics = ""
+                current_mean = []
+                current_median = []
+                current_skew = []
+                current_kurtosis = []
+                current_autocorr = []
+                for i in range(len(tracedata)):
+                    df = pd.DataFrame(tracedata[i])
+                    current_mean.append(df[0].mean())
+                    current_median.append(df[0].median())
+                    current_skew.append(df[0].skew())
+                    current_kurtosis.append(df[0].kurtosis())
+                    current_autocorr.append(df[0].autocorr())
 
-        if current_mean != statistics["mean"]:
-            invalid_statistics += ("Mean not correct. Should be: " + str(current_mean) + " but is " +
-                                   str(statistics["mean"]) + "\n")
-            statistics_valid = False
-        if current_median != statistics["median"]:
-            invalid_statistics += ("Median not correct. Should be: " + str(current_median) + " but is " +
-                                   str(statistics["median"]) + "\n")
-            statistics_valid = False
-        if current_skew != statistics["skew"]:
-            invalid_statistics += ("Skew not correct. Should be: " + str(current_skew) + " but is " +
-                                   str(statistics["skew"]) + "\n")
-            statistics_valid = False
-        if current_kurtosis != statistics["kurtosis"]:
-            invalid_statistics += ("Kurtosis not correct. Should be: " + str(current_kurtosis) + " but is " +
-                                   str(statistics["kurtosis"]) + "\n")
-            statistics_valid = False
-        if current_autocorr != statistics["autocorrelation"]:
-            invalid_statistics += ("Autocorrelation not correct. Should be: " + str(current_autocorr) + " but is " +
-                                   str(statistics["autocorrelation"]) + "\n")
-            statistics_valid = False
-        if statistics_valid:
-            print("All statistics are valid")
-            mb.showinfo("Statistic Validation", "All statistics are valid")
-        else:
-            print(invalid_statistics)
-            mb.showinfo("Statistic Validation", invalid_statistics)
+                if current_mean != statistics["mean"]:
+                    invalid_statistics += ("Mean not correct. Should be: " + str(current_mean) + " but is " +
+                                           str(statistics["mean"]) + "\n")
+                    statistics_valid = False
+                if current_median != statistics["median"]:
+                    invalid_statistics += ("Median not correct. Should be: " + str(current_median) + " but is " +
+                                           str(statistics["median"]) + "\n")
+                    statistics_valid = False
+                if current_skew != statistics["skew"]:
+                    invalid_statistics += ("Skew not correct. Should be: " + str(current_skew) + " but is " +
+                                           str(statistics["skew"]) + "\n")
+                    statistics_valid = False
+                if current_kurtosis != statistics["kurtosis"]:
+                    invalid_statistics += ("Kurtosis not correct. Should be: " + str(current_kurtosis) + " but is " +
+                                           str(statistics["kurtosis"]) + "\n")
+                    statistics_valid = False
+                if current_autocorr != statistics["autocorrelation"]:
+                    invalid_statistics += (
+                                "Autocorrelation not correct. Should be: " + str(current_autocorr) + " but is " +
+                                str(statistics["autocorrelation"]) + "\n")
+                    statistics_valid = False
+                if statistics_valid:
+                    print("All statistics are valid")
+                    mb.showinfo("Statistic Validation", "All statistics are valid")
+                else:
+                    print(invalid_statistics)
+                    mb.showinfo("Statistic Validation", invalid_statistics)
+        except json.decoder.JSONDecodeError:
+            mb.showerror("Trace content invalid", "Please check if the trace content is valid")
+    else:
+        mb.showerror("Trace invalid", "Please check if the file is valid")
 
 
 def remove_lines_from_csv(filename, line_amount):
@@ -165,15 +173,21 @@ def hash_check(filename):
     Computes hash for the input file and compares it to the stored hash inside the file
     :param filename: Input file
     """
-    with open(filename) as tr:
-        tracedata = json.load(tr)
-        stored_hash = tracedata["traceheader"]["metainformation"]["hash"]
-        computed_hash = hash_from_trace(filename)
-    if stored_hash == computed_hash:
-        tkinter.messagebox.showinfo("Hash check result", "Hashes are equal")
+    if os.path.isfile(filename) and pathlib.Path(filename).suffix == ".json":
+        try:
+            with open(filename) as tr:
+                tracedata = json.load(tr)
+                stored_hash = tracedata["traceheader"]["metainformation"]["hash"]
+                computed_hash = hash_from_trace(filename)
+            if stored_hash == computed_hash:
+                tkinter.messagebox.showinfo("Hash check result", "Hashes are equal")
+            else:
+                tkinter.messagebox.showinfo("Hash check result", "Stored Hash: " + stored_hash + "\n" +
+                                            "Computed Hash: " + hash_from_trace(filename))
+        except json.decoder.JSONDecodeError:
+            mb.showerror("Trace content invalid", "Please check if the trace content is valid")
     else:
-        tkinter.messagebox.showinfo("Hash check result", "Stored Hash: " + stored_hash + "\n" + "Computed Hash: " +
-                                    hash_from_trace(filename))
+        mb.showerror("Trace invalid", "Please check if the file is valid")
 
 
 trace_template = {"traceheader": {
@@ -199,3 +213,5 @@ trace_template = {"traceheader": {
         "tracedata": []
     }
 }
+
+print(pathlib.Path('converted_traces/valley_bike_data_2019_08_converted.json').suffix)

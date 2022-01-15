@@ -10,6 +10,7 @@ from idlelib.tooltip import Hovertip
 from tkinter import *
 from tkinter import scrolledtext
 from tkinter import ttk
+import pathlib
 
 import pandas as pd
 
@@ -126,7 +127,7 @@ class TraceConverterGUI:
             Displays the selected file in the preparation tab
             :param filename: File that will be displayed
             """
-            if os.path.isfile(filename):
+            if os.path.isfile(filename) and pathlib.Path(filename).suffix == ".csv":
                 with open(filename, 'r') as f:
                     file_displayer_label_prt.configure(text=os.path.basename(filename))
                     file_displayer_prt.grid(column=0, row=5, columnspan=12, rowspan=10)
@@ -269,7 +270,8 @@ class TraceConverterGUI:
             """
             Takes the user input from the entry fields and converts the selected trace to the predefined standard format
             """
-            if os.path.isfile(original_tracefile_entry_ct.get()):
+            org_filename = original_tracefile_entry_ct.get()
+            if os.path.isfile(org_filename) and pathlib.Path(org_filename).suffix == ".csv":
                 col = list(map(int, (columns_entry_ct.get().split(","))))
                 trace_template["tracebody"]["tracedata"] = \
                     get_tracedata_from_file(original_tracefile_entry_ct.get(), col)
@@ -432,23 +434,26 @@ class TraceConverterGUI:
             """
             Select converted traces for filtering
             """
-            file_tuple = fd.askopenfilenames(initialdir=config.get('directories', 'converted_traces_dir'),
-                                             title="Select a File",
-                                             filetypes=(("JSON files", "*.json*"),))
-            if not file_tuple:
-                mb.showinfo(config.get('browse_file', 'no_files_selected_window'),
-                            config.get('browse_file', 'no_files_selected_message'))
-            selected_traces_lb.delete(0, 'end')
-            selected_files.clear()
-            selected_filenames.clear()
-            for i in file_tuple:
-                with open(str(i)) as json_file:
-                    selected_files.append(json.load(json_file))
-                    selected_filenames.append(os.path.basename(i))
-            for i in range(len(selected_filenames)):
-                selected_traces_lb.insert(i, selected_filenames[i])
-            selected_traces_lb.grid(column=1, row=2, rowspan=5)
-            browse_button_ft.grid(column=1, row=8)
+            try:
+                file_tuple = fd.askopenfilenames(initialdir=config.get('directories', 'converted_traces_dir'),
+                                                 title="Select a File",
+                                                 filetypes=(("JSON files", "*.json*"),))
+                if not file_tuple:
+                    mb.showinfo(config.get('browse_file', 'no_files_selected_window'),
+                                config.get('browse_file', 'no_files_selected_message'))
+                selected_traces_lb.delete(0, 'end')
+                selected_files.clear()
+                selected_filenames.clear()
+                for i in file_tuple:
+                    with open(str(i)) as json_file:
+                        selected_files.append(json.load(json_file))
+                        selected_filenames.append(os.path.basename(i))
+                for i in range(len(selected_filenames)):
+                    selected_traces_lb.insert(i, selected_filenames[i])
+                selected_traces_lb.grid(column=1, row=2, rowspan=5)
+                browse_button_ft.grid(column=1, row=8)
+            except json.decoder.JSONDecodeError:
+                mb.showerror("Invalid Trace", "Invalid/corrupted traces were selected")
 
         def filter_traces(expression):
             """
@@ -468,8 +473,12 @@ class TraceConverterGUI:
                     skew = skew_list[j]
                     kurtosis = kurtosis_list[j]
                     autocorrelation = autocorrelation_list[j]
-                    if eval(expression):
-                        filter_result.append(os.path.basename(selected_filenames[i]))
+                    try:
+                        if eval(expression):
+                            filter_result.append(os.path.basename(selected_filenames[i]))
+                    except (NameError, SyntaxError):
+                        mb.showerror("Expression invalid", "Please enter a valid expression")
+                        raise
             filter_result_lb.delete(0, 'end')
             unique_filter_result = list(set(filter_result))
             for i in range(len(unique_filter_result)):
@@ -524,31 +533,37 @@ class TraceConverterGUI:
             """
             Extracts the tracedata as columns so the trace can be used in ProFiDo
             """
+            org_filename = input_trace_entry_pt.get()
+            if os.path.isfile(org_filename) and pathlib.Path(org_filename).suffix == ".json":
+                try:
+                    with open(input_trace_entry_pt.get()) as trace_in:
+                        tracedata = json.load(trace_in)["tracebody"]["tracedata"]
+                        df = pd.DataFrame(tracedata)
+                        filename = config.get('directories', 'profido_traces_dir') + profido_filename_entry_pt.get() \
+                                   + '_dat.trace'
+                        dont_overwrite = 0
+                        if os.path.exists(filename):
+                            dont_overwrite = not mb.askyesno("File already exists", os.path.basename(filename) +
+                                                             " already exists. \n Would you like to overwrite it?")
+                        if not dont_overwrite:
+                            df.transpose().to_csv(filename, sep='\t',
+                                                  float_format="%e",
+                                                  index=False, header=False)
 
-            with open(input_trace_entry_pt.get()) as trace_in:
-                tracedata = json.load(trace_in)["tracebody"]["tracedata"]
-                df = pd.DataFrame(tracedata)
-                filename = config.get('directories', 'profido_traces_dir') + profido_filename_entry_pt.get() \
-                           + '_dat.trace'
-                dont_overwrite = 0
-                if os.path.exists(filename):
-                    dont_overwrite = not mb.askyesno("File already exists",
-                                                     os.path.basename(filename) + " already exists. \n "
-                                                                                  "Would you like to overwrite it?")
-                if not dont_overwrite:
-                    df.transpose().to_csv(filename, sep='\t',
-                                          float_format="%e",
-                                          index=False, header=False)
-
-            with open(filename, 'r') as f:
-                trace_column_display_pt.config(state=NORMAL)
-                trace_column_display_pt.delete("1.0", "end")
-                trace_column_display_pt.insert(INSERT, f.read())
-                trace_column_display_pt.config(state=DISABLED)
-                trace_column_display_pt.grid(column=0, row=6)
-                mb.showinfo("Data extracted", "Displaying extracted columns")
-                print("Columns were extracted from " + str(os.path.basename(input_trace_entry_pt.get())) +
-                      " result was saved to " + profido_filename_entry_pt.get() + '_dat.trace')
+                    with open(filename, 'r') as f:
+                        trace_column_display_pt.config(state=NORMAL)
+                        trace_column_display_pt.delete("1.0", "end")
+                        trace_column_display_pt.insert(INSERT, f.read())
+                        trace_column_display_pt.config(state=DISABLED)
+                        trace_column_display_pt.grid(column=0, row=6)
+                        mb.showinfo("Data extracted", "Displaying extracted columns")
+                        print("Columns were extracted from " + str(os.path.basename(input_trace_entry_pt.get())) +
+                              " result was saved to " + profido_filename_entry_pt.get() + '_dat.trace')
+                except json.decoder.JSONDecodeError:
+                    mb.showerror('Invalid Trace', 'The selected file is not a valid Trace')
+            else:
+                mb.showinfo(config.get('browse_file', 'no_file_selected_window'),
+                            config.get('browse_file', 'no_file_selected_message'))
 
         choose_trace_button_pt = Button(profido_format_tab, text="Choose File", command=browse_file_pt)
         choose_trace_button_pt.grid(row=0, column=0)
@@ -591,18 +606,23 @@ class TraceConverterGUI:
             (Re)generates statistics and hash for the input trace
             :param filename: Input file
             """
-            with open(filename) as tr:
-                tracedata = json.load(tr)
-                trace = generate_statistic(tracedata, statistic_format_entry_vt.get())
-            dont_overwrite = 0
-            if os.path.exists(filename):
-                dont_overwrite = not mb.askyesno("File already exists",
-                                                 os.path.basename(filename) + " already exists. \n "
-                                                                              "Would you like to overwrite it?")
-            if not dont_overwrite:
-                with open(filename, 'w') as fp:
-                    json.dump(trace, fp, indent=4)
-            add_hash_to_trace(filename)
+            if os.path.isfile(filename) and pathlib.Path(filename).suffix == ".json":
+                try:
+                    with open(filename) as tr:
+                        tracedata = json.load(tr)
+                        trace = generate_statistic(tracedata, statistic_format_entry_vt.get())
+                    dont_overwrite = 0
+                    if os.path.exists(filename):
+                        dont_overwrite = not mb.askyesno("Overwriting File",
+                                                         "Restoring the traceheader will overwrite the file. Continue?")
+                    if not dont_overwrite:
+                        with open(filename, 'w') as fp:
+                            json.dump(trace, fp, indent=4)
+                    add_hash_to_trace(filename)
+                except json.decoder.JSONDecodeError:
+                    mb.showerror("Trace content invalid", "Please check if the trace content is valid")
+            else:
+                mb.showerror("Trace invalid", "Please check if the file is valid")
 
         file_entry_vt = Entry(validation_tab, width=config.get('entries', 'entry_width'))
 
