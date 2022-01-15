@@ -10,6 +10,8 @@ import tkinter.messagebox as mb
 import pandas as pd
 
 # Load config
+from pandas.errors import EmptyDataError
+
 config = configparser.RawConfigParser()
 config.read('config.properties')
 
@@ -25,15 +27,26 @@ def get_tracedata_from_file(file, cols):
     :return: Columns of the original trace as lists
     """
     df = pd.read_csv(file, header=0, delimiter=',')
-    tracedata_list = []
-    relevant_column_numbers = list(range(0, len(df.columns)))
-    for i in range(len(cols)):
-        relevant_column_numbers.remove(cols[i])
-    df.drop(df.columns[relevant_column_numbers], axis=1, inplace=True)
-    for column in df:
-        tracedata_list.append(df[column].values.reshape(1, -1).ravel().tolist())
-    print("Tracedata from " + os.path.basename(file) + " successfully retrieved")
-    return tracedata_list
+    if columns_valid(cols, len(df.columns)):
+        tracedata_list = []
+        relevant_column_numbers = list(range(0, len(df.columns)))
+        for i in range(len(cols)):
+            relevant_column_numbers.remove(cols[i])
+        df.drop(df.columns[relevant_column_numbers], axis=1, inplace=True)
+        for column in df:
+            tracedata_list.append(df[column].values.reshape(1, -1).ravel().tolist())
+        print("Tracedata from " + os.path.basename(file) + " successfully retrieved")
+        return tracedata_list
+    else:
+        mb.showerror("Columns invalid", "Please specify valid columns")
+        raise
+
+
+def columns_valid(columns, size):
+    for i in range(len(columns)):
+        if not isinstance(columns[i], int) or columns[i] < 0 or columns[i] >= size or len(columns) != len(set(columns)):
+            return False
+    return True
 
 
 def verify_statistics(converted_trace_file):
@@ -95,12 +108,24 @@ def remove_lines_from_csv(filename, line_amount):
     :param filename: Input file
     :param line_amount: How many lines shall be removed from the beginning of the file
     """
-    df = pd.read_csv(filename, skiprows=line_amount)
-    df.to_csv(filename, index=False)
-    if line_amount == 1:
-        print("Removed the first row from " + filename)
-    if line_amount > 1:
-        print("Removed the first " + str(line_amount) + " rows from " + filename)
+    try:
+        try:
+            line_amount = int(line_amount)
+            try:
+                df = pd.read_csv(filename, skiprows=line_amount)
+                df.to_csv(filename, index=False)
+                if line_amount == 1:
+                    mb.showinfo('Removing successfully', 'Removed the first row from ' + os.path.basename(filename))
+                if line_amount > 1:
+                    mb.showinfo('Removing successfully', 'Removed the first ' + str(line_amount) + ' rows from ' +
+                                os.path.basename(filename))
+            except (EmptyDataError, ValueError):
+                mb.showerror('Invalid amount of Rows', 'Please specify a valid amount of rows to remove')
+        except ValueError:
+            mb.showerror('Integer needed', 'Please enter an integer amount of rows')
+    except FileNotFoundError:
+        mb.showinfo(config.get('browse_file', 'no_file_selected_window'),
+                    config.get('browse_file', 'no_file_selected_message'))
 
 
 def add_header_to_csv(filename, header):
@@ -112,13 +137,13 @@ def add_header_to_csv(filename, header):
     if os.path.splitext(filename)[1] == ".csv":
         df = pd.read_csv(filename, delimiter=',', header=None)
         if len(header) != len(df.columns):
-            print('The passed header has ' + str(len(header)) + ' elements. \nBut ' + str(len(df.columns)) +
-                  ' elements are required!')
+            mb.showinfo('Invalid header passed', 'The passed header has ' + str(len(header)) + ' elements. \nBut ' +
+                        str(len(df.columns)) + ' elements are required!')
         else:
             df.to_csv(filename, header=header, index=False)
-            print(str(header) + " was added as header to " + filename)
+            mb.showinfo('Header added ', str(header) + " was added as header to " + filename)
     else:
-        print("You can only add headers to .csv")
+        mb.showinfo('Please select a csv file', 'You can only add headers to csv files')
 
 
 def hash_from_trace(filename):
@@ -174,6 +199,3 @@ trace_template = {"traceheader": {
         "tracedata": []
     }
 }
-mean = 2
-median = 1
-print(eval("mean>median and mean+2>3"))

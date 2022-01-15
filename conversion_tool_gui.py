@@ -5,11 +5,11 @@ import logging
 import os
 import tkinter
 import tkinter.filedialog as fd
+import tkinter.messagebox as mb
 from idlelib.tooltip import Hovertip
 from tkinter import *
 from tkinter import scrolledtext
 from tkinter import ttk
-import tkinter.messagebox as mb
 
 import pandas as pd
 
@@ -66,7 +66,6 @@ class TraceConverterGUI:
             file_entry_prt.insert(END, selected_file)
             file_entry_prt.grid(row=0, column=1)
             file_button_prt.grid(row=0, column=0)
-            print(selected_file + " was chosen in preparation tab")
             if selected_file:
                 display_file_prt(file_entry_prt.get())
             first_line_is_header_checkbutton_prt.grid(row=0, column=2)
@@ -89,7 +88,7 @@ class TraceConverterGUI:
 
         remove_rows_button_prt = Button(preparation_tab, text="Remove Rows",
                                         command=lambda: [remove_lines_from_csv(file_entry_prt.get(),
-                                                                               int(remove_rows_entry_prt.get())),
+                                                                               remove_rows_entry_prt.get()),
                                                          display_file_prt(file_entry_prt.get())])
         remove_rows_button_prt.grid(column=2, row=2)
 
@@ -127,14 +126,14 @@ class TraceConverterGUI:
             Displays the selected file in the preparation tab
             :param filename: File that will be displayed
             """
-            with open(filename, 'r') as f:
-                file_displayer_label_prt.configure(text=os.path.basename(filename))
-                file_displayer_prt.grid(column=0, row=5, columnspan=12, rowspan=10)
-                file_displayer_prt.config(state=NORMAL)
-                file_displayer_prt.delete("1.0", "end")
-                file_displayer_prt.insert(INSERT, f.read())
-                file_displayer_prt.config(state=DISABLED)
-                print(filename + " displayed in preparation tab")
+            if os.path.isfile(filename):
+                with open(filename, 'r') as f:
+                    file_displayer_label_prt.configure(text=os.path.basename(filename))
+                    file_displayer_prt.grid(column=0, row=5, columnspan=12, rowspan=10)
+                    file_displayer_prt.config(state=NORMAL)
+                    file_displayer_prt.delete("1.0", "end")
+                    file_displayer_prt.insert(INSERT, f.read())
+                    file_displayer_prt.config(state=DISABLED)
 
         def transform_file_prt(filename, delimiter, header):
             df = pd.read_csv(filename, sep=delimiter)
@@ -225,9 +224,9 @@ class TraceConverterGUI:
                             config.get('browse_file', 'no_file_selected_message'))
             original_tracefile_entry_ct.insert(END, selected_file)
             original_tracefile_entry_ct.grid(row=1, column=1)
-            print(selected_file + " was chosen in convert tab")
             if selected_file:
                 display_file_ct(selected_file)
+
         # Create entries and set default values
         original_tracefile_button_ct = Button(convert_tab, text="Choose File", command=browse_file_ct)
 
@@ -270,50 +269,55 @@ class TraceConverterGUI:
             """
             Takes the user input from the entry fields and converts the selected trace to the predefined standard format
             """
-            col = list(map(int, (columns_entry_ct.get().split(","))))
-            trace_template["tracebody"]["tracedata"] = get_tracedata_from_file(original_tracefile_entry_ct.get(), col)
-            amount_tracedata = len(trace_template["tracebody"]["tracedata"][0])
-            trace_template["tracebody"]["tracedatadescription"] = tracedatadescription_entry_ct.get().split("||")
-            trace_template["traceheader"]["metainformation"]["name"] = os.path.basename(
-                original_tracefile_entry_ct.get())
-            trace_template["traceheader"]["metainformation"]["source"] = source_entry_ct.get()
-            trace_template["traceheader"]["metainformation"]["description"] = description_entry_ct.get()
-            trace_template["traceheader"]["metainformation"]["date"] = str(datetime.datetime.now())
-            trace_template["traceheader"]["metainformation"]["user"] = username_entry_ct.get()
-            if len(custom_field_entry_ct.get('1.0', 'end-1c')) != 0:
-                trace_template["traceheader"]["metainformation"]["additional information"] = custom_field_entry_ct. \
-                    get('1.0', 'end-1c')
-            else:
-                trace_template["traceheader"]["metainformation"].pop("additional information")
+            if os.path.isfile(original_tracefile_entry_ct.get()):
+                col = list(map(int, (columns_entry_ct.get().split(","))))
+                trace_template["tracebody"]["tracedata"] = \
+                    get_tracedata_from_file(original_tracefile_entry_ct.get(), col)
+                amount_tracedata = len(trace_template["tracebody"]["tracedata"][0])
+                trace_template["tracebody"]["tracedatadescription"] = tracedatadescription_entry_ct.get().split("||")
+                trace_template["traceheader"]["metainformation"]["name"] = os.path.basename(
+                    original_tracefile_entry_ct.get())
+                trace_template["traceheader"]["metainformation"]["source"] = source_entry_ct.get()
+                trace_template["traceheader"]["metainformation"]["description"] = description_entry_ct.get()
+                trace_template["traceheader"]["metainformation"]["date"] = str(datetime.datetime.now())
+                trace_template["traceheader"]["metainformation"]["user"] = username_entry_ct.get()
+                if len(custom_field_entry_ct.get('1.0', 'end-1c')) != 0:
+                    trace_template["traceheader"]["metainformation"]["additional information"] = \
+                        custom_field_entry_ct.get('1.0', 'end-1c')
+                else:
+                    trace_template["traceheader"]["metainformation"].pop("additional information")
 
-            #  Generate statistics and adds them into a list. Each list entry represents one column of the raw trace
-            if amount_tracedata > 4:
-                trace = generate_statistic(trace_template, statistic_format_entry_ct.get())
+                #  Generate statistics and adds them into a list. Each list entry represents one column of the raw trace
+                if amount_tracedata > 4:
+                    trace = generate_statistic(trace_template, statistic_format_entry_ct.get())
+                else:
+                    trace = trace_template
+                    mb.showinfo("Statistics won't be computed", "Tracedata only contains " + str(amount_tracedata) +
+                                " elements per column. Computing statistics requires five or more.")
+                # Save trace to file
+                filename = 'converted_traces/' + result_filename_entry_ct.get() + '_converted.json'
+                dont_overwrite = 0
+                if os.path.exists(filename):
+                    dont_overwrite = not mb.askyesno("File already exists",
+                                                     os.path.basename(filename) + " already exists. \n "
+                                                                                  "Would you like to overwrite it?")
+                if not dont_overwrite:
+                    with open(filename, 'w') as fp:
+                        json.dump(trace, fp, indent=4)
+                        print("Trace was converted successfully!")
+                        # If profido checkbox is selected the columns will also be extracted for profido use
+                    add_hash_to_trace(filename)
+                    if extract_profido_checkbutton_var_ct.get() == 1:
+                        extract_after_conversion(
+                            filename)
+                    mb.showinfo("Trace converted successfully", "Displaying converted Trace")
+                else:
+                    mb.showinfo("File already exists", "Displaying existing File")
+                # Display the created traces
+                display_file_ct(filename)
             else:
-                trace = trace_template
-                mb.showinfo("Statistics won't be computed", "Tracedata only contains " +
-                            str(amount_tracedata) + " elements per column. Computing statistics requires five or more.")
-            # Save trace to file
-            filename = 'converted_traces/' + result_filename_entry_ct.get() + '_converted.json'
-            dont_overwrite = 0
-            if os.path.exists(filename):
-                dont_overwrite = not mb.askyesno("File already exists",
-                                                 os.path.basename(filename) + " already exists. \n "
-                                                                              "Would you like to overwrite it?")
-            if not dont_overwrite:
-                with open(filename, 'w') as fp:
-                    json.dump(trace, fp, indent=4)
-                    print("Trace was converted successfully!")
-                    # If profido checkbox is selected the columns will also be extracted for profido use
-                add_hash_to_trace(filename)
-                if extract_profido_checkbutton_var_ct.get() == 1:
-                    extract_after_conversion(
-                        filename)
-                mb.showinfo("Trace converted successfully", "Displaying converted Trace")
-            else:
-                mb.showinfo("File already exists", "Displaying existing File")
-            # Display the created traces
-            display_file_ct(filename)
+                mb.showinfo(config.get('browse_file', 'no_file_selected_window'),
+                            config.get('browse_file', 'no_file_selected_message'))
 
         def generate_statistic(trace, formatstring):
             # Clear statistic lists so the next trace won't have old values
@@ -337,6 +341,9 @@ class TraceConverterGUI:
                     trace["traceheader"]["statistical characteristics"]["autocorrelation"].append(float(
                         formatstring.format(df[0].autocorr())))
                 return trace
+            except TypeError:
+                mb.showerror("Type Error", "One of the selected columns does not contain valid data")
+                raise
             except (KeyError, IndexError):
                 mb.showerror("Format Error", "Invalid Statistic Format entered")
                 raise
@@ -442,7 +449,6 @@ class TraceConverterGUI:
                 selected_traces_lb.insert(i, selected_filenames[i])
             selected_traces_lb.grid(column=1, row=2, rowspan=5)
             browse_button_ft.grid(column=1, row=8)
-            print("Traces for filtering were selected")
 
         def filter_traces(expression):
             """
@@ -478,7 +484,8 @@ class TraceConverterGUI:
         expression_entry_ft.grid(column=4, row=2)
 
         # Label and Buttons
-        filter_button_ft = Button(filter_tab, text="Filter Traces", command=lambda: filter_traces(expression_entry_ft.get()))
+        filter_button_ft = Button(filter_tab, text="Filter Traces",
+                                  command=lambda: filter_traces(expression_entry_ft.get()))
         filter_button_ft.grid(column=5, row=2)
 
         browse_button_ft = Button(filter_tab, text="Choose Files", command=browse_files_ft)
