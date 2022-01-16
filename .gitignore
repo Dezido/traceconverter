@@ -139,3 +139,6 @@ dmypy.json
 
 # unformatted traces
 /unformatted_tracefiles/
+
+# exceptions
+!requirements.txt
