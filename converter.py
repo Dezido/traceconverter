@@ -213,5 +213,3 @@ trace_template = {"traceheader": {
         "tracedata": []
     }
 }
-
-print(pathlib.Path('converted_traces/valley_bike_data_2019_08_converted.json').suffix)

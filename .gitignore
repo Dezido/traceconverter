@@ -134,8 +134,10 @@ dmypy.json
 *txt
 *trace
 *dat
+
 #IDEA folder
-.idea
+**/.idea/workspace.xml
+**/.idea/tasks.xml
 
 # unformatted traces
 /unformatted_tracefiles/
