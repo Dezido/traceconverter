@@ -16,9 +16,6 @@ from pandas.errors import EmptyDataError
 config = configparser.RawConfigParser()
 config.read('config.properties')
 
-# Logging
-logging.basicConfig(format=config.get('logging', 'logging_format'), level=logging.INFO)
-
 
 def get_tracedata_from_file(file, cols):
     """

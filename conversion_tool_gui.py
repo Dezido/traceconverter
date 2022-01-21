@@ -21,8 +21,6 @@ from converter import trace_template, get_tracedata_from_file, remove_lines_from
 config = configparser.RawConfigParser()
 config.read('config.properties')
 
-# Logging configuration
-logging.basicConfig(format=config.get('logging', 'logging_format'), level=logging.INFO)
 
 
 class TraceConverterGUI:
@@ -204,11 +202,11 @@ class TraceConverterGUI:
                                                        offvalue=0)
         # scientific_format_checkbutton_ct.grid(column=4, row=2)
 
-        statistic_format_label_ct = Label(convert_tab, text="Statistic Format")
-        statistic_format_label_ct.grid(row=12, column=0)
+        numerical_format_label_ct = Label(convert_tab, text="Numerical Format")
+        numerical_format_label_ct.grid(row=12, column=0)
 
-        statistic_format_entry_ct = Entry(convert_tab, width=config.get('entries', 'entry_width'))
-        statistic_format_entry_ct.grid(row=12, column=1)
+        numerical_format_entry_ct = Entry(convert_tab, width=config.get('entries', 'entry_width'))
+        numerical_format_entry_ct.grid(row=12, column=1)
 
         original_tracefile_entry_ct = Entry(convert_tab, width=config.get('entries', 'entry_width'))
 
@@ -291,7 +289,7 @@ class TraceConverterGUI:
 
                 #  Generate statistics and adds them into a list. Each list entry represents one column of the raw trace
                 if amount_tracedata > 4:
-                    trace = generate_statistic(trace_template, statistic_format_entry_ct.get())
+                    trace = generate_statistic(trace_template, numerical_format_entry_ct.get())
                 else:
                     trace = trace_template
                     mb.showinfo("Statistics won't be computed", "Tracedata only contains " + str(amount_tracedata) +
@@ -328,7 +326,7 @@ class TraceConverterGUI:
             trace["traceheader"]["statistical characteristics"]["skew"].clear()
             trace["traceheader"]["statistical characteristics"]["kurtosis"].clear()
             trace["traceheader"]["statistical characteristics"]["autocorrelation"].clear()
-            formatstring = "{" + formatstring + "}"
+            formatstring = formatstring # TODO  ValueError: unexpected '{' in field name
             try:
                 for i in range(len(trace["tracebody"]["tracedata"])):
                     df = pd.DataFrame(trace["tracebody"]["tracedata"][i])
@@ -347,7 +345,7 @@ class TraceConverterGUI:
                 mb.showerror("Type Error", "One of the selected columns does not contain valid data")
                 raise
             except (KeyError, IndexError):
-                mb.showerror("Format Error", "Invalid Statistic Format entered")
+                mb.showerror("Format Error", "Invalid Numerical Format entered")
                 raise
 
         def add_hash_to_trace(filename):
@@ -414,8 +412,8 @@ class TraceConverterGUI:
                                                  config.get('tooltips', 'browse_file_button'))
         convert_button_tooltip_ct = Hovertip(convert_button_ct,
                                              config.get('tooltips', 'browse_file_button'))
-        statistic_format_tooltip_ct = Hovertip(statistic_format_label_ct,
-                                               config.get('tooltips', 'statistic_format'))
+        numerical_format_tooltip_ct = Hovertip(numerical_format_label_ct,
+                                               config.get('tooltips', 'numerical_format'))
 
         # Filter Tab
         selected_traces_label_ft = Label(filter_tab, text="Selected traces")
@@ -610,7 +608,7 @@ class TraceConverterGUI:
                 try:
                     with open(filename) as tr:
                         tracedata = json.load(tr)
-                        trace = generate_statistic(tracedata, statistic_format_entry_vt.get())
+                        trace = generate_statistic(tracedata, numerical_format_entry_vt.get())
                     dont_overwrite = 0
                     if os.path.exists(filename):
                         dont_overwrite = not mb.askyesno("Overwriting File",
@@ -641,11 +639,11 @@ class TraceConverterGUI:
                                                command=lambda: restore_traceheader(file_entry_vt.get()))
         restore_traceheader_button_vt.grid(row=4, column=0)
 
-        statistic_format_label_vt = Label(validation_tab, text="Statistic Format")
-        statistic_format_label_vt.grid(column=1, row=2)
+        numerical_format_label_vt = Label(validation_tab, text="Numerical Format")
+        numerical_format_label_vt.grid(column=1, row=2)
 
-        statistic_format_entry_vt = Entry(validation_tab, width=config.get('entries', 'entry_width'))
-        statistic_format_entry_vt.grid(column=2, row=2)
+        numerical_format_entry_vt = Entry(validation_tab, width=config.get('entries', 'entry_width'))
+        numerical_format_entry_vt.grid(column=2, row=2)
 
         # Tooltips
         browse_file_button_tooltip_vt = Hovertip(browse_file_button_vt, config.get('tooltips', 'browse_file_button_vt'))
@@ -655,8 +653,8 @@ class TraceConverterGUI:
                                                    config.get('tooltips', 'validate_hash_button'))
         restore_traceheader_button_tooltip_vt = Hovertip(restore_traceheader_button_vt,
                                                          config.get('tooltips', 'restore_traceheader_button'))
-        statistic_format_tooltip_vt = Hovertip(statistic_format_label_vt,
-                                               config.get('tooltips', 'statistic_format'))
+        numerical_format_tooltip_vt = Hovertip(numerical_format_label_vt,
+                                               config.get('tooltips', 'numerical_format'))
 
 
 # Create TCGUI instance and run mainloop
