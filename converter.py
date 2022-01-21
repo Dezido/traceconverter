@@ -2,14 +2,13 @@ import configparser
 import hashlib
 import json
 import json.decoder
-import logging
 import os
 import pathlib
 import tkinter
+import tkinter.filedialog
 import tkinter.messagebox as mb
 
 import pandas as pd
-
 # Load config
 from pandas.errors import EmptyDataError
 
@@ -92,8 +91,8 @@ def verify_statistics(converted_trace_file):
                     statistics_valid = False
                 if current_autocorr != statistics["autocorrelation"]:
                     invalid_statistics += (
-                                "Autocorrelation not correct. Should be: " + str(current_autocorr) + " but is " +
-                                str(statistics["autocorrelation"]) + "\n")
+                            "Autocorrelation not correct. Should be: " + str(current_autocorr) + " but is " +
+                            str(statistics["autocorrelation"]) + "\n")
                     statistics_valid = False
                 if statistics_valid:
                     print("All statistics are valid")

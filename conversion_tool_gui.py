@@ -1,7 +1,6 @@
 import configparser
 import datetime
 import json
-import logging
 import os
 import tkinter
 import tkinter.filedialog as fd
@@ -20,7 +19,6 @@ from converter import trace_template, get_tracedata_from_file, remove_lines_from
 # Load config file
 config = configparser.RawConfigParser()
 config.read('config.properties')
-
 
 
 class TraceConverterGUI:
@@ -230,7 +228,7 @@ class TraceConverterGUI:
         original_tracefile_button_ct = Button(convert_tab, text="Choose File", command=browse_file_ct)
 
         columns_entry_ct = Entry(convert_tab, width=config.get('entries', 'entry_width'))
-        columns_entry_ct.insert(END, ['0'])
+        columns_entry_ct.insert(END, config.get('default_entries', 'default_columns_entry'))
 
         source_entry_ct = Entry(convert_tab, width=config.get('entries', 'entry_width'))
         source_entry_ct.insert(END, config.get('default_entries', 'default_source_entry'))
@@ -305,8 +303,8 @@ class TraceConverterGUI:
                     with open(filename, 'w') as fp:
                         json.dump(trace, fp, indent=4)
                         print("Trace was converted successfully!")
-                        # If profido checkbox is selected the columns will also be extracted for profido use
                     add_hash_to_trace(filename)
+                    # If profido checkbox is selected the columns will also be extracted for profido use
                     if extract_profido_checkbutton_var_ct.get() == 1:
                         extract_after_conversion(
                             filename)
@@ -321,25 +319,25 @@ class TraceConverterGUI:
 
         def generate_statistic(trace, formatstring):
             # Clear statistic lists so the next trace won't have old values
-            trace["traceheader"]["statistical characteristics"]["mean"].clear()
-            trace["traceheader"]["statistical characteristics"]["median"].clear()
-            trace["traceheader"]["statistical characteristics"]["skew"].clear()
-            trace["traceheader"]["statistical characteristics"]["kurtosis"].clear()
-            trace["traceheader"]["statistical characteristics"]["autocorrelation"].clear()
-            formatstring = formatstring # TODO  ValueError: unexpected '{' in field name
+            trace["traceheader"]["statistical characteristics"]["mean"] = []
+            trace["traceheader"]["statistical characteristics"]["median"] = []
+            trace["traceheader"]["statistical characteristics"]["skew"] = []
+            trace["traceheader"]["statistical characteristics"]["kurtosis"] = []
+            trace["traceheader"]["statistical characteristics"]["autocorrelation"] = []
+            formatstring = '{' + formatstring + '}'
             try:
                 for i in range(len(trace["tracebody"]["tracedata"])):
                     df = pd.DataFrame(trace["tracebody"]["tracedata"][i])
-                    trace["traceheader"]["statistical characteristics"]["mean"].append(float(
-                        formatstring.format(df[0].mean())))
-                    trace["traceheader"]["statistical characteristics"]["median"].append(float(
-                        formatstring.format(df[0].median())))
-                    trace["traceheader"]["statistical characteristics"]["skew"].append(float(
-                        formatstring.format(df[0].skew())))
-                    trace["traceheader"]["statistical characteristics"]["kurtosis"].append(float(
-                        formatstring.format(df[0].kurtosis())))
-                    trace["traceheader"]["statistical characteristics"]["autocorrelation"].append(float(
-                        formatstring.format(df[0].autocorr())))
+                    trace["traceheader"]["statistical characteristics"]["mean"].append(
+                        formatstring.format(df[0].mean()))
+                    trace["traceheader"]["statistical characteristics"]["median"].append(
+                        formatstring.format(df[0].median()))
+                    trace["traceheader"]["statistical characteristics"]["skew"].append(
+                        formatstring.format(df[0].skew()))
+                    trace["traceheader"]["statistical characteristics"]["kurtosis"].append(
+                        formatstring.format(df[0].kurtosis()))
+                    trace["traceheader"]["statistical characteristics"]["autocorrelation"].append(
+                        formatstring.format(df[0].autocorr()))
                 return trace
             except TypeError:
                 mb.showerror("Type Error", "One of the selected columns does not contain valid data")
@@ -421,8 +419,18 @@ class TraceConverterGUI:
 
         selected_traces_lb = Listbox(filter_tab, width=config.get('listbox', 'listbox_width'),
                                      height=config.get('listbox', 'listbox_height'))
-        filter_result_lb = Listbox(filter_tab, width=config.get('listbox', 'listbox_width'),
-                                   height=config.get('listbox', 'listbox_height'))
+
+        treeview_columns = ['name', 'mean', 'median', 'skew', 'kurtosis', 'autocorrelation']
+        filter_results_tv = ttk.Treeview(filter_tab, columns=treeview_columns, show='headings')
+        vsb_filter_results_tv = ttk.Scrollbar(filter_tab, orient="vertical", command=filter_results_tv.yview)
+        filter_results_tv.configure(yscrollcommand=vsb_filter_results_tv.set)
+        filter_results_tv.heading('name', text='Name')
+        filter_results_tv.column('name', width=300)
+        filter_results_tv.heading('mean', text='Mean')
+        filter_results_tv.heading('median', text='Median')
+        filter_results_tv.heading('skew', text='Skew')
+        filter_results_tv.heading('kurtosis', text='Kurtosis')
+        filter_results_tv.heading('autocorrelation', text='Autocorrelation')
 
         selected_filenames = []
         selected_files = []
@@ -433,10 +441,17 @@ class TraceConverterGUI:
             Select converted traces for filtering
             """
             try:
-                file_tuple = fd.askopenfilenames(initialdir=config.get('directories', 'converted_traces_dir'),
-                                                 title="Select a File",
-                                                 filetypes=(("JSON files", "*.json*"),))
-                if not file_tuple:
+                file_tuple = ()
+                additional_files = True
+                while additional_files:
+                    files = fd.askopenfilenames(initialdir=config.get('directories', 'converted_traces_dir'),
+                                                title="Select a File",
+                                                filetypes=(("JSON files", "*.json*"),))
+                    if files:
+                        file_tuple += files
+                    additional_files = mb.askyesno('Select additional files',
+                                                   'Do you want to add more files to the selection?')
+                if len(file_tuple) == 0:
                     mb.showinfo(config.get('browse_file', 'no_files_selected_window'),
                                 config.get('browse_file', 'no_files_selected_message'))
                 selected_traces_lb.delete(0, 'end')
@@ -445,7 +460,7 @@ class TraceConverterGUI:
                 for i in file_tuple:
                     with open(str(i)) as json_file:
                         selected_files.append(json.load(json_file))
-                        selected_filenames.append(os.path.basename(i))
+                        selected_filenames.append(os.path.basename(os.path.dirname(i)) + '/' + os.path.basename(i))
                 for i in range(len(selected_filenames)):
                     selected_traces_lb.insert(i, selected_filenames[i])
                 selected_traces_lb.grid(column=1, row=2, rowspan=5)
@@ -458,6 +473,8 @@ class TraceConverterGUI:
             Evaluates the expression on the selected traces
             """
             filter_result.clear()
+            for i in filter_results_tv.get_children():
+                filter_results_tv.delete(i)
             for i in range(len(selected_files)):
                 mean_list = selected_files[i]["traceheader"]["statistical characteristics"]["mean"]
                 median_list = selected_files[i]["traceheader"]["statistical characteristics"]["median"]
@@ -466,23 +483,34 @@ class TraceConverterGUI:
                 autocorrelation_list = \
                     selected_files[i]["traceheader"]["statistical characteristics"]["autocorrelation"]
                 for j in range(len(selected_files[i]["traceheader"]["statistical characteristics"]["mean"])):
-                    mean = mean_list[j]
-                    median = median_list[j]
-                    skew = skew_list[j]
-                    kurtosis = kurtosis_list[j]
-                    autocorrelation = autocorrelation_list[j]
+                    mean = float(mean_list[j])
+                    median = float(median_list[j])
+                    skew = float(skew_list[j])
+                    kurtosis = float(kurtosis_list[j])
+                    autocorrelation = float(autocorrelation_list[j])
                     try:
                         if eval(expression):
-                            filter_result.append(os.path.basename(selected_filenames[i]))
+                            trace = [os.path.basename(selected_filenames[i]),
+                                     mean,
+                                     median,
+                                     skew,
+                                     kurtosis,
+                                     autocorrelation
+                                     ]
+                            filter_result.append(trace)
                     except (NameError, SyntaxError):
                         mb.showerror("Expression invalid", "Please enter a valid expression")
                         raise
-            filter_result_lb.delete(0, 'end')
-            unique_filter_result = list(set(filter_result))
-            for i in range(len(unique_filter_result)):
-                filter_result_lb.insert(i, unique_filter_result[i])
+            for i in range(len(filter_result)):
+                filter_results_tv.insert('', 'end', values=(filter_result[i][0],
+                                                            filter_result[i][1],
+                                                            filter_result[i][2],
+                                                            filter_result[i][3],
+                                                            filter_result[i][4],
+                                                            filter_result[i][5],))
             Label(filter_tab, text="Results").grid(column=1, row=10)
-            filter_result_lb.grid(column=1, row=11)
+            filter_results_tv.grid(column=1, row=11, columnspan=10)
+            vsb_filter_results_tv.grid(column=11, row=11, sticky=N + S)
 
         expression_label_ft = Label(filter_tab, text="Boolean Expression")
         expression_label_ft.grid(column=3, row=2)
