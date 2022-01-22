@@ -49,8 +49,7 @@ class TraceConverterGUI:
             file_entry_prt.delete(0, END)  # removes previously selected file
             selected_file = fd.askopenfilename(initialdir=config.get('directories', 'raw_traces_dir'),
                                                title="Select a File",
-                                               filetypes=(("CSV files", "*.csv*"), ("all files",
-                                                                                    "*.*")))
+                                               filetypes=(("CSV files", "*.csv*"), ("all files", "*.*")))
             if not selected_file:
                 mb.showinfo(config.get('browse_file', 'no_file_selected_window'),
                             config.get('browse_file', 'no_file_selected_message'))
@@ -187,22 +186,16 @@ class TraceConverterGUI:
                 print("Extract columns for PoFiDo option was selected in the convert tab")
 
         extract_profido_checkbutton_var_ct = tkinter.IntVar()
-        extract_profido_checkbutton_ct = Checkbutton(convert_tab, text="extract ProFiDo format after conversion",
+        extract_profido_checkbutton_ct = Checkbutton(convert_tab, text="Extract ProFiDo format after conversion",
                                                      variable=extract_profido_checkbutton_var_ct, onvalue=1,
                                                      offvalue=0, command=show_name_entry)
         extract_profido_checkbutton_ct.grid(column=4, row=3)
 
-        scientific_format_checkbutton_var_ct = tkinter.IntVar()
-        scientific_format_checkbutton_ct = Checkbutton(convert_tab, text="statistics in scientific notation",
-                                                       variable=scientific_format_checkbutton_var_ct, onvalue=1,
-                                                       offvalue=0)
-        # scientific_format_checkbutton_ct.grid(column=4, row=2)
+        number_format_label_ct = Label(convert_tab, text="Statistic Number Format ")
+        number_format_label_ct.grid(row=12, column=0)
 
-        numerical_format_label_ct = Label(convert_tab, text="Numerical Format")
-        numerical_format_label_ct.grid(row=12, column=0)
-
-        numerical_format_entry_ct = Entry(convert_tab, width=config.get('entries', 'entry_width'))
-        numerical_format_entry_ct.grid(row=12, column=1)
+        number_format_entry_ct = Entry(convert_tab, width=config.get('entries', 'entry_width'))
+        number_format_entry_ct.grid(row=12, column=1)
 
         original_tracefile_entry_ct = Entry(convert_tab, width=config.get('entries', 'entry_width'))
 
@@ -281,7 +274,7 @@ class TraceConverterGUI:
 
                 #  Generate statistics and adds them into a list. Each list entry represents one column of the raw trace
                 if amount_tracedata > 4:
-                    trace = generate_statistic(trace_template, numerical_format_entry_ct.get())
+                    trace = generate_statistic(trace_template, number_format_entry_ct.get())
                 else:
                     trace = trace_template
                     mb.showinfo("Statistics won't be computed", "Tracedata only contains " + str(amount_tracedata) +
@@ -413,7 +406,7 @@ class TraceConverterGUI:
                                                  config.get('tooltips', 'browse_file_button'))
         convert_button_tooltip_ct = Hovertip(convert_button_ct,
                                              config.get('tooltips', 'browse_file_button'))
-        numerical_format_tooltip_ct = Hovertip(numerical_format_label_ct,
+        numerical_format_tooltip_ct = Hovertip(number_format_label_ct,
                                                config.get('tooltips', 'numerical_format'))
 
         # Filter Tab
