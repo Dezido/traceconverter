@@ -2,6 +2,7 @@ import configparser
 import datetime
 import json
 import os
+import pathlib
 import tkinter
 import tkinter.filedialog as fd
 import tkinter.messagebox as mb
@@ -9,12 +10,11 @@ from idlelib.tooltip import Hovertip
 from tkinter import *
 from tkinter import scrolledtext
 from tkinter import ttk
-import pathlib
 
 import pandas as pd
 
-import converter as c
-from converter import trace_template, get_tracedata_from_file, remove_lines_from_csv, hash_from_trace
+import converter as cnv
+from converter import trace_template
 
 # Load config file
 config = configparser.RawConfigParser()
@@ -23,10 +23,7 @@ config.read('config.properties')
 
 class TraceConverterGUI:
     def __init__(self, master):
-        """
-        Creates a GUI for the traceconverter
-        :param master:
-        """
+        """Creates a GUI for the tool"""
         self.master = master
         master.title("Traceconverting Tool")
         # Notebook and Tabs
@@ -47,11 +44,8 @@ class TraceConverterGUI:
         tab_parent.pack(expand=1, fill='both')
 
         # Preparation Tab
-
         def browse_file_prt():
-            """
-            Opens a file explorer to select a file
-            """
+            """Opens file explorer to select a file"""
             file_entry_prt.delete(0, END)  # removes previously selected file
             selected_file = fd.askopenfilename(initialdir=config.get('directories', 'raw_traces_dir'),
                                                title="Select a File",
@@ -84,8 +78,8 @@ class TraceConverterGUI:
         remove_rows_entry_prt.grid(column=1, row=2)
 
         remove_rows_button_prt = Button(preparation_tab, text="Remove Rows",
-                                        command=lambda: [remove_lines_from_csv(file_entry_prt.get(),
-                                                                               remove_rows_entry_prt.get()),
+                                        command=lambda: [cnv.remove_lines_from_csv(file_entry_prt.get(),
+                                                                                   remove_rows_entry_prt.get()),
                                                          display_file_prt(file_entry_prt.get())])
         remove_rows_button_prt.grid(column=2, row=2)
 
@@ -96,9 +90,10 @@ class TraceConverterGUI:
         add_header_entry_prt.grid(column=1, row=3)
 
         add_header_button_prt = Button(preparation_tab, text="Add Header",
-                                       command=lambda: [c.add_header_to_csv(file_entry_prt.get(),
-                                                                            list(
-                                                                                add_header_entry_prt.get().split(","))),
+                                       command=lambda: [cnv.add_header_to_csv(file_entry_prt.get(),
+                                                                              list(
+                                                                                  add_header_entry_prt.get().split(
+                                                                                      ","))),
                                                         display_file_prt(file_entry_prt.get())])
         add_header_button_prt.grid(column=2, row=3)
 
@@ -113,9 +108,9 @@ class TraceConverterGUI:
         transform_filetype_button_prt = Button(preparation_tab,
                                                text="Change Filetype",
                                                command=lambda:
-                                               transform_file_prt(file_entry_prt.get(),
-                                                                  delimiter_entry_prt.get(),
-                                                                  first_line_is_header_checkbutton_var_prt.get()))
+                                               convert_file_to_csv_prt(file_entry_prt.get(),
+                                                                       delimiter_entry_prt.get(),
+                                                                       first_line_is_header_checkbutton_var_prt.get()))
         transform_filetype_button_prt.grid(column=2, row=4)
 
         def display_file_prt(filename):
@@ -132,15 +127,20 @@ class TraceConverterGUI:
                     file_displayer_prt.insert(INSERT, f.read())
                     file_displayer_prt.config(state=DISABLED)
 
-        def transform_file_prt(filename, delimiter, header):
+        def convert_file_to_csv_prt(filename, delimiter, header):
+            """
+            Converts file to csv format
+            :param filename:Input file
+            :param delimiter:Delimiter of the file
+            :param header:File header
+            """
             df = pd.read_csv(filename, sep=delimiter)
             result_filename = \
                 config.get('directories', 'raw_traces_dir') + '/' + os.path.basename(filename).split('.')[0] + '.csv'
             dont_overwrite = 0
             if os.path.exists(filename):
-                dont_overwrite = not mb.askyesno("File already exists",
-                                                 os.path.basename(filename) + " already exists. \n "
-                                                                              "Would you like to overwrite it?")
+                dont_overwrite = not mb.askyesno("File already exists", os.path.basename(filename) +
+                                                 " already exists. \n Would you like to overwrite it?")
             if not dont_overwrite:
                 df.to_csv(result_filename, index=False, sep=',', header=header)
                 display_file_prt(result_filename)
@@ -176,9 +176,7 @@ class TraceConverterGUI:
         profido_filename_entry_ct = Entry(convert_tab)
 
         def show_name_entry():
-            """
-            Puts the profido_filename_label on the grid if the checkbox is selected
-            """
+            """Puts the profido_filename_label on the grid if the checkbox is selected"""
             if extract_profido_checkbutton_var_ct.get() == 0:
                 profido_filename_label_ct.grid_forget()
                 profido_filename_entry_ct.grid_forget()
@@ -209,9 +207,7 @@ class TraceConverterGUI:
         original_tracefile_entry_ct = Entry(convert_tab, width=config.get('entries', 'entry_width'))
 
         def browse_file_ct():
-            """
-            Opens a file explorer to select a raw trace
-            """
+            """Opens file explorer to select a file"""
             original_tracefile_entry_ct.delete(0, END)  # removes previously selected file
             selected_file = fd.askopenfilename(initialdir=config.get('directories', 'raw_traces_dir'),
                                                title="Select a File",
@@ -263,14 +259,12 @@ class TraceConverterGUI:
         file_displayer_ct = scrolledtext.ScrolledText(convert_tab, width=100, height=33)
 
         def convert_trace():
-            """
-            Takes the user input from the entry fields and converts the selected trace to the predefined standard format
-            """
+            """Takes the user input from the entry fields and converts the selected trace to the standard format"""
             org_filename = original_tracefile_entry_ct.get()
             if os.path.isfile(org_filename) and pathlib.Path(org_filename).suffix == ".csv":
                 col = list(map(int, (columns_entry_ct.get().split(","))))
                 trace_template["tracebody"]["tracedata"] = \
-                    get_tracedata_from_file(original_tracefile_entry_ct.get(), col)
+                    cnv.get_tracedata_from_file(original_tracefile_entry_ct.get(), col)
                 amount_tracedata = len(trace_template["tracebody"]["tracedata"][0])
                 trace_template["tracebody"]["tracedatadescription"] = tracedatadescription_entry_ct.get().split("||")
                 trace_template["traceheader"]["metainformation"]["name"] = os.path.basename(
@@ -318,6 +312,11 @@ class TraceConverterGUI:
                             config.get('browse_file', 'no_file_selected_message'))
 
         def generate_statistic(trace, formatstring):
+            """
+            Computes the statistics for the trace
+            :param trace:
+            :param formatstring: For formatting the computed values
+            """
             # Clear statistic lists so the next trace won't have old values
             trace["traceheader"]["statistical characteristics"]["mean"] = []
             trace["traceheader"]["statistical characteristics"]["median"] = []
@@ -347,15 +346,19 @@ class TraceConverterGUI:
                 raise
 
         def add_hash_to_trace(filename):
+            """
+            Adds hash value to metainformation
+            :param filename: File the hash will be computed for
+            """
             with open(filename) as tr:
                 tracedata = json.load(tr)
-                tracedata["traceheader"]["metainformation"]["hash"] = hash_from_trace(filename)
+                tracedata["traceheader"]["metainformation"]["hash"] = cnv.hash_from_trace(filename)
             with open(filename, 'w') as fp:
                 json.dump(tracedata, fp, indent=4)
 
         def display_file_ct(filename):
             """
-            Displays the selected file in the preparation tab
+            Displays the selected file in the convert tab
             :param filename: File that will be displayed
             """
             with open(filename, 'r') as f:
@@ -368,15 +371,15 @@ class TraceConverterGUI:
 
         def extract_after_conversion(filename):
             """
-            Extracts columns for ProFiDo usage from the input trace
+            Extracts columns for ProFiDo usage from the trace
             :param filename: Name of the converted tracefile
             """
             with open(filename) as tr:
                 tracedata = json.load(tr)["tracebody"]["tracedata"]
                 df = pd.DataFrame(tracedata)
                 dont_overwrite = 0
-                result_filename = config.get('directories', 'profido_traces_dir') + \
-                                  profido_filename_entry_ct.get() + '_dat.trace'
+                result_filename = config.get('directories', 'profido_traces_dir') + profido_filename_entry_ct.get() + \
+                                  '_dat.trace'
                 if os.path.exists(result_filename):
                     dont_overwrite = not mb.askyesno("File already exists",
                                                      os.path.basename(result_filename) +
@@ -437,9 +440,7 @@ class TraceConverterGUI:
         filter_result = []
 
         def browse_files_ft():
-            """
-            Select converted traces for filtering
-            """
+            """Opens file explorer to select files for filtering"""
             try:
                 file_tuple = ()
                 additional_files = True
@@ -469,9 +470,7 @@ class TraceConverterGUI:
                 mb.showerror("Invalid Trace", "Invalid/corrupted traces were selected")
 
         def filter_traces(expression):
-            """
-            Evaluates the expression on the selected traces
-            """
+            """Evaluates the expression for the selected traces"""
             filter_result.clear()
             for i in filter_results_tv.get_children():
                 filter_results_tv.delete(i)
@@ -542,9 +541,7 @@ class TraceConverterGUI:
         trace_column_display_pt = scrolledtext.ScrolledText(profido_format_tab, width=45, height=20)
 
         def browse_file_pt():
-            """
-            Select trace the columns shall be extracted from
-            """
+            """Opens file explorer to select a file"""
             input_trace_entry_pt.delete(0, END)
             selected_trace = fd.askopenfilename(initialdir=config.get('directories', 'converted_traces_dir'),
                                                 title="Select a File",
@@ -556,17 +553,15 @@ class TraceConverterGUI:
             input_trace_entry_pt.grid(row=0, column=1)
 
         def extract_columns():
-            """
-            Extracts the tracedata as columns so the trace can be used in ProFiDo
-            """
+            """Extracts the tracedata so the trace can be used in ProFiDo"""
             org_filename = input_trace_entry_pt.get()
             if os.path.isfile(org_filename) and pathlib.Path(org_filename).suffix == ".json":
                 try:
                     with open(input_trace_entry_pt.get()) as trace_in:
                         tracedata = json.load(trace_in)["tracebody"]["tracedata"]
                         df = pd.DataFrame(tracedata)
-                        filename = config.get('directories', 'profido_traces_dir') + profido_filename_entry_pt.get() \
-                                   + '_dat.trace'
+                        filename = config.get('directories', 'profido_traces_dir') + profido_filename_entry_pt.get() + \
+                                   '_dat.trace'
                         dont_overwrite = 0
                         if os.path.exists(filename):
                             dont_overwrite = not mb.askyesno("File already exists", os.path.basename(filename) +
@@ -614,9 +609,7 @@ class TraceConverterGUI:
         # Validation tab
 
         def browse_file_vt():
-            """
-            Select trace you want to validate
-            """
+            """Opens file explorer to select a file"""
             file_entry_vt.delete(0, END)
             selected_trace = fd.askopenfilename(initialdir=config.get('directories', 'converted_traces_dir'),
                                                 title="Select a File",
@@ -656,11 +649,11 @@ class TraceConverterGUI:
         browse_file_button_vt.grid(row=1, column=0)
 
         validate_statistics_button_vt = Button(validation_tab, text="Validate Statistics",
-                                               command=lambda: c.verify_statistics(file_entry_vt.get()))
+                                               command=lambda: cnv.verify_statistics(file_entry_vt.get()))
         validate_statistics_button_vt.grid(row=2, column=0)
 
         validate_hash_button_vt = Button(validation_tab, text="Validate Hash",
-                                         command=lambda: c.hash_check(file_entry_vt.get()))
+                                         command=lambda: cnv.hash_check(file_entry_vt.get()))
         validate_hash_button_vt.grid(row=3, column=0)
 
         restore_traceheader_button_vt = Button(validation_tab, text="Restore Traceheader",

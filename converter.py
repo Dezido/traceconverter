@@ -9,9 +9,9 @@ import tkinter.filedialog
 import tkinter.messagebox as mb
 
 import pandas as pd
-# Load config
 from pandas.errors import EmptyDataError
 
+# Load config from file
 config = configparser.RawConfigParser()
 config.read('config.properties')
 
@@ -48,9 +48,8 @@ def columns_valid(columns, size):
 
 def verify_statistics(converted_trace_file):
     """
-    Checks if the statistics are valid for the tracedata
-    :param converted_trace_file: A tracefile in standard format
-    :return:
+    Checks if the statistics of the trace are valid
+    :param converted_trace_file: An already converted trace
     """
     if os.path.isfile(converted_trace_file) and pathlib.Path(converted_trace_file).suffix == ".json":
         try:
@@ -110,7 +109,7 @@ def remove_lines_from_csv(filename, line_amount):
     """
     Removes rows from the beginning of a file
     :param filename: Input file
-    :param line_amount: How many lines shall be removed from the beginning of the file
+    :param line_amount: Amount of lines to be removed from the beginning of the file
     """
     try:
         try:
@@ -134,9 +133,9 @@ def remove_lines_from_csv(filename, line_amount):
 
 def add_header_to_csv(filename, header):
     """
-    Add a header to .csv file
+    Adds new header to csv file
     :param filename: Input file
-    :param header: Header that will be placed on top of the file
+    :param header: New header
     """
     if os.path.splitext(filename)[1] == ".csv":
         df = pd.read_csv(filename, delimiter=',', header=None)
@@ -154,7 +153,7 @@ def hash_from_trace(filename):
     """
     Computes hash value for a given file
     :param filename: Input file
-    :return: hash value
+    :return: Computed hash value
     """
     sha256_hash = hashlib.sha256()
     with open(filename, "r") as f:
