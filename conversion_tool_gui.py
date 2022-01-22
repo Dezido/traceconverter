@@ -262,11 +262,11 @@ class TraceConverterGUI:
             """Takes the user input from the entry fields and converts the selected trace to the standard format"""
             org_filename = original_tracefile_entry_ct.get()
             if os.path.isfile(org_filename) and pathlib.Path(org_filename).suffix == ".csv":
-                col = list(map(int, (columns_entry_ct.get().split(","))))
+                col = list(map(int, (columns_entry_ct.get().split(";"))))
                 trace_template["tracebody"]["tracedata"] = \
                     cnv.get_tracedata_from_file(original_tracefile_entry_ct.get(), col)
                 amount_tracedata = len(trace_template["tracebody"]["tracedata"][0])
-                trace_template["tracebody"]["tracedatadescription"] = tracedatadescription_entry_ct.get().split("||")
+                trace_template["tracebody"]["tracedatadescription"] = tracedatadescription_entry_ct.get().split(";")
                 trace_template["traceheader"]["metainformation"]["name"] = os.path.basename(
                     original_tracefile_entry_ct.get())
                 trace_template["traceheader"]["metainformation"]["source"] = source_entry_ct.get()
