@@ -453,7 +453,7 @@ class TraceConverterGUI:
                 selected_filenames.clear()
                 for i in file_tuple:
                     with open(str(i)) as json_file:
-                        selected_files.append(json.load(json_file))
+                        selected_files.append(json.load(json_file)["traceheader"]["statistical characteristics"])
                         selected_filenames.append(os.path.basename(os.path.dirname(i)) + '/' + os.path.basename(i))
                 for i in range(len(selected_filenames)):
                     selected_traces_lb.insert(i, selected_filenames[i])
@@ -468,13 +468,12 @@ class TraceConverterGUI:
             for i in filter_results_tv.get_children():
                 filter_results_tv.delete(i)
             for i in range(len(selected_files)):
-                mean_list = selected_files[i]["traceheader"]["statistical characteristics"]["mean"]
-                median_list = selected_files[i]["traceheader"]["statistical characteristics"]["median"]
-                skew_list = selected_files[i]["traceheader"]["statistical characteristics"]["skew"]
-                kurtosis_list = selected_files[i]["traceheader"]["statistical characteristics"]["kurtosis"]
-                autocorrelation_list = \
-                    selected_files[i]["traceheader"]["statistical characteristics"]["autocorrelation"]
-                for j in range(len(selected_files[i]["traceheader"]["statistical characteristics"]["mean"])):
+                mean_list = selected_files[i]["mean"]
+                median_list = selected_files[i]["median"]
+                skew_list = selected_files[i]["skew"]
+                kurtosis_list = selected_files[i]["kurtosis"]
+                autocorrelation_list = selected_files[i]["autocorrelation"]
+                for j in range(len(selected_files[i]["mean"])):
                     mean = float(mean_list[j])
                     median = float(median_list[j])
                     skew = float(skew_list[j])
