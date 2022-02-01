@@ -58,7 +58,7 @@ class TraceConverterGUI:
             file_button_prt.grid(row=0, column=0)
             if selected_file:
                 display_file_prt(file_entry_prt.get())
-            first_line_is_header_checkbutton_prt.grid(row=0, column=2)
+            first_line_is_header_checkbutton_prt.grid(row=4, column=3)
 
         first_line_is_header_checkbutton_var_prt = tkinter.IntVar()
         first_line_is_header_checkbutton_prt = Checkbutton(preparation_tab, text="First line is header",
@@ -117,7 +117,7 @@ class TraceConverterGUI:
             Displays the selected file in the preparation tab
             :param filename: File that will be displayed
             """
-            if os.path.isfile(filename) and pathlib.Path(filename).suffix == ".csv":
+            if os.path.isfile(filename):
                 with open(filename, 'r') as f:
                     file_displayer_label_prt.configure(text=os.path.basename(filename))
                     file_displayer_prt.grid(column=0, row=5, columnspan=12, rowspan=10)
@@ -130,20 +130,22 @@ class TraceConverterGUI:
             """
             Converts file to csv format
             :param filename:Input file
-            :param delimiter:Delimiter of the file
+            :param delimiter:Delimiter of the file. For example regex
             :param header:File header
             """
-            df = pd.read_csv(filename, sep=delimiter)
+            try:
+                df = pd.read_csv(filename, header=0, sep=delimiter)
+            except ValueError:
+                mb.showerror("Error while reading file", "Please check if the file and the delimiter are valid")
             result_filename = \
                 config.get('directories', 'raw_traces_dir') + '/' + os.path.basename(filename).split('.')[0] + '.csv'
             dont_overwrite = 0
-            if os.path.exists(filename):
-                dont_overwrite = not mb.askyesno("File already exists", os.path.basename(filename) +
+            if os.path.exists(result_filename):
+                dont_overwrite = not mb.askyesno("File already exists", result_filename +
                                                  " already exists. \n Would you like to overwrite it?")
             if not dont_overwrite:
                 df.to_csv(result_filename, index=False, sep=',', header=header)
                 display_file_prt(result_filename)
-                print(filename + " was transformed into csv file")
 
         # Tooltips
         file_button_tooltip_prt = Hovertip(file_button_prt, config.get('tooltips', 'file_button'))
@@ -154,6 +156,8 @@ class TraceConverterGUI:
         delimiter_tooltip_prt = Hovertip(delimiter_label_prt, config.get('tooltips', 'delimiter'))
         transform_button_tooltip_prt = Hovertip(transform_filetype_button_prt,
                                                 config.get('tooltips', 'transform_button'))
+        header_checkbutton_tooltip_prt = Hovertip(first_line_is_header_checkbutton_prt,
+                                                config.get('tooltips', 'header_checkbutton'))
 
         # Converting Tab
         columns_label_ct = Label(convert_tab, text="Columns to keep")
@@ -255,7 +259,11 @@ class TraceConverterGUI:
             """Takes the user input from the entry fields and converts the selected trace to the standard format"""
             org_filename = original_tracefile_entry_ct.get()
             if os.path.isfile(org_filename) and pathlib.Path(org_filename).suffix == ".csv":
-                col = list(map(int, (columns_entry_ct.get().split(";"))))
+                try:
+                    col = list(map(int, (columns_entry_ct.get().split(";"))))
+                except ValueError:
+                    mb.showerror("Columns to keep entry invalid",
+                                 "Columns need to be integers seperated by a semicolon [;]")
                 trace_template["tracebody"]["tracedata"] = \
                     cnv.get_tracedata_from_file(original_tracefile_entry_ct.get(), col)
                 amount_tracedata = len(trace_template["tracebody"]["tracedata"][0])
