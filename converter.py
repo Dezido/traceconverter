@@ -7,6 +7,8 @@ import pathlib
 import tkinter
 import tkinter.filedialog
 import tkinter.messagebox as mb
+import time
+import datetime
 
 import pandas as pd
 from pandas.errors import EmptyDataError
@@ -16,15 +18,28 @@ config = configparser.RawConfigParser()
 config.read('config.properties')
 
 
-def get_tracedata_from_file(file, cols):
+def df_columns_to_epoch(dataframe, columns, date_time_format):
+    for i in range(len(columns)):
+        for j in range(len(dataframe.index)):
+            if not pd.isnull(dataframe.at[j, dataframe.columns[columns[i]]]):
+                dataframe.at[j, dataframe.columns[columns[i]]] = \
+                    date_time_to_epoch(dataframe.at[j, dataframe.columns[columns[i]]], date_time_format[i])
+    return dataframe
+
+
+def date_time_to_epoch(date_time, time_format):
+    return time.mktime(datetime.datetime.strptime(date_time, time_format).timetuple())
+
+
+def get_tracedata_from_file(file, keep_cols):
     """
     Gets the relevant columns and adds each column as a separate list into the result list
     :param file: Tracefile the data shall be extracted from
-    :param cols: List of column numbers that shall be kept
+    :param keep_cols: List of column numbers that shall be kept
     :return: Columns of the original trace as lists
     """
     df = pd.read_csv(file, header=0, delimiter=',')
-    if columns_valid(cols, len(df.columns)):
+    if columns_valid(keep_cols, len(df.columns)):
         tracedata_list = []
         relevant_column_numbers = list(range(0, len(df.columns)))
         for i in range(len(cols)):
