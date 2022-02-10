@@ -567,10 +567,8 @@ class TraceConverterGUI:
                             dont_overwrite = not mb.askyesno("File already exists", os.path.basename(filename) +
                                                              " already exists. \n Would you like to overwrite it?")
                         if not dont_overwrite:
-                            df.transpose().to_csv(filename, sep='\t',
-                                                  float_format="%e",
-                                                  index=False, header=False)
-
+                            df = df.transpose().dropna()  # TODO float_format entry
+                            df.to_csv(filename, sep='\t', float_format="%e", index=False, header=False)
                     with open(filename, 'r') as f:
                         trace_column_display_pt.config(state=NORMAL)
                         trace_column_display_pt.delete("1.0", "end")
