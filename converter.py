@@ -66,11 +66,17 @@ def verify_statistics(converted_trace_file):
                 current_autocorr = []
                 for i in range(len(tracedata)):
                     df = pd.DataFrame(tracedata[i])
-                    current_mean.append(df[0].mean())
-                    current_median.append(df[0].median())
-                    current_skew.append(df[0].skew())
-                    current_kurtosis.append(df[0].kurtosis())
-                    current_autocorr.append(df[0].autocorr())
+                    current_mean.append(float(df[0].mean()))
+                    current_median.append(float(df[0].median()))
+                    current_skew.append(float(df[0].skew()))
+                    current_kurtosis.append(float(df[0].kurtosis()))
+                    current_autocorr.append(float(df[0].autocorr()))
+
+                    statistics["mean"][i] = float(statistics["mean"][i])
+                    statistics["median"][i] = float(statistics["median"][i])
+                    statistics["skew"][i] = float(statistics["skew"][i])
+                    statistics["kurtosis"][i] = float(statistics["kurtosis"][i])
+                    statistics["autocorrelation"][i] = float(statistics["autocorrelation"][i])
 
                 if current_mean != statistics["mean"]:
                     invalid_statistics += ("Mean not correct. Should be: " + str(current_mean) + " but is " +
