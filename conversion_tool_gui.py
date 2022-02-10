@@ -134,7 +134,7 @@ class TraceConverterGUI:
             :param header:File header
             """
             try:
-                df = pd.read_csv(filename, header=0, sep=delimiter)
+                df = pd.read_csv(filename, header=None, sep=delimiter)
             except ValueError:
                 mb.showerror("Error while reading file", "Please check if the file and the delimiter are valid")
             result_filename = \
@@ -144,7 +144,7 @@ class TraceConverterGUI:
                 dont_overwrite = not mb.askyesno("File already exists", result_filename +
                                                  " already exists. \n Would you like to overwrite it?")
             if not dont_overwrite:
-                df.to_csv(result_filename, index=False, sep=',', header=header)
+                df.to_csv(result_filename, index=False, sep=',')
                 display_file_prt(result_filename)
 
         # Tooltips
