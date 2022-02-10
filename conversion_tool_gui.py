@@ -82,7 +82,7 @@ class TraceConverterGUI:
                                                          display_file_prt(file_entry_prt.get())])
         remove_rows_button_prt.grid(column=2, row=2)
 
-        add_header_label_prt = Label(preparation_tab, text="Add header to file")
+        add_header_label_prt = Label(preparation_tab, text="Add header to CSV-file")
         add_header_label_prt.grid(column=0, row=3)
 
         add_header_entry_prt = Entry(preparation_tab, width=config.get('entries', 'entry_width'))
@@ -276,7 +276,7 @@ class TraceConverterGUI:
                 trace_template["traceheader"]["metainformation"]["user"] = username_entry_ct.get()
                 if len(custom_field_entry_ct.get('1.0', 'end-1c')) != 0:
                     trace_template["traceheader"]["metainformation"]["additional information"] = \
-                        custom_field_entry_ct.get('1.0', 'end-1c')
+                        custom_field_entry_ct.get('1.0', 'end-1c').replace("\n", "").split(";")
                 else:
                     trace_template["traceheader"]["metainformation"].pop("additional information")
 
@@ -315,7 +315,7 @@ class TraceConverterGUI:
         def generate_statistic(trace, formatstring):
             """
             Computes the statistics for the trace
-            :param trace:
+            :param trace: Tracefile to compute from and add the statistics to
             :param formatstring: For formatting the computed values
             """
             # Clear statistic lists so the next trace won't have old values
@@ -661,10 +661,10 @@ class TraceConverterGUI:
         restore_traceheader_button_vt.grid(row=4, column=0)
 
         numerical_format_label_vt = Label(validation_tab, text="Numerical Format")
-        numerical_format_label_vt.grid(column=1, row=2)
+        numerical_format_label_vt.grid(column=1, row=4)
 
         numerical_format_entry_vt = Entry(validation_tab, width=config.get('entries', 'entry_width'))
-        numerical_format_entry_vt.grid(column=2, row=2)
+        numerical_format_entry_vt.grid(column=2, row=4)
 
         # Tooltips
         browse_file_button_tooltip_vt = Hovertip(browse_file_button_vt, config.get('tooltips', 'browse_file_button_vt'))
