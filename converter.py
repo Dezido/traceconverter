@@ -42,8 +42,8 @@ def get_tracedata_from_file(file, keep_cols):
     if columns_valid(keep_cols, len(df.columns)):
         tracedata_list = []
         relevant_column_numbers = list(range(0, len(df.columns)))
-        for i in range(len(cols)):
-            relevant_column_numbers.remove(cols[i])
+        for i in range(len(keep_cols)):
+            relevant_column_numbers.remove(keep_cols[i])
         df.drop(df.columns[relevant_column_numbers], axis=1, inplace=True)
         for column in df:
             tracedata_list.append(df[column].values.reshape(1, -1).ravel().tolist())
