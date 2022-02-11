@@ -60,6 +60,16 @@ class TraceConverterGUI:
                 display_file_prt(file_entry_prt.get())
             first_line_is_header_checkbutton_prt.grid(row=4, column=3)
 
+        def calculate_timestamp_prt():
+            columns_list = list(map(int, (date_columns_entry_prt.get().split(';'))))
+            format_list = date_format_entry_prt.get().split(';')
+            df = pd.read_csv(file_entry_prt.get(), header=0, delimiter=',')
+            df = cnv.df_columns_to_epoch(df, [2, 3], format_list)
+            df[df.columns[int(delta_column_entry_prt.get())]] = \
+                df[df.columns[3]] - df[df.columns[2]]
+            df.to_csv(file_entry_prt.get(), index=False, sep=',')
+            display_file_prt(file_entry_prt.get())
+
         first_line_is_header_checkbutton_var_prt = tkinter.IntVar()
         first_line_is_header_checkbutton_prt = Checkbutton(preparation_tab, text="First line is header",
                                                            variable=first_line_is_header_checkbutton_var_prt,
@@ -97,20 +107,40 @@ class TraceConverterGUI:
         add_header_button_prt.grid(column=2, row=3)
 
         file_displayer_label_prt = Label(preparation_tab)
-        file_displayer_label_prt.grid(column=0, row=5)
+        file_displayer_label_prt.grid(column=0, row=7)
         file_displayer_prt = scrolledtext.ScrolledText(preparation_tab, width=200, height=33)
 
+        ####
+        date_format_label_prt = Label(preparation_tab, text="Date format")
+        date_format_label_prt.grid(column=0, row=4)
+        date_format_entry_prt = Entry(preparation_tab, width=config.get('entries', 'entry_width'))
+        date_format_entry_prt.grid(column=1, row=4)
+
+        date_columns_label_prt = Label(preparation_tab, text="Date columns")
+        date_columns_label_prt.grid(column=0, row=5)
+        date_columns_entry_prt = Entry(preparation_tab, width=config.get('entries', 'entry_width'))
+        date_columns_entry_prt.grid(column=1, row=5)
+
+        delta_column_label_prt = Label(preparation_tab, text="Delta column")
+        delta_column_label_prt.grid(column=2, row=5)
+        delta_column_entry_prt = Entry(preparation_tab, width=config.get('entries', 'entry_width'))
+        delta_column_entry_prt.grid(column=3, row=5)
+
+        calculate_timestamp_button_prt = Button(preparation_tab, text="get tmstp", command=calculate_timestamp_prt)
+        calculate_timestamp_button_prt.grid(column=4, row=5)
+        ####
+
         delimiter_label_prt = Label(preparation_tab, text="Delimiter")
-        delimiter_label_prt.grid(column=0, row=4)
+        delimiter_label_prt.grid(column=0, row=6)
         delimiter_entry_prt = Entry(preparation_tab, width=config.get('entries', 'entry_width'))
-        delimiter_entry_prt.grid(column=1, row=4)
+        delimiter_entry_prt.grid(column=1, row=6)
         transform_filetype_button_prt = Button(preparation_tab,
                                                text="Change Filetype",
                                                command=lambda:
                                                convert_file_to_csv_prt(file_entry_prt.get(),
                                                                        delimiter_entry_prt.get(),
                                                                        first_line_is_header_checkbutton_var_prt.get()))
-        transform_filetype_button_prt.grid(column=2, row=4)
+        transform_filetype_button_prt.grid(column=2, row=6)
 
         def display_file_prt(filename):
             """
@@ -120,7 +150,7 @@ class TraceConverterGUI:
             if os.path.isfile(filename):
                 with open(filename, 'r') as f:
                     file_displayer_label_prt.configure(text=os.path.basename(filename))
-                    file_displayer_prt.grid(column=0, row=5, columnspan=12, rowspan=10)
+                    file_displayer_prt.grid(column=0, row=7, columnspan=12, rowspan=10)
                     file_displayer_prt.config(state=NORMAL)
                     file_displayer_prt.delete("1.0", "end")
                     file_displayer_prt.insert(INSERT, f.read())
@@ -157,7 +187,7 @@ class TraceConverterGUI:
         transform_button_tooltip_prt = Hovertip(transform_filetype_button_prt,
                                                 config.get('tooltips', 'transform_button'))
         header_checkbutton_tooltip_prt = Hovertip(first_line_is_header_checkbutton_prt,
-                                                config.get('tooltips', 'header_checkbutton'))
+                                                  config.get('tooltips', 'header_checkbutton'))
 
         # Converting Tab
         columns_label_ct = Label(convert_tab, text="Columns to keep")
