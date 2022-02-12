@@ -62,24 +62,54 @@ class TraceConverterGUI:
             first_line_is_header_checkbutton_prt.grid(row=4, column=3)
 
         def calculate_timestamp_prt(file, date_and_time_columns, date_and_time_format_list):
+            """
+            Overwrites timestamps in passed columns to unix timestamps
+            :param file: Input file
+            :param date_and_time_columns: List with column indexes. Passed via GUI
+            :param date_and_time_format_list: List with format strings. Passed via GUI
+            """
             columns_list = list(map(int, (date_and_time_columns.split(';'))))
             format_list = date_and_time_format_list.split(';')
             df = pd.read_csv(file, header=0, delimiter=',')
-            df = cnv.df_columns_to_epoch(df, columns_list, format_list)
-            df.to_csv(file, index=False, sep=',')
-            mb.showinfo('Timestamps successfully calculated', 'Displaying file')
-            display_file_prt(file)
+            try:
+                df = cnv.df_columns_to_epoch(df, columns_list, format_list)
+                df.to_csv(file, index=False, sep=',')
+                mb.showinfo('Timestamps successfully calculated', 'Displaying file')
+                display_file_prt(file)
+            except IndexError:
+                mb.showerror('Error during timestamp conversion', 'Column indexes invalid')
+            except TypeError:
+                mb.showerror('Error during timestamp conversion', 'The columns need to contain strings')
+            except ValueError:
+                mb.showerror('Error during timestamp conversion',
+                             'Timestamp could not be converted with the passed format strings.\nPlease check if you'
+                             ' passed the same number of format strings and column indexes '
+                             'or if the timestamps need further preparation')
 
         def calculate_iat_prt(file, columns):
-            columns = list(map(int, (columns.split(';'))))
-            if len(columns) != 2:
-                mb.showerror('Invalid number of columns', 'Specify two columns to calculate the inter arrival time')
-                raise
+            """
+            Adds or overwrites a column with inter arrival times. Calculated by subtracting two columns
+            :param file: Input file
+            :param columns: Indexes of the columns. Second column will be subtracted from first
+            """
+            try:
+                columns = list(map(int, (columns.split(';'))))
+            except ValueError:
+                mb.showerror('Error during iat calculation', 'Both columns need to contain positive integers')
+                return
+            if len(columns) != 2 or columns[0] < 0 or columns[1] < 0:
+                mb.showerror('Invalid number of columns', 'Pass two positive integers to calculate inter arrival time')
+                return
             df = pd.read_csv(file)
-            df[new_column_name_entry_prt.get()] = df[df.columns[columns[0]]] - df[df.columns[columns[1]]]
-            df.to_csv(file, index=False, sep=',')
-            mb.showinfo('Inter arrival time successfully calculated', 'Displaying file')
-            display_file_prt(file)
+            try:
+                df[new_column_name_entry_prt.get()] = df[df.columns[columns[0]]] - df[df.columns[columns[1]]]
+                df.to_csv(file, index=False, sep=',')
+                mb.showinfo('Inter arrival time successfully calculated', 'Displaying file')
+                display_file_prt(file)
+            except IndexError:
+                mb.showerror('Error during iat calculation', 'Column indexes invalid')
+            except TypeError:
+                mb.showerror('Error during iat calculation', 'Both columns need to contain numbers')
 
         first_line_is_header_checkbutton_var_prt = tkinter.IntVar()
         first_line_is_header_checkbutton_prt = Checkbutton(preparation_tab, text="First line is header",
@@ -163,8 +193,7 @@ class TraceConverterGUI:
                                                text="Change Filetype",
                                                command=lambda:
                                                convert_file_to_csv_prt(file_entry_prt.get(),
-                                                                       delimiter_entry_prt.get(),
-                                                                       first_line_is_header_checkbutton_var_prt.get()))
+                                                                       delimiter_entry_prt.get()))
         transform_filetype_button_prt.grid(column=2, row=6)
 
         def display_file_prt(filename):
@@ -181,17 +210,17 @@ class TraceConverterGUI:
                     file_displayer_prt.insert(INSERT, f.read())
                     file_displayer_prt.config(state=DISABLED)
 
-        def convert_file_to_csv_prt(filename, delimiter, header):
+        def convert_file_to_csv_prt(filename, delimiter):
             """
             Converts file to csv format
             :param filename:Input file
             :param delimiter:Delimiter of the file. For example regex
-            :param header:File header
             """
             try:
                 df = pd.read_csv(filename, header=None, sep=delimiter)
                 result_filename = \
-                    config.get('directories', 'raw_traces_dir') + '/' + os.path.basename(filename).split('.')[0] + '.csv'
+                    config.get('directories', 'raw_traces_dir') + '/' + os.path.basename(filename).split('.')[
+                        0] + '.csv'
                 dont_overwrite = 0
                 if os.path.exists(result_filename):
                     dont_overwrite = not mb.askyesno("File already exists", result_filename +
@@ -215,7 +244,8 @@ class TraceConverterGUI:
                                                   config.get('tooltips', 'header_checkbutton'))
         timestamp_format_tooltip_prt = Hovertip(date_format_label_prt, config.get('tooltips', 'timestamp_format'))
         timestamp_columns_tooltip_prt = Hovertip(date_columns_label_prt, config.get('tooltips', 'timestamp_columns'))
-        calc_epoch_button_tooltip_prt = Hovertip(calculate_timestamp_button_prt, config.get('tooltips', 'calc_epoch_button'))
+        calc_epoch_button_tooltip_prt = Hovertip(calculate_timestamp_button_prt,
+                                                 config.get('tooltips', 'calc_epoch_button'))
         iat_columns_tooltip_prt = Hovertip(delta_column_label_prt, config.get('tooltips', 'iat_columns'))
         column_name_tooltip_prt = Hovertip(new_column_name_label_prt, config.get('tooltips', 'column_name'))
         calc_iat_button_tooltip_prt = Hovertip(calculate_iat_button_prt, config.get('tooltips', 'calc_iat_button'))

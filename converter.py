@@ -19,6 +19,13 @@ config.read('config.properties')
 
 
 def df_columns_to_epoch(dataframe, columns, date_time_format):
+    """
+    Transforms columns in a dataframe to unix timestamp
+    :param dataframe: The dataframe
+    :param columns: List with column indexes
+    :param date_time_format: List with timestamp formats
+    :return: Transformed dataframe
+    """
     for i in range(len(columns)):
         for j in range(len(dataframe.index)):
             if not pd.isnull(dataframe.at[j, dataframe.columns[columns[i]]]):
@@ -28,6 +35,12 @@ def df_columns_to_epoch(dataframe, columns, date_time_format):
 
 
 def date_time_to_epoch(date_time, time_format):
+    """
+    Transforms a timestamp into unix timestamp
+    :param date_time: Original timestamp
+    :param time_format: Format of timestamp
+    :return: Unix timestamp
+    """
     return time.mktime(datetime.datetime.strptime(date_time, time_format).timetuple())
 
 
@@ -55,6 +68,12 @@ def get_tracedata_from_file(file, keep_cols):
 
 
 def columns_valid(columns, size):
+    """
+    Checks if passed columns are valid
+    :param columns: List with column indexes
+    :param size: Size of dataframe the indexes are not allowed to surpass
+    :return: True if the columns are valid
+    """
     for i in range(len(columns)):
         if not isinstance(columns[i], int) or columns[i] < 0 or columns[i] >= size or len(columns) != len(set(columns)):
             return False
