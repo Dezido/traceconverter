@@ -3,6 +3,7 @@ import datetime
 import json
 import os
 import pathlib
+import sys
 import tkinter
 import tkinter.filedialog as fd
 import tkinter.messagebox as mb
@@ -60,15 +61,25 @@ class TraceConverterGUI:
                 display_file_prt(file_entry_prt.get())
             first_line_is_header_checkbutton_prt.grid(row=4, column=3)
 
-        def calculate_timestamp_prt():
-            columns_list = list(map(int, (date_columns_entry_prt.get().split(';'))))
-            format_list = date_format_entry_prt.get().split(';')
-            df = pd.read_csv(file_entry_prt.get(), header=0, delimiter=',')
-            df = cnv.df_columns_to_epoch(df, [2, 3], format_list)
-            df[df.columns[int(delta_column_entry_prt.get())]] = \
-                df[df.columns[3]] - df[df.columns[2]]
-            df.to_csv(file_entry_prt.get(), index=False, sep=',')
-            display_file_prt(file_entry_prt.get())
+        def calculate_timestamp_prt(file, date_and_time_columns, date_and_time_format_list):
+            columns_list = list(map(int, (date_and_time_columns.split(';'))))
+            format_list = date_and_time_format_list.split(';')
+            df = pd.read_csv(file, header=0, delimiter=',')
+            df = cnv.df_columns_to_epoch(df, columns_list, format_list)
+            df.to_csv(file, index=False, sep=',')
+            mb.showinfo('Timestamps successfully calculated', 'Displaying file')
+            display_file_prt(file)
+
+        def calculate_iat_prt(file, columns):
+            columns = list(map(int, (columns.split(';'))))
+            if len(columns) != 2:
+                mb.showerror('Invalid number of columns', 'Specify two columns to calculate the inter arrival time')
+                raise
+            df = pd.read_csv(file)
+            df[new_column_name_entry_prt.get()] = df[df.columns[columns[0]]] - df[df.columns[columns[1]]]
+            df.to_csv(file, index=False, sep=',')
+            mb.showinfo('Inter arrival time successfully calculated', 'Displaying file')
+            display_file_prt(file)
 
         first_line_is_header_checkbutton_var_prt = tkinter.IntVar()
         first_line_is_header_checkbutton_prt = Checkbutton(preparation_tab, text="First line is header",
@@ -110,25 +121,39 @@ class TraceConverterGUI:
         file_displayer_label_prt.grid(column=0, row=7)
         file_displayer_prt = scrolledtext.ScrolledText(preparation_tab, width=200, height=33)
 
-        ####
-        date_format_label_prt = Label(preparation_tab, text="Date format")
+        date_format_label_prt = Label(preparation_tab, text="Timestamp format")
         date_format_label_prt.grid(column=0, row=4)
         date_format_entry_prt = Entry(preparation_tab, width=config.get('entries', 'entry_width'))
         date_format_entry_prt.grid(column=1, row=4)
+        date_format_entry_prt.insert(END, config.get('default_entries', 'default_dateformat_entry'))
 
-        date_columns_label_prt = Label(preparation_tab, text="Date columns")
-        date_columns_label_prt.grid(column=0, row=5)
+        date_columns_label_prt = Label(preparation_tab, text="Timestamp columns")
+        date_columns_label_prt.grid(column=2, row=4)
         date_columns_entry_prt = Entry(preparation_tab, width=config.get('entries', 'entry_width'))
-        date_columns_entry_prt.grid(column=1, row=5)
+        date_columns_entry_prt.grid(column=3, row=4)
 
-        delta_column_label_prt = Label(preparation_tab, text="Delta column")
-        delta_column_label_prt.grid(column=2, row=5)
+        delta_column_label_prt = Label(preparation_tab, text="IAT columns")
+        delta_column_label_prt.grid(column=0, row=5)
         delta_column_entry_prt = Entry(preparation_tab, width=config.get('entries', 'entry_width'))
-        delta_column_entry_prt.grid(column=3, row=5)
+        delta_column_entry_prt.grid(column=1, row=5)
 
-        calculate_timestamp_button_prt = Button(preparation_tab, text="get tmstp", command=calculate_timestamp_prt)
-        calculate_timestamp_button_prt.grid(column=4, row=5)
-        ####
+        new_column_name_label_prt = Label(preparation_tab, text="Column name")
+        new_column_name_label_prt.grid(column=2, row=5)
+        new_column_name_entry_prt = Entry(preparation_tab, width=config.get('entries', 'entry_width'))
+        new_column_name_entry_prt.grid(column=3, row=5)
+
+        calculate_timestamp_button_prt = Button(preparation_tab, text="Calculate Epoch",
+                                                command=lambda: calculate_timestamp_prt(
+                                                    file_entry_prt.get(),
+                                                    date_columns_entry_prt.get(),
+                                                    date_format_entry_prt.get()))
+        calculate_timestamp_button_prt.grid(column=4, row=4)
+
+        calculate_iat_button_prt = Button(preparation_tab, text="Calculate IAT",
+                                          command=lambda: calculate_iat_prt(
+                                              file_entry_prt.get(),
+                                              delta_column_entry_prt.get()))
+        calculate_iat_button_prt.grid(column=4, row=5)
 
         delimiter_label_prt = Label(preparation_tab, text="Delimiter")
         delimiter_label_prt.grid(column=0, row=6)
@@ -165,17 +190,17 @@ class TraceConverterGUI:
             """
             try:
                 df = pd.read_csv(filename, header=None, sep=delimiter)
+                result_filename = \
+                    config.get('directories', 'raw_traces_dir') + '/' + os.path.basename(filename).split('.')[0] + '.csv'
+                dont_overwrite = 0
+                if os.path.exists(result_filename):
+                    dont_overwrite = not mb.askyesno("File already exists", result_filename +
+                                                     " already exists. \n Would you like to overwrite it?")
+                if not dont_overwrite:
+                    df.to_csv(result_filename, index=False, sep=',')
+                    display_file_prt(result_filename)
             except ValueError:
                 mb.showerror("Error while reading file", "Please check if the file and the delimiter are valid")
-            result_filename = \
-                config.get('directories', 'raw_traces_dir') + '/' + os.path.basename(filename).split('.')[0] + '.csv'
-            dont_overwrite = 0
-            if os.path.exists(result_filename):
-                dont_overwrite = not mb.askyesno("File already exists", result_filename +
-                                                 " already exists. \n Would you like to overwrite it?")
-            if not dont_overwrite:
-                df.to_csv(result_filename, index=False, sep=',')
-                display_file_prt(result_filename)
 
         # Tooltips
         file_button_tooltip_prt = Hovertip(file_button_prt, config.get('tooltips', 'file_button'))
@@ -188,6 +213,12 @@ class TraceConverterGUI:
                                                 config.get('tooltips', 'transform_button'))
         header_checkbutton_tooltip_prt = Hovertip(first_line_is_header_checkbutton_prt,
                                                   config.get('tooltips', 'header_checkbutton'))
+        timestamp_format_tooltip_prt = Hovertip(date_format_label_prt, config.get('tooltips', 'timestamp_format'))
+        timestamp_columns_tooltip_prt = Hovertip(date_columns_label_prt, config.get('tooltips', 'timestamp_columns'))
+        calc_epoch_button_tooltip_prt = Hovertip(calculate_timestamp_button_prt, config.get('tooltips', 'calc_epoch_button'))
+        iat_columns_tooltip_prt = Hovertip(delta_column_label_prt, config.get('tooltips', 'iat_columns'))
+        column_name_tooltip_prt = Hovertip(new_column_name_label_prt, config.get('tooltips', 'column_name'))
+        calc_iat_button_tooltip_prt = Hovertip(calculate_iat_button_prt, config.get('tooltips', 'calc_iat_button'))
 
         # Converting Tab
         columns_label_ct = Label(convert_tab, text="Columns to keep")
@@ -710,3 +741,4 @@ class TraceConverterGUI:
 root = Tk()
 converting_tool_gui = TraceConverterGUI(root)
 root.mainloop()
+sys.exit()
