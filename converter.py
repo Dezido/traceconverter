@@ -98,6 +98,7 @@ def verify_statistics(converted_trace_file):
                 current_skew = []
                 current_kurtosis = []
                 current_autocorr = []
+                current_variance = []
                 for i in range(len(tracedata)):
                     df = pd.DataFrame(tracedata[i])
                     current_mean.append(float(df[0].mean()))
@@ -105,12 +106,14 @@ def verify_statistics(converted_trace_file):
                     current_skew.append(float(df[0].skew()))
                     current_kurtosis.append(float(df[0].kurtosis()))
                     current_autocorr.append(float(df[0].autocorr()))
+                    current_variance.append(float(df[0].var()))
 
                     statistics["mean"][i] = float(statistics["mean"][i])
                     statistics["median"][i] = float(statistics["median"][i])
                     statistics["skew"][i] = float(statistics["skew"][i])
                     statistics["kurtosis"][i] = float(statistics["kurtosis"][i])
                     statistics["autocorrelation"][i] = float(statistics["autocorrelation"][i])
+                    statistics["variance"][i] = float(statistics["variance"][i])
 
                 if current_mean != statistics["mean"]:
                     invalid_statistics += ("Mean not correct. Should be: " + str(current_mean) + " but is " +
@@ -133,6 +136,12 @@ def verify_statistics(converted_trace_file):
                             "Autocorrelation not correct. Should be: " + str(current_autocorr) + " but is " +
                             str(statistics["autocorrelation"]) + "\n")
                     statistics_valid = False
+                if current_variance != statistics["variance"]:
+                    invalid_statistics += (
+                            "Variance not correct. Should be: " + str(current_variance) + " but is " +
+                            str(statistics["variance"]) + "\n")
+                    statistics_valid = False
+
                 if statistics_valid:
                     print("All statistics are valid")
                     mb.showinfo("Statistic Validation", "All statistics are valid")
@@ -241,6 +250,7 @@ trace_template = {"traceheader": {
         "skew": [],
         "kurtosis": [],
         "autocorrelation": [],
+        "variance": []
     }
 },
     "tracebody": {

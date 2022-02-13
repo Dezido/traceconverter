@@ -463,6 +463,7 @@ class TraceConverterGUI:
             trace["traceheader"]["statistical characteristics"]["skew"] = []
             trace["traceheader"]["statistical characteristics"]["kurtosis"] = []
             trace["traceheader"]["statistical characteristics"]["autocorrelation"] = []
+            trace["traceheader"]["statistical characteristics"]["variance"] = []
             formatstring = '{' + formatstring + '}'
             try:
                 for i in range(len(trace["tracebody"]["tracedata"])):
@@ -477,6 +478,8 @@ class TraceConverterGUI:
                         formatstring.format(df[0].kurtosis()))
                     trace["traceheader"]["statistical characteristics"]["autocorrelation"].append(
                         formatstring.format(df[0].autocorr()))
+                    trace["traceheader"]["statistical characteristics"]["variance"].append(
+                        formatstring.format(df[0].var()))
                 return trace
             except TypeError:
                 mb.showerror("Type Error", "One of the selected columns does not contain valid data")
@@ -563,7 +566,7 @@ class TraceConverterGUI:
         selected_traces_lb = Listbox(filter_tab, width=config.get('listbox', 'listbox_width'),
                                      height=config.get('listbox', 'listbox_height'))
 
-        treeview_columns = ['name', 'mean', 'median', 'skew', 'kurtosis', 'autocorrelation']
+        treeview_columns = ['name', 'mean', 'median', 'skew', 'kurtosis', 'autocorrelation', 'variance']
         filter_results_tv = ttk.Treeview(filter_tab, columns=treeview_columns, show='headings')
         vsb_filter_results_tv = ttk.Scrollbar(filter_tab, orient="vertical", command=filter_results_tv.yview)
         filter_results_tv.configure(yscrollcommand=vsb_filter_results_tv.set)
@@ -574,6 +577,7 @@ class TraceConverterGUI:
         filter_results_tv.heading('skew', text='Skew')
         filter_results_tv.heading('kurtosis', text='Kurtosis')
         filter_results_tv.heading('autocorrelation', text='Autocorrelation')
+        filter_results_tv.heading('variance', text='Variance')
 
         selected_filenames = []
         selected_files = []
@@ -620,12 +624,14 @@ class TraceConverterGUI:
                 skew_list = selected_files[i]["skew"]
                 kurtosis_list = selected_files[i]["kurtosis"]
                 autocorrelation_list = selected_files[i]["autocorrelation"]
+                variance_list = selected_files[i]["variance"]
                 for j in range(len(selected_files[i]["mean"])):
                     mean = float(mean_list[j])
                     median = float(median_list[j])
                     skew = float(skew_list[j])
                     kurtosis = float(kurtosis_list[j])
                     autocorrelation = float(autocorrelation_list[j])
+                    variance = float(variance_list[j])
                     try:
                         if eval(expression):
                             trace = [os.path.basename(selected_filenames[i]),
@@ -633,7 +639,8 @@ class TraceConverterGUI:
                                      median,
                                      skew,
                                      kurtosis,
-                                     autocorrelation
+                                     autocorrelation,
+                                     variance
                                      ]
                             filter_result.append(trace)
                     except (NameError, SyntaxError):
@@ -645,7 +652,8 @@ class TraceConverterGUI:
                                                             filter_result[i][2],
                                                             filter_result[i][3],
                                                             filter_result[i][4],
-                                                            filter_result[i][5],))
+                                                            filter_result[i][5],
+                                                            filter_result[i][6]))
             Label(filter_tab, text="Results").grid(column=1, row=10)
             filter_results_tv.grid(column=1, row=11, columnspan=10)
             vsb_filter_results_tv.grid(column=11, row=11, sticky=N + S)
