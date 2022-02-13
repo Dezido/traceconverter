@@ -176,7 +176,7 @@ class TraceConverterGUI:
         date_format_label_prt.grid(column=0, row=4)
         date_format_entry_prt = Entry(preparation_tab, width=config.get('entries', 'entry_width'))
         date_format_entry_prt.grid(column=1, row=4)
-        date_format_entry_prt.insert(END, config.get('default_entries', 'default_dateformat_entry'))
+        date_format_entry_prt.insert(END, config.get('default_entries', 'default_date_format_entry'))
 
         date_columns_label_prt = Label(preparation_tab, text="Timestamp columns")
         date_columns_label_prt.grid(column=2, row=4)
@@ -674,7 +674,12 @@ class TraceConverterGUI:
         converted_trace_label_pt = Label(profido_format_tab, text="Trace")
         converted_trace_label_pt.grid(row=0)
         profido_filename_label_pt = Label(profido_format_tab, text="Result filename")
-        profido_filename_label_pt.grid(row=1)
+        profido_filename_label_pt.grid(row=1, column=0)
+        float_format_label_pt = Label(profido_format_tab, text="Float format")
+        float_format_label_pt.grid(row=1, column=2)
+        float_format_entry_pt = Entry(profido_format_tab, width=config.get('entries', 'entry_width'))
+        float_format_entry_pt.grid(row=1, column=3)
+        float_format_entry_pt.insert(END, config.get('default_entries', 'default_float_format_entry'))
         input_trace_entry_pt = Entry(profido_format_tab, width=config.get('entries', 'entry_width'))
 
         trace_column_display_pt = scrolledtext.ScrolledText(profido_format_tab, width=45, height=20)
@@ -690,6 +695,19 @@ class TraceConverterGUI:
                             config.get('browse_file', 'no_file_selected_message'))
             input_trace_entry_pt.insert(END, selected_trace)
             input_trace_entry_pt.grid(row=0, column=1)
+            display_file_pt(selected_trace)
+
+        def display_file_pt(filename):
+            """
+            Displays the selected file in the profido tab
+            :param filename: File that will be displayed
+            """
+            with open(filename, 'r') as f:
+                trace_column_display_pt.config(state=NORMAL)
+                trace_column_display_pt.delete("1.0", "end")
+                trace_column_display_pt.insert(INSERT, f.read())
+                trace_column_display_pt.config(state=DISABLED)
+                trace_column_display_pt.grid(column=0, row=6)
 
         def extract_columns():
             """Extracts the tracedata so the trace can be used in ProFiDo"""
@@ -699,26 +717,24 @@ class TraceConverterGUI:
                     with open(input_trace_entry_pt.get()) as trace_in:
                         tracedata = json.load(trace_in)["tracebody"]["tracedata"]
                         df = pd.DataFrame(tracedata)
-                        filename = config.get('directories', 'profido_traces_dir') + profido_filename_entry_pt.get() + \
-                                   '_dat.trace'
+                        filename = config.get('directories', 'profido_traces_dir') \
+                                   + profido_filename_entry_pt.get() + '_dat.trace'
                         dont_overwrite = 0
                         if os.path.exists(filename):
                             dont_overwrite = not mb.askyesno("File already exists", os.path.basename(filename) +
                                                              " already exists. \n Would you like to overwrite it?")
                         if not dont_overwrite:
-                            df = df.transpose().dropna()  # TODO float_format entry
-                            df.to_csv(filename, sep='\t', float_format="%e", index=False, header=False)
-                    with open(filename, 'r') as f:
-                        trace_column_display_pt.config(state=NORMAL)
-                        trace_column_display_pt.delete("1.0", "end")
-                        trace_column_display_pt.insert(INSERT, f.read())
-                        trace_column_display_pt.config(state=DISABLED)
-                        trace_column_display_pt.grid(column=0, row=6)
+                            df = df.transpose().dropna()
+                            try:
+                                df.to_csv(filename, sep='\t', float_format=float_format_entry_pt.get(),
+                                          index=False, header=False)
+                            except TypeError:
+                                mb.showerror('Invalid float format string', 'Please enter a valid format string')
+                        display_file_pt(filename)
                         mb.showinfo("Data extracted", "Displaying extracted columns")
-                        print("Columns were extracted from " + str(os.path.basename(input_trace_entry_pt.get())) +
-                              " result was saved to " + profido_filename_entry_pt.get() + '_dat.trace')
                 except json.decoder.JSONDecodeError:
                     mb.showerror('Invalid Trace', 'The selected file is not a valid Trace')
+
             else:
                 mb.showinfo(config.get('browse_file', 'no_file_selected_window'),
                             config.get('browse_file', 'no_file_selected_message'))
@@ -738,10 +754,9 @@ class TraceConverterGUI:
                                                     config.get('tooltips', 'converted_trace'))
         profido_filename_entry_tooltip_pt = Hovertip(profido_filename_label_pt,
                                                      config.get('tooltips', 'profido_filename'))
-        browse_trace_button_tooltip_pt = Hovertip(choose_trace_button_pt,
-                                                  config.get('tooltips', 'browse_trace_button'))
-        extract_button_tooltip_pt = Hovertip(extract_columns_button_pt,
-                                             config.get('tooltips', 'extract_button'))
+        browse_trace_button_tooltip_pt = Hovertip(choose_trace_button_pt, config.get('tooltips', 'browse_trace_button'))
+        extract_button_tooltip_pt = Hovertip(extract_columns_button_pt, config.get('tooltips', 'extract_button'))
+        float_format_tooltip_pt = Hovertip(float_format_label_pt, config.get('tooltips', 'float_format'))
 
         # Validation tab
 
