@@ -427,7 +427,7 @@ class TraceConverterGUI:
                     mb.showinfo("Statistics won't be computed", "Tracedata only contains " + str(amount_tracedata) +
                                 " elements per column. Computing statistics requires five or more.")
                 # Save trace to file
-                filename = 'converted_traces/' + result_filename_entry_ct.get() + '_converted.json'
+                filename = config.get('directories', 'converted_traces_dir') + '/' + result_filename_entry_ct.get() + '_converted.json'
                 dont_overwrite = 0
                 if os.path.exists(filename):
                     dont_overwrite = not mb.askyesno("File already exists",
