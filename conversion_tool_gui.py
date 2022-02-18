@@ -40,7 +40,7 @@ class TraceConverterGUI:
         tab_parent.add(preparation_tab, text="Prepare File")
         tab_parent.add(convert_tab, text="Convert Trace")
         tab_parent.add(filter_tab, text="Filter Traces")
-        tab_parent.add(profido_format_tab, text="ProFiDo Format from Trace")
+        tab_parent.add(profido_format_tab, text="Extract Tracedata for Usage in ProFiDo")
         tab_parent.add(validation_tab, text="Validate Trace")
         tab_parent.pack(expand=1, fill='both')
 
@@ -142,7 +142,7 @@ class TraceConverterGUI:
         file_button_prt = Button(preparation_tab, text="Choose File", command=browse_file_prt)
         file_button_prt.grid(column=1, row=0)
 
-        remove_rows_label_prt = Label(preparation_tab, text="Number of rows to remove")
+        remove_rows_label_prt = Label(preparation_tab, text="Amount of Rows")
         remove_rows_label_prt.grid(column=0, row=2)
 
         remove_rows_entry_prt = Entry(preparation_tab, width=config.get('entries', 'entry_width'))
@@ -154,13 +154,13 @@ class TraceConverterGUI:
                                                          display_file_prt(file_entry_prt.get())])
         remove_rows_button_prt.grid(column=2, row=2)
 
-        add_header_label_prt = Label(preparation_tab, text="Add header to CSV-file")
+        add_header_label_prt = Label(preparation_tab, text="Header")
         add_header_label_prt.grid(column=0, row=3)
 
         add_header_entry_prt = Entry(preparation_tab, width=config.get('entries', 'entry_width'))
         add_header_entry_prt.grid(column=1, row=3)
 
-        add_header_button_prt = Button(preparation_tab, text="Add Header",
+        add_header_button_prt = Button(preparation_tab, text="Add Header to CSV",
                                        command=lambda: [cnv.add_header_to_csv(file_entry_prt.get(),
                                                                               list(
                                                                                   add_header_entry_prt.get().split(
@@ -172,52 +172,52 @@ class TraceConverterGUI:
         file_displayer_label_prt.grid(column=0, row=8)
         file_displayer_prt = scrolledtext.ScrolledText(preparation_tab, width=200, height=33)
 
-        date_format_label_prt = Label(preparation_tab, text="Timestamp format")
+        date_format_label_prt = Label(preparation_tab, text="Timestamp Format Strings")
         date_format_label_prt.grid(column=0, row=4)
         date_format_entry_prt = Entry(preparation_tab, width=config.get('entries', 'entry_width'))
         date_format_entry_prt.grid(column=1, row=4)
         date_format_entry_prt.insert(END, config.get('default_entries', 'default_date_format_entry'))
 
-        date_columns_label_prt = Label(preparation_tab, text="Timestamp columns")
+        date_columns_label_prt = Label(preparation_tab, text="Column Indexes")
         date_columns_label_prt.grid(column=2, row=4)
         date_columns_entry_prt = Entry(preparation_tab, width=config.get('entries', 'entry_width'))
         date_columns_entry_prt.grid(column=3, row=4)
 
-        columns_wise_difference_label_prt = Label(preparation_tab, text="Difference between two columns")
+        columns_wise_difference_label_prt = Label(preparation_tab, text="Column Indexes")
         columns_wise_difference_label_prt.grid(column=0, row=5)
         columns_wise_difference_entry_prt = Entry(preparation_tab, width=config.get('entries', 'entry_width'))
         columns_wise_difference_entry_prt.grid(column=1, row=5)
 
-        columns_wise_difference_result_column_label_prt = Label(preparation_tab, text="Result column name")
+        columns_wise_difference_result_column_label_prt = Label(preparation_tab, text="Result Column Name")
         columns_wise_difference_result_column_label_prt.grid(column=2, row=5)
         columns_wise_difference_result_column_entry_prt = Entry(preparation_tab,
                                                                 width=config.get('entries', 'entry_width'))
         columns_wise_difference_result_column_entry_prt.grid(column=3, row=5)
 
-        row_wise_difference_label_prt = Label(preparation_tab, text="Row-wise difference for column")
+        row_wise_difference_label_prt = Label(preparation_tab, text="Column Index")
         row_wise_difference_label_prt.grid(column=0, row=6)
         row_wise_difference_entry_prt = Entry(preparation_tab, width=config.get('entries', 'entry_width'))
         row_wise_difference_entry_prt.grid(column=1, row=6)
 
-        row_wise_difference_result_column_label_prt = Label(preparation_tab, text="Result column name")
+        row_wise_difference_result_column_label_prt = Label(preparation_tab, text="Result Column Name")
         row_wise_difference_result_column_label_prt.grid(column=2, row=6)
         row_wise_difference_result_column_entry_prt = Entry(preparation_tab, width=config.get('entries', 'entry_width'))
         row_wise_difference_result_column_entry_prt.grid(column=3, row=6)
 
-        calculate_timestamp_button_prt = Button(preparation_tab, text="Calculate Epoch",
+        calculate_timestamp_button_prt = Button(preparation_tab, text="Calculate Unix Time",
                                                 command=lambda: calculate_timestamp_prt(
                                                     file_entry_prt.get(),
                                                     date_columns_entry_prt.get(),
                                                     date_format_entry_prt.get()))
         calculate_timestamp_button_prt.grid(column=4, row=4)
 
-        column_wise_difference_button_prt = Button(preparation_tab, text="Calculate IAT column",
+        column_wise_difference_button_prt = Button(preparation_tab, text="Calculate column-wise Difference",
                                                    command=lambda: calculate_iat_columns_prt(
                                                        file_entry_prt.get(),
                                                        columns_wise_difference_entry_prt.get()))
         column_wise_difference_button_prt.grid(column=4, row=5)
 
-        row_wise_difference_button_prt = Button(preparation_tab, text="Calculate IAT rows",
+        row_wise_difference_button_prt = Button(preparation_tab, text="Calculate row-wise Difference",
                                                 command=lambda: calculate_iat_rows_prt(
                                                     file_entry_prt.get()))
         row_wise_difference_button_prt.grid(column=4, row=6)
@@ -226,12 +226,23 @@ class TraceConverterGUI:
         delimiter_label_prt.grid(column=0, row=7)
         delimiter_entry_prt = Entry(preparation_tab, width=config.get('entries', 'entry_width'))
         delimiter_entry_prt.grid(column=1, row=7)
+        header_label_prt = Label(preparation_tab, text="Header")
+        header_label_prt.grid(column=2, row=7)
+        header_entry_prt = Entry(preparation_tab, width=config.get('entries', 'entry_width'))
+        header_entry_prt.grid(column=3, row=7)
+
+        keep_header_checkbutton_var_pt = tkinter.IntVar()
+        keep_header_checkbutton_pt = Checkbutton(preparation_tab, text="Use first Line as Header",
+                                                 variable=keep_header_checkbutton_var_pt, onvalue=1,
+                                                 offvalue=0)
+        keep_header_checkbutton_pt.grid(column=5, row=7)
+
         transform_filetype_button_prt = Button(preparation_tab,
-                                               text="Change Filetype",
+                                               text="Convert to CSV",
                                                command=lambda:
                                                convert_file_to_csv_prt(file_entry_prt.get(),
                                                                        delimiter_entry_prt.get()))
-        transform_filetype_button_prt.grid(column=2, row=7)
+        transform_filetype_button_prt.grid(column=4, row=7)
 
         def display_file_prt(filename):
             """
@@ -254,19 +265,27 @@ class TraceConverterGUI:
             :param delimiter:Delimiter of the file. For example regex
             """
             try:
-                df = pd.read_csv(filename, header=None, sep=delimiter)
-                result_filename = \
-                    config.get('directories', 'raw_traces_dir') + '/' + os.path.basename(filename).split('.')[
-                        0] + '.csv'
+                if keep_header_checkbutton_var_pt.get() == 1:
+                    df = pd.read_csv(filename, header=0, sep=delimiter)
+                else:
+                    df = pd.read_csv(filename, header=None, sep=delimiter)
+                result_filename = filename.split('.')[0] + '.csv'
                 dont_overwrite = 0
-                if os.path.exists(result_filename):
-                    dont_overwrite = not mb.askyesno("File already exists", result_filename +
-                                                     " already exists. \n Would you like to overwrite it?")
-                if not dont_overwrite:
-                    df.to_csv(result_filename, index=False, sep=',')
-                    display_file_prt(result_filename)
             except ValueError:
                 mb.showerror("Error while reading file", "Please check if the file and the delimiter are valid")
+            if os.path.exists(result_filename):
+                dont_overwrite = not mb.askyesno("File already exists", result_filename +
+                                                 " already exists. \n Would you like to overwrite it?")
+            try:
+                if not dont_overwrite:
+                    if header_entry_prt.get() == "":
+                        df.to_csv(result_filename, index=False, sep=',')
+                    else:
+                        df.to_csv(result_filename, index=False, sep=',', header=header_entry_prt.get().split(','))
+                    mb.showinfo('File successfully converted', 'Displaying file')
+                    display_file_prt(result_filename)
+            except ValueError:
+                mb.showerror("Error while converting file", "Please check if the file and the header are valid")
 
         # Tooltips
         file_button_tooltip_prt = Hovertip(file_button_prt, config.get('tooltips', 'file_button'))
@@ -297,9 +316,11 @@ class TraceConverterGUI:
                                                                             'row_wise_difference_result_column'))
         row_wise_difference_button_tooltip_prt = Hovertip(row_wise_difference_button_prt,
                                                           config.get('tooltips', 'row_wise_difference_button'))
+        header_tooltip_prt = Hovertip(header_label_prt, config.get('tooltips', 'header'))
+        header_checkbutton_tooltip_prt = Hovertip(first_line_is_header_checkbutton_prt, config.get('tooltips', 'header_checkbutton'))
 
         # Converting Tab
-        columns_label_ct = Label(convert_tab, text="Columns to keep")
+        columns_label_ct = Label(convert_tab, text="Column Indexes for Tracedata")
         columns_label_ct.grid(row=2)
         source_label_ct = Label(convert_tab, text="Tracesource")
         source_label_ct.grid(row=3)
@@ -314,7 +335,7 @@ class TraceConverterGUI:
         result_filename_label_ct = Label(convert_tab, text="Result Filename")
         result_filename_label_ct.grid(row=8)
 
-        profido_filename_label_ct = Label(convert_tab, text="ProFiDo filename:")
+        profido_filename_label_ct = Label(convert_tab, text="Filename")
         profido_filename_entry_ct = Entry(convert_tab)
 
         def show_name_entry():
@@ -329,12 +350,12 @@ class TraceConverterGUI:
                 print("Extract columns for PoFiDo option was selected in the convert tab")
 
         extract_profido_checkbutton_var_ct = tkinter.IntVar()
-        extract_profido_checkbutton_ct = Checkbutton(convert_tab, text="Extract ProFiDo format after conversion",
+        extract_profido_checkbutton_ct = Checkbutton(convert_tab, text="Extract Tracedata for Usage in ProFiDo after Conversion",
                                                      variable=extract_profido_checkbutton_var_ct, onvalue=1,
                                                      offvalue=0, command=show_name_entry)
         extract_profido_checkbutton_ct.grid(column=4, row=3)
 
-        number_format_label_ct = Label(convert_tab, text="Statistic Number Format ")
+        number_format_label_ct = Label(convert_tab, text="Statistics Format String")
         number_format_label_ct.grid(row=12, column=0)
 
         number_format_entry_ct = Entry(convert_tab, width=config.get('entries', 'entry_width'))
@@ -427,7 +448,8 @@ class TraceConverterGUI:
                     mb.showinfo("Statistics won't be computed", "Tracedata only contains " + str(amount_tracedata) +
                                 " elements per column. Computing statistics requires five or more.")
                 # Save trace to file
-                filename = config.get('directories', 'converted_traces_dir') + '/' + result_filename_entry_ct.get() + '_converted.json'
+                filename = config.get('directories',
+                                      'converted_traces_dir') + '/' + result_filename_entry_ct.get() + '_converted.json'
                 dont_overwrite = 0
                 if os.path.exists(filename):
                     dont_overwrite = not mb.askyesno("File already exists",
@@ -557,10 +579,10 @@ class TraceConverterGUI:
         convert_button_tooltip_ct = Hovertip(convert_button_ct,
                                              config.get('tooltips', 'browse_file_button'))
         numerical_format_tooltip_ct = Hovertip(number_format_label_ct,
-                                               config.get('tooltips', 'numerical_format'))
+                                               config.get('tooltips', 'statistics_format_string'))
 
         # Filter Tab
-        selected_traces_label_ft = Label(filter_tab, text="Selected traces")
+        selected_traces_label_ft = Label(filter_tab, text="Selected Traces")
         selected_traces_label_ft.grid(column=1, row=1)
 
         selected_traces_lb = Listbox(filter_tab, width=config.get('listbox', 'listbox_width'),
@@ -681,9 +703,9 @@ class TraceConverterGUI:
         # ===ProFiDo format Tab
         converted_trace_label_pt = Label(profido_format_tab, text="Trace")
         converted_trace_label_pt.grid(row=0)
-        profido_filename_label_pt = Label(profido_format_tab, text="Result filename")
+        profido_filename_label_pt = Label(profido_format_tab, text="Result Filename")
         profido_filename_label_pt.grid(row=1, column=0)
-        float_format_label_pt = Label(profido_format_tab, text="Float format")
+        float_format_label_pt = Label(profido_format_tab, text="Float Format String")
         float_format_label_pt.grid(row=1, column=2)
         float_format_entry_pt = Entry(profido_format_tab, width=config.get('entries', 'entry_width'))
         float_format_entry_pt.grid(row=1, column=3)
@@ -753,7 +775,7 @@ class TraceConverterGUI:
         profido_filename_entry_pt = Entry(profido_format_tab, width=config.get('entries', 'entry_width'))
         profido_filename_entry_pt.grid(row=1, column=1)
 
-        extract_columns_button_pt = Button(profido_format_tab, text="Extract ProFiDo Format from Trace",
+        extract_columns_button_pt = Button(profido_format_tab, text="Extract Tracedata for Usage in ProFiDo",
                                            command=extract_columns)
         extract_columns_button_pt.grid(row=3, column=1)
 
@@ -789,7 +811,7 @@ class TraceConverterGUI:
                 try:
                     with open(filename) as tr:
                         tracedata = json.load(tr)
-                        trace = generate_statistic(tracedata, numerical_format_entry_vt.get())
+                        trace = generate_statistic(tracedata, statistics_format_string_entry_vt.get())
                     dont_overwrite = 0
                     if os.path.exists(filename):
                         dont_overwrite = not mb.askyesno("Overwriting File",
@@ -820,11 +842,11 @@ class TraceConverterGUI:
                                                command=lambda: restore_traceheader(file_entry_vt.get()))
         restore_traceheader_button_vt.grid(row=4, column=0)
 
-        numerical_format_label_vt = Label(validation_tab, text="Numerical Format")
-        numerical_format_label_vt.grid(column=1, row=4)
+        statistics_format_string_label_vt = Label(validation_tab, text="Statistic Format String")
+        statistics_format_string_label_vt.grid(column=1, row=4)
 
-        numerical_format_entry_vt = Entry(validation_tab, width=config.get('entries', 'entry_width'))
-        numerical_format_entry_vt.grid(column=2, row=4)
+        statistics_format_string_entry_vt = Entry(validation_tab, width=config.get('entries', 'entry_width'))
+        statistics_format_string_entry_vt.grid(column=2, row=4)
 
         # Tooltips
         browse_file_button_tooltip_vt = Hovertip(browse_file_button_vt, config.get('tooltips', 'browse_file_button_vt'))
@@ -834,8 +856,8 @@ class TraceConverterGUI:
                                                    config.get('tooltips', 'validate_hash_button'))
         restore_traceheader_button_tooltip_vt = Hovertip(restore_traceheader_button_vt,
                                                          config.get('tooltips', 'restore_traceheader_button'))
-        numerical_format_tooltip_vt = Hovertip(numerical_format_label_vt,
-                                               config.get('tooltips', 'numerical_format'))
+        numerical_format_tooltip_vt = Hovertip(statistics_format_string_label_vt,
+                                               config.get('tooltips', 'statistics_format_string'))
 
 
 # Create TCGUI instance and run mainloop
