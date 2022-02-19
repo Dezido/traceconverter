@@ -26,7 +26,7 @@ class TraceConverterGUI:
     def __init__(self, master):
         """Creates a GUI for the tool"""
         self.master = master
-        master.title("Traceconverting Tool")
+        master.title("Trace Converting Tool")
         # Notebook and Tabs
         tab_parent = ttk.Notebook(master)
 
@@ -173,15 +173,15 @@ class TraceConverterGUI:
         file_displayer_prt = scrolledtext.ScrolledText(preparation_tab, width=200, height=33)
 
         date_format_label_prt = Label(preparation_tab, text="Timestamp Format Strings")
-        date_format_label_prt.grid(column=0, row=4)
+        date_format_label_prt.grid(column=2, row=4)
         date_format_entry_prt = Entry(preparation_tab, width=config.get('entries', 'entry_width'))
-        date_format_entry_prt.grid(column=1, row=4)
+        date_format_entry_prt.grid(column=3, row=4)
         date_format_entry_prt.insert(END, config.get('default_entries', 'default_date_format_entry'))
 
         date_columns_label_prt = Label(preparation_tab, text="Column Indexes")
-        date_columns_label_prt.grid(column=2, row=4)
+        date_columns_label_prt.grid(column=0, row=4)
         date_columns_entry_prt = Entry(preparation_tab, width=config.get('entries', 'entry_width'))
-        date_columns_entry_prt.grid(column=3, row=4)
+        date_columns_entry_prt.grid(column=1, row=4)
 
         columns_wise_difference_label_prt = Label(preparation_tab, text="Column Indexes")
         columns_wise_difference_label_prt.grid(column=0, row=5)
@@ -284,6 +284,8 @@ class TraceConverterGUI:
                         df.to_csv(result_filename, index=False, sep=',', header=header_entry_prt.get().split(','))
                     mb.showinfo('File successfully converted', 'Displaying file')
                     display_file_prt(result_filename)
+                    file_entry_prt.delete(0, END)
+                    file_entry_prt.insert(END, result_filename)
             except ValueError:
                 mb.showerror("Error while converting file", "Please check if the file and the header are valid")
 
@@ -432,7 +434,7 @@ class TraceConverterGUI:
                     original_tracefile_entry_ct.get())
                 trace_template["traceheader"]["metainformation"]["source"] = source_entry_ct.get()
                 trace_template["traceheader"]["metainformation"]["description"] = description_entry_ct.get()
-                trace_template["traceheader"]["metainformation"]["date"] = str(datetime.datetime.now())
+                trace_template["traceheader"]["metainformation"]["creation timestamp"] = str(datetime.datetime.now())
                 trace_template["traceheader"]["metainformation"]["user"] = username_entry_ct.get()
                 if len(custom_field_entry_ct.get('1.0', 'end-1c')) != 0:
                     trace_template["traceheader"]["metainformation"]["additional information"] = \

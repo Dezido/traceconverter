@@ -239,7 +239,7 @@ trace_template = {"traceheader": {
         "name": "",
         "source": "",
         "description": "",
-        "date": "",
+        "creation timestamp": "",
         "user": "",
         "additional information": "",
         "hash": ""
