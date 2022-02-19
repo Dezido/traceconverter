@@ -2,6 +2,7 @@ import configparser
 import hashlib
 import json
 import json.decoder
+import math
 import os
 import pathlib
 import tkinter
@@ -80,73 +81,64 @@ def columns_valid(columns, size):
     return True
 
 
-def verify_statistics(converted_trace_file):
+def verify_statistics(converted_trace_file, tolerance):
     """
     Checks if the statistics of the trace are valid
+    :param tolerance: relative tolerance
     :param converted_trace_file: An already converted trace
     """
     if os.path.isfile(converted_trace_file) and pathlib.Path(converted_trace_file).suffix == ".json":
         try:
+            try:
+                tolerance = float(tolerance)
+                if tolerance < 0 or tolerance > 1:
+                    mb.showerror('Tolerance must be between 0 and 1', 'Please enter a value between 0 and 1')
+                    return
+            except ValueError:
+                mb.showerror('Tolerance Entry invalid', 'Please enter a valid float')
+                return
             with open(converted_trace_file) as trace_file:
                 trace = json.load(trace_file)
                 statistics = trace["traceheader"]["statistical characteristics"]
                 tracedata = trace["tracebody"]["tracedata"]
                 statistics_valid = True
                 invalid_statistics = ""
-                current_mean = []
-                current_median = []
-                current_skew = []
-                current_kurtosis = []
-                current_autocorr = []
-                current_variance = []
                 for i in range(len(tracedata)):
                     df = pd.DataFrame(tracedata[i])
-                    current_mean.append(float(df[0].mean()))
-                    current_median.append(float(df[0].median()))
-                    current_skew.append(float(df[0].skew()))
-                    current_kurtosis.append(float(df[0].kurtosis()))
-                    current_autocorr.append(float(df[0].autocorr()))
-                    current_variance.append(float(df[0].var()))
-
-                    statistics["mean"][i] = float(statistics["mean"][i])
-                    statistics["median"][i] = float(statistics["median"][i])
-                    statistics["skew"][i] = float(statistics["skew"][i])
-                    statistics["kurtosis"][i] = float(statistics["kurtosis"][i])
-                    statistics["autocorrelation"][i] = float(statistics["autocorrelation"][i])
-                    statistics["variance"][i] = float(statistics["variance"][i])
-
-                if current_mean != statistics["mean"]:
-                    invalid_statistics += ("Mean not correct. Should be: " + str(current_mean) + " but is " +
-                                           str(statistics["mean"]) + "\n")
-                    statistics_valid = False
-                if current_median != statistics["median"]:
-                    invalid_statistics += ("Median not correct. Should be: " + str(current_median) + " but is " +
-                                           str(statistics["median"]) + "\n")
-                    statistics_valid = False
-                if current_skew != statistics["skew"]:
-                    invalid_statistics += ("Skew not correct. Should be: " + str(current_skew) + " but is " +
-                                           str(statistics["skew"]) + "\n")
-                    statistics_valid = False
-                if current_kurtosis != statistics["kurtosis"]:
-                    invalid_statistics += ("Kurtosis not correct. Should be: " + str(current_kurtosis) + " but is " +
-                                           str(statistics["kurtosis"]) + "\n")
-                    statistics_valid = False
-                if current_autocorr != statistics["autocorrelation"]:
-                    invalid_statistics += (
-                            "Autocorrelation not correct. Should be: " + str(current_autocorr) + " but is " +
-                            str(statistics["autocorrelation"]) + "\n")
-                    statistics_valid = False
-                if current_variance != statistics["variance"]:
-                    invalid_statistics += (
-                            "Variance not correct. Should be: " + str(current_variance) + " but is " +
-                            str(statistics["variance"]) + "\n")
-                    statistics_valid = False
-
+                    if not math.isclose(float(df.mean()[0]), float(statistics["mean"][i]), rel_tol=tolerance):
+                        invalid_statistics += (
+                                "Mean [" + str(i) + "] not equal. Should be: " + str(df.mean()[0]) + " but is " +
+                                str(statistics["mean"][i]) + "\n")
+                        statistics_valid = False
+                    if not math.isclose(float(df.median()[0]), float(statistics["median"][i]), rel_tol=tolerance):
+                        invalid_statistics += (
+                                "Median [" + str(i) + "] not equal. Should be: " + str(df.median()[0]) + " but is " +
+                                str(statistics["median"][i]) + "\n")
+                        statistics_valid = False
+                    if not math.isclose(float(df.skew()[0]), float(statistics["skew"][i]), rel_tol=tolerance):
+                        invalid_statistics += (
+                                "Skew [" + str(i) + "] not equal. Should be: " + str(df.skew()[0]) + " but is " +
+                                str(statistics["skew"][i]) + "\n")
+                        statistics_valid = False
+                    if not math.isclose(float(df.kurtosis()[0]), float(statistics["kurtosis"][i]), rel_tol=tolerance):
+                        invalid_statistics += (
+                                "Kurtosis [" + str(i) + "] not equal. Should be: " + str(df.kurtosis()[0]) + " but is " +
+                                str(statistics["kurtosis"][i]) + "\n")
+                        statistics_valid = False
+                    if not math.isclose(float(df[0].autocorr()), float(statistics["autocorrelation"][i]),
+                                        rel_tol=tolerance):
+                        invalid_statistics += (
+                                "Autocorrelation [" + str(i) + "] not equal. Should be: " + str(df[0].autocorr()) +
+                                " but is " + str(statistics["autocorrelation"][i]) + "\n")
+                        statistics_valid = False
+                    if not math.isclose(float(df.var()[0]), float(statistics["variance"][i]), rel_tol=tolerance):
+                        invalid_statistics += (
+                                "Variance [" + str(i) + "] not equal. Should be: " + str(df[0].var()) + " but is " +
+                                str(statistics["variance"][i]) + "\n")
+                        statistics_valid = False
                 if statistics_valid:
-                    print("All statistics are valid")
                     mb.showinfo("Statistic Validation", "All statistics are valid")
                 else:
-                    print(invalid_statistics)
                     mb.showinfo("Statistic Validation", invalid_statistics)
         except json.decoder.JSONDecodeError:
             mb.showerror("Trace content invalid", "Please check if the trace content is valid")

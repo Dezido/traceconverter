@@ -319,7 +319,8 @@ class TraceConverterGUI:
         row_wise_difference_button_tooltip_prt = Hovertip(row_wise_difference_button_prt,
                                                           config.get('tooltips', 'row_wise_difference_button'))
         header_tooltip_prt = Hovertip(header_label_prt, config.get('tooltips', 'header'))
-        header_checkbutton_tooltip_prt = Hovertip(first_line_is_header_checkbutton_prt, config.get('tooltips', 'header_checkbutton'))
+        header_checkbutton_tooltip_prt = Hovertip(first_line_is_header_checkbutton_prt,
+                                                  config.get('tooltips', 'header_checkbutton'))
 
         # Converting Tab
         columns_label_ct = Label(convert_tab, text="Column Indexes for Tracedata")
@@ -352,7 +353,8 @@ class TraceConverterGUI:
                 print("Extract columns for PoFiDo option was selected in the convert tab")
 
         extract_profido_checkbutton_var_ct = tkinter.IntVar()
-        extract_profido_checkbutton_ct = Checkbutton(convert_tab, text="Extract Tracedata for Usage in ProFiDo after Conversion",
+        extract_profido_checkbutton_ct = Checkbutton(convert_tab,
+                                                     text="Extract Tracedata for Usage in ProFiDo after Conversion",
                                                      variable=extract_profido_checkbutton_var_ct, onvalue=1,
                                                      offvalue=0, command=show_name_entry)
         extract_profido_checkbutton_ct.grid(column=4, row=3)
@@ -829,11 +831,18 @@ class TraceConverterGUI:
 
         file_entry_vt = Entry(validation_tab, width=config.get('entries', 'entry_width'))
 
+        relative_tolerance_label_vt = Label(validation_tab, text="Relative Tolerance")
+        relative_tolerance_label_vt.grid(column=1, row=2)
+
+        relative_tolerance_entry_vt = Entry(validation_tab, width=config.get('entries', 'entry_width'))
+        relative_tolerance_entry_vt.grid(column=2, row=2)
+
         browse_file_button_vt = Button(validation_tab, text="Choose File", command=browse_file_vt)
         browse_file_button_vt.grid(row=1, column=0)
 
         validate_statistics_button_vt = Button(validation_tab, text="Validate Statistics",
-                                               command=lambda: cnv.verify_statistics(file_entry_vt.get()))
+                                               command=lambda: cnv.verify_statistics(file_entry_vt.get(),
+                                                                                     relative_tolerance_entry_vt.get()))
         validate_statistics_button_vt.grid(row=2, column=0)
 
         validate_hash_button_vt = Button(validation_tab, text="Validate Hash",
@@ -854,6 +863,8 @@ class TraceConverterGUI:
         browse_file_button_tooltip_vt = Hovertip(browse_file_button_vt, config.get('tooltips', 'browse_file_button_vt'))
         validate_statistics_button_tooltip_vt = Hovertip(validate_statistics_button_vt,
                                                          config.get('tooltips', 'validate_statistics_button'))
+        relative_tolerance_tooltip_vt = Hovertip(relative_tolerance_label_vt,
+                                                 config.get('tooltips', 'relative_tolerance_vt'))
         validate_hash_button_tooltip_vt = Hovertip(validate_hash_button_vt,
                                                    config.get('tooltips', 'validate_hash_button'))
         restore_traceheader_button_tooltip_vt = Hovertip(restore_traceheader_button_vt,
