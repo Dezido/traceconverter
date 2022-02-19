@@ -14,8 +14,8 @@ from tkinter import ttk
 
 import pandas as pd
 
-import converter as cnv
-from converter import trace_template
+import trace_converting_tool_model as cnv
+from trace_converting_tool_model import trace_template
 
 # Load config file
 config = configparser.RawConfigParser()
@@ -466,7 +466,7 @@ class TraceConverterGUI:
                     if extract_profido_checkbutton_var_ct.get() == 1:
                         extract_after_conversion(
                             filename)
-                    mb.showinfo("Trace converted successfully", "Displaying converted Trace")
+                    mb.showinfo("Trace successfully converted", "Displaying converted Trace")
                 else:
                     mb.showinfo("File already exists", "Displaying existing File")
                 # Display the created traces
@@ -708,13 +708,13 @@ class TraceConverterGUI:
         profido_filename_label_pt = Label(profido_format_tab, text="Result Filename")
         profido_filename_label_pt.grid(row=1, column=0)
         float_format_label_pt = Label(profido_format_tab, text="Float Format String")
-        float_format_label_pt.grid(row=1, column=2)
+        float_format_label_pt.grid(row=2, column=0)
         float_format_entry_pt = Entry(profido_format_tab, width=config.get('entries', 'entry_width'))
-        float_format_entry_pt.grid(row=1, column=3)
+        float_format_entry_pt.grid(row=2, column=1)
         float_format_entry_pt.insert(END, config.get('default_entries', 'default_float_format_entry'))
         input_trace_entry_pt = Entry(profido_format_tab, width=config.get('entries', 'entry_width'))
 
-        trace_column_display_pt = scrolledtext.ScrolledText(profido_format_tab, width=45, height=20)
+        trace_column_display_pt = scrolledtext.ScrolledText(profido_format_tab, width=100, height=33)
 
         def browse_file_pt():
             """Opens file explorer to select a file"""
@@ -739,7 +739,7 @@ class TraceConverterGUI:
                 trace_column_display_pt.delete("1.0", "end")
                 trace_column_display_pt.insert(INSERT, f.read())
                 trace_column_display_pt.config(state=DISABLED)
-                trace_column_display_pt.grid(column=0, row=6)
+                trace_column_display_pt.grid(column=0, row=6, columnspan=4)
 
         def extract_columns():
             """Extracts the tracedata so the trace can be used in ProFiDo"""
@@ -779,7 +779,7 @@ class TraceConverterGUI:
 
         extract_columns_button_pt = Button(profido_format_tab, text="Extract Tracedata for Usage in ProFiDo",
                                            command=extract_columns)
-        extract_columns_button_pt.grid(row=3, column=1)
+        extract_columns_button_pt.grid(row=2, column=2)
 
         # Tooltips
         converted_trace_label_tooltip_pt = Hovertip(converted_trace_label_pt,
