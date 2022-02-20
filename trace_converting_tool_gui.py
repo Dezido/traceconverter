@@ -359,11 +359,11 @@ class TraceConverterGUI:
                                                      offvalue=0, command=show_name_entry)
         extract_profido_checkbutton_ct.grid(column=4, row=3)
 
-        number_format_label_ct = Label(convert_tab, text="Statistics Format String")
-        number_format_label_ct.grid(row=12, column=0)
+        statistics_format_label_ct = Label(convert_tab, text="Statistics Format String")
+        statistics_format_label_ct.grid(row=12, column=0)
 
-        number_format_entry_ct = Entry(convert_tab, width=config.get('entries', 'entry_width'))
-        number_format_entry_ct.grid(row=12, column=1)
+        statistics_format_entry_ct = Entry(convert_tab, width=config.get('entries', 'entry_width'))
+        statistics_format_entry_ct.grid(row=12, column=1)
 
         original_tracefile_entry_ct = Entry(convert_tab, width=config.get('entries', 'entry_width'))
 
@@ -446,14 +446,14 @@ class TraceConverterGUI:
 
                 #  Generate statistics and adds them into a list. Each list entry represents one column of the raw trace
                 if amount_tracedata > 4:
-                    trace = generate_statistic(trace_template, number_format_entry_ct.get())
+                    trace = generate_statistic(trace_template, statistics_format_entry_ct.get())
                 else:
                     trace = trace_template
                     mb.showinfo("Statistics won't be computed", "Tracedata only contains " + str(amount_tracedata) +
                                 " elements per column. Computing statistics requires five or more.")
                 # Save trace to file
                 filename = config.get('directories',
-                                      'converted_traces_dir') + '/' + result_filename_entry_ct.get() + '_converted.json'
+                                      'converted_traces_dir') + '/' + result_filename_entry_ct.get() + '_sf.json'
                 dont_overwrite = 0
                 if os.path.exists(filename):
                     dont_overwrite = not mb.askyesno("File already exists",
@@ -582,7 +582,7 @@ class TraceConverterGUI:
                                                  config.get('tooltips', 'browse_file_button'))
         convert_button_tooltip_ct = Hovertip(convert_button_ct,
                                              config.get('tooltips', 'browse_file_button'))
-        numerical_format_tooltip_ct = Hovertip(number_format_label_ct,
+        numerical_format_tooltip_ct = Hovertip(statistics_format_label_ct,
                                                config.get('tooltips', 'statistics_format_string'))
 
         # Filter Tab
@@ -853,7 +853,7 @@ class TraceConverterGUI:
                                                command=lambda: restore_traceheader(file_entry_vt.get()))
         restore_traceheader_button_vt.grid(row=4, column=0)
 
-        statistics_format_string_label_vt = Label(validation_tab, text="Statistic Format String")
+        statistics_format_string_label_vt = Label(validation_tab, text="Statistics Format String")
         statistics_format_string_label_vt.grid(column=1, row=4)
 
         statistics_format_string_entry_vt = Entry(validation_tab, width=config.get('entries', 'entry_width'))

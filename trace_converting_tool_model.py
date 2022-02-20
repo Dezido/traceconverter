@@ -137,7 +137,7 @@ def verify_statistics(converted_trace_file, tolerance):
                                 str(statistics["variance"][i]) + "\n")
                         statistics_valid = False
                 if statistics_valid:
-                    mb.showinfo("Statistic Validation", "All statistics are valid")
+                    mb.showinfo("Statistic Validation", "All statistics are close considering the passed relative tolerance")
                 else:
                     mb.showinfo("Statistic Validation", invalid_statistics)
         except json.decoder.JSONDecodeError:
