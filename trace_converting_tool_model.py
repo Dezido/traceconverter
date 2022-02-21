@@ -199,7 +199,7 @@ def hash_from_trace(filename):
     sha256_hash = hashlib.sha256()
     with open(filename, "r") as file:
         for line in file:
-            if 'hash' not in line:
+            if 'hash value' not in line:
                 sha256_hash.update(line.encode('UTF-8'))
         return sha256_hash.hexdigest()
 
@@ -213,7 +213,7 @@ def hash_check(filename):
         try:
             with open(filename) as file:
                 tracedata = json.load(file)
-                stored_hash = tracedata["traceheader"]["metainformation"]["hash"]
+                stored_hash = tracedata["traceheader"]["metainformation"]["hash value"]
                 computed_hash = hash_from_trace(filename)
             if stored_hash == computed_hash:
                 tkinter.messagebox.showinfo("Hash check result", "Hashes are equal")
@@ -234,7 +234,7 @@ trace_template = {"traceheader": {
         "creation timestamp": "",
         "user": "",
         "additional information": "",
-        "hash": ""
+        "hash value": ""
     },
     "statistical characteristics": {
         "mean": [],

@@ -173,7 +173,7 @@ class TraceConvertingToolGUI:
         date_format_label_prt.grid(column=2, row=4)
         date_format_entry_prt = Entry(prepare_file_tab, width=config.get('entries', 'entry_width'))
         date_format_entry_prt.grid(column=3, row=4)
-        date_format_entry_prt.insert(END, config.get('default_entries', 'default_date_format_entry'))
+        date_format_entry_prt.insert(END, config.get('entries', 'default_date_format_entry_prt'))
 
         date_columns_label_prt = Label(prepare_file_tab, text="Column Indexes")
         date_columns_label_prt.grid(column=0, row=4)
@@ -249,7 +249,7 @@ class TraceConvertingToolGUI:
             if os.path.isfile(filename):
                 with open(filename, 'r') as file:
                     file_displayer_label_prt.configure(text=os.path.basename(filename))
-                    file_displayer_prt.grid(column=0, row=8, columnspan=12, rowspan=10)
+                    file_displayer_prt.grid(column=0, row=9, columnspan=12, rowspan=10)
                     file_displayer_prt.config(state=NORMAL)
                     file_displayer_prt.delete("1.0", "end")
                     file_displayer_prt.insert(INSERT, file.read())
@@ -343,11 +343,9 @@ class TraceConvertingToolGUI:
             if extract_profido_checkbutton_var_ct.get() == 0:
                 profido_filename_label_ct.grid_forget()
                 profido_filename_entry_ct.grid_forget()
-                print("Extract columns for PoFiDo option was unselected in the convert tab")
             if extract_profido_checkbutton_var_ct.get() == 1:
                 profido_filename_label_ct.grid(column=4, row=4)
                 profido_filename_entry_ct.grid(column=4, row=5)
-                print("Extract columns for PoFiDo option was selected in the convert tab")
 
         extract_profido_checkbutton_var_ct = IntVar()
         extract_profido_checkbutton_ct = Checkbutton(convert_trace_tab,
@@ -382,26 +380,26 @@ class TraceConvertingToolGUI:
         original_tracefile_button_ct = Button(convert_trace_tab, text="Choose File", command=browse_file_ct)
 
         columns_entry_ct = Entry(convert_trace_tab, width=config.get('entries', 'entry_width'))
-        columns_entry_ct.insert(END, config.get('default_entries', 'default_columns_entry'))
+        columns_entry_ct.insert(END, config.get('entries', 'default_columns_entry'))
 
         source_entry_ct = Entry(convert_trace_tab, width=config.get('entries', 'entry_width'))
-        source_entry_ct.insert(END, config.get('default_entries', 'default_source_entry'))
+        source_entry_ct.insert(END, config.get('entries', 'default_source_entry'))
 
         description_entry_ct = Entry(convert_trace_tab, width=config.get('entries', 'entry_width'))
-        description_entry_ct.insert(END, config.get('default_entries', 'default_description_entry'))
+        description_entry_ct.insert(END, config.get('entries', 'default_description_entry'))
 
         tracedatadescription_entry_ct = Entry(convert_trace_tab, width=config.get('entries', 'entry_width'))
-        tracedatadescription_entry_ct.insert(END, config.get('default_entries', 'default_tracedatadescription_entry'))
+        tracedatadescription_entry_ct.insert(END, config.get('entries', 'default_tracedatadescription_entry'))
 
         username_entry_ct = Entry(convert_trace_tab, width=config.get('entries', 'entry_width'))
-        username_entry_ct.insert(END, config.get('default_entries', 'default_username_entry'))
+        username_entry_ct.insert(END, config.get('entries', 'default_username_entry'))
 
         custom_field_entry_ct = Text(convert_trace_tab, width=config.get('entries', 'entry_width'), height=25,
                                      font=config.get('fonts', 'default_font'))
-        custom_field_entry_ct.insert(END, config.get('default_entries', 'default_customfield_entry'))
+        custom_field_entry_ct.insert(END, config.get('entries', 'default_customfield_entry'))
 
         result_filename_entry_ct = Entry(convert_trace_tab, width=config.get('entries', 'entry_width'))
-        result_filename_entry_ct.insert(END, config.get('default_entries', 'default_filename_entry'))
+        result_filename_entry_ct.insert(END, config.get('entries', 'default_filename_entry'))
 
         # Place Entries
         original_tracefile_button_ct.grid(row=1, column=0)
@@ -459,7 +457,6 @@ class TraceConvertingToolGUI:
                 if not dont_overwrite:
                     with open(filename, 'w') as fp:
                         json.dump(trace, fp, indent=4)
-                        print("Trace was converted successfully!")
                     add_hash_value_to_trace(filename)
                     # If profido checkbox is selected the columns will also be extracted for profido use
                     if extract_profido_checkbutton_var_ct.get() == 1:
@@ -518,7 +515,7 @@ class TraceConvertingToolGUI:
             """
             with open(filename) as tr:
                 tracedata = json.load(tr)
-                tracedata["traceheader"]["metainformation"]["hash"] = model.hash_from_trace(filename)
+                tracedata["traceheader"]["metainformation"]["hash value"] = model.hash_from_trace(filename)
             with open(filename, 'w') as fp:
                 json.dump(tracedata, fp, indent=4)
 
@@ -533,7 +530,6 @@ class TraceConvertingToolGUI:
                 file_displayer_ct.insert(INSERT, f.read())
                 file_displayer_ct.config(state=DISABLED)
                 file_displayer_ct.grid(column=5, row=1, columnspan=12, rowspan=10)
-                print(filename + " displayed in preparation tab")
 
         def extract_tracedata_after_conversion(filename):
             """
@@ -556,7 +552,6 @@ class TraceConvertingToolGUI:
                                           sep='\t',
                                           float_format="%e",
                                           index=False, header=False)
-                    print("Columns were extracted after conversion")
 
         convert_button_ct = Button(convert_trace_tab, text='Convert Trace', command=convert_trace)
         convert_button_ct.grid(row=13, column=1)
@@ -710,7 +705,7 @@ class TraceConvertingToolGUI:
         float_format_label_pt.grid(row=2, column=0)
         float_format_entry_pt = Entry(extract_tracedata_tab, width=config.get('entries', 'entry_width'))
         float_format_entry_pt.grid(row=2, column=1)
-        float_format_entry_pt.insert(END, config.get('default_entries', 'default_float_format_entry'))
+        float_format_entry_pt.insert(END, config.get('entries', 'default_float_format_entry_pt'))
         input_trace_entry_pt = Entry(extract_tracedata_tab, width=config.get('entries', 'entry_width'))
 
         trace_column_display_pt = scrolledtext.ScrolledText(extract_tracedata_tab, width=100, height=33)
