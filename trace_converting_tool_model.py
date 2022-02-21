@@ -1,15 +1,15 @@
 import configparser
+import datetime
 import hashlib
 import json
 import json.decoder
 import math
 import os
 import pathlib
+import time
 import tkinter
 import tkinter.filedialog
 import tkinter.messagebox as mb
-import time
-import datetime
 
 import pandas as pd
 from pandas.errors import EmptyDataError
@@ -61,7 +61,6 @@ def get_tracedata_from_file(file, keep_cols):
         df.drop(df.columns[relevant_column_numbers], axis=1, inplace=True)
         for column in df:
             tracedata_list.append(df[column].values.reshape(1, -1).ravel().tolist())
-        print("Tracedata from " + os.path.basename(file) + " successfully retrieved")
         return tracedata_list
     else:
         mb.showerror("Columns invalid", "Please specify valid columns")
@@ -122,8 +121,8 @@ def verify_statistics(converted_trace_file, tolerance):
                         statistics_valid = False
                     if not math.isclose(float(df.kurtosis()[0]), float(statistics["kurtosis"][i]), rel_tol=tolerance):
                         invalid_statistics += (
-                                "Kurtosis [" + str(i) + "] not equal. Should be: " + str(df.kurtosis()[0]) + " but is " +
-                                str(statistics["kurtosis"][i]) + "\n")
+                                "Kurtosis [" + str(i) + "] not equal. Should be: " + str(df.kurtosis()[0]) +
+                                " but is " + str(statistics["kurtosis"][i]) + "\n")
                         statistics_valid = False
                     if not math.isclose(float(df[0].autocorr()), float(statistics["autocorrelation"][i]),
                                         rel_tol=tolerance):
@@ -137,7 +136,8 @@ def verify_statistics(converted_trace_file, tolerance):
                                 str(statistics["variance"][i]) + "\n")
                         statistics_valid = False
                 if statistics_valid:
-                    mb.showinfo("Statistic Validation", "All statistics are close considering the passed relative tolerance")
+                    mb.showinfo("Statistic Validation",
+                                "All statistics are close considering the passed relative tolerance")
                 else:
                     mb.showinfo("Statistic Validation", invalid_statistics)
         except json.decoder.JSONDecodeError:
@@ -197,8 +197,8 @@ def hash_from_trace(filename):
     :return: Computed hash value
     """
     sha256_hash = hashlib.sha256()
-    with open(filename, "r") as f:
-        for line in f:
+    with open(filename, "r") as file:
+        for line in file:
             if 'hash' not in line:
                 sha256_hash.update(line.encode('UTF-8'))
         return sha256_hash.hexdigest()
@@ -211,8 +211,8 @@ def hash_check(filename):
     """
     if os.path.isfile(filename) and pathlib.Path(filename).suffix == ".json":
         try:
-            with open(filename) as tr:
-                tracedata = json.load(tr)
+            with open(filename) as file:
+                tracedata = json.load(file)
                 stored_hash = tracedata["traceheader"]["metainformation"]["hash"]
                 computed_hash = hash_from_trace(filename)
             if stored_hash == computed_hash:
