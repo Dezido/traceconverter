@@ -7,8 +7,9 @@ import sys
 import tkinter.filedialog as fd
 import tkinter.messagebox as mb
 from idlelib.tooltip import Hovertip
-from tkinter import ttk, scrolledtext
 from tkinter import *
+from tkinter import ttk, scrolledtext
+
 import pandas as pd
 
 import trace_converting_tool_model as model
@@ -160,8 +161,8 @@ class TraceConvertingToolGUI:
         add_header_button_prt = Button(prepare_file_tab, text="Add Header to CSV",
                                        command=lambda: [model.add_header_to_csv(file_entry_prt.get(),
                                                                                 list(
-                                                                                  add_header_entry_prt.get().split(
-                                                                                      ","))),
+                                                                                    add_header_entry_prt.get().split(
+                                                                                        ","))),
                                                         display_file_prt(file_entry_prt.get())])
         add_header_button_prt.grid(column=2, row=3)
 
@@ -198,7 +199,8 @@ class TraceConvertingToolGUI:
 
         row_wise_difference_result_column_label_prt = Label(prepare_file_tab, text="Result Column Name")
         row_wise_difference_result_column_label_prt.grid(column=2, row=6)
-        row_wise_difference_result_column_entry_prt = Entry(prepare_file_tab, width=config.get('entries', 'entry_width'))
+        row_wise_difference_result_column_entry_prt = Entry(prepare_file_tab,
+                                                            width=config.get('entries', 'entry_width'))
         row_wise_difference_result_column_entry_prt.grid(column=3, row=6)
 
         calculate_timestamp_button_prt = Button(prepare_file_tab, text="Calculate Unix Time",
@@ -330,8 +332,8 @@ class TraceConvertingToolGUI:
         tracedatadescription_label_ct.grid(row=5)
         username_label_ct = Label(convert_trace_tab, text="Username")
         username_label_ct.grid(row=6)
-        custom_field_label_ct = Label(convert_trace_tab, text="Additional Information")
-        custom_field_label_ct.grid(row=7)
+        additional_information_label_ct = Label(convert_trace_tab, text="Additional Information")
+        additional_information_label_ct.grid(row=7)
         result_filename_label_ct = Label(convert_trace_tab, text="Result Filename")
         result_filename_label_ct.grid(row=8)
 
@@ -394,9 +396,9 @@ class TraceConvertingToolGUI:
         username_entry_ct = Entry(convert_trace_tab, width=config.get('entries', 'entry_width'))
         username_entry_ct.insert(END, config.get('entries', 'default_username_entry'))
 
-        custom_field_entry_ct = Text(convert_trace_tab, width=config.get('entries', 'entry_width'), height=25,
-                                     font=config.get('fonts', 'default_font'))
-        custom_field_entry_ct.insert(END, config.get('entries', 'default_customfield_entry'))
+        additional_information_entry_ct = Text(convert_trace_tab, width=config.get('entries', 'entry_width'), height=25,
+                                               font=config.get('fonts', 'default_font'))
+        additional_information_entry_ct.insert(END, config.get('entries', 'default_additional_information_entry'))
 
         result_filename_entry_ct = Entry(convert_trace_tab, width=config.get('entries', 'entry_width'))
         result_filename_entry_ct.insert(END, config.get('entries', 'default_filename_entry'))
@@ -408,7 +410,7 @@ class TraceConvertingToolGUI:
         description_entry_ct.grid(row=4, column=1)
         tracedatadescription_entry_ct.grid(row=5, column=1)
         username_entry_ct.grid(row=6, column=1)
-        custom_field_entry_ct.grid(row=7, column=1)
+        additional_information_entry_ct.grid(row=7, column=1)
         result_filename_entry_ct.grid(row=8, column=1)
 
         # Text widget to display the converted trace
@@ -433,9 +435,9 @@ class TraceConvertingToolGUI:
                 trace_template["traceheader"]["metainformation"]["description"] = description_entry_ct.get()
                 trace_template["traceheader"]["metainformation"]["creation timestamp"] = str(datetime.datetime.now())
                 trace_template["traceheader"]["metainformation"]["user"] = username_entry_ct.get()
-                if len(custom_field_entry_ct.get('1.0', 'end-1c')) != 0:
+                if len(additional_information_entry_ct.get('1.0', 'end-1c')) != 0:
                     trace_template["traceheader"]["metainformation"]["additional information"] = \
-                        custom_field_entry_ct.get('1.0', 'end-1c').replace("\n", "").split(";")
+                        additional_information_entry_ct.get('1.0', 'end-1c').replace("\n", "").split(";")
                 else:
                     trace_template["traceheader"]["metainformation"].pop("additional information")
 
@@ -563,7 +565,8 @@ class TraceConvertingToolGUI:
         tracedatadescription_tooltip_ct = Hovertip(tracedatadescription_label_ct,
                                                    config.get('tooltips', 'tracedatadescription'))
         username_tooltip_ct = Hovertip(username_label_ct, config.get('tooltips', 'username'))
-        custom_field_tooltip_ct = Hovertip(custom_field_label_ct, config.get('tooltips', 'custom_field'))
+        additional_information_tooltip_ct = Hovertip(additional_information_label_ct,
+                                                     config.get('tooltips', 'additional_information'))
         result_filename_tooltip_ct = Hovertip(result_filename_label_ct,
                                               config.get('tooltips', 'result_filename'))
         profido_checkbutton_tooltip_ct = Hovertip(extract_profido_checkbutton_ct,
