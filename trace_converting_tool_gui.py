@@ -439,7 +439,7 @@ class TraceConvertingToolGUI:
                     trace_template["traceheader"]["metainformation"]["additional information"] = \
                         additional_information_entry_ct.get('1.0', 'end-1c').replace("\n", "").split(";")
                 else:
-                    trace_template["traceheader"]["metainformation"].pop("additional information")
+                    trace_template["traceheader"]["metainformation"].pop("additional information", None)
 
                 #  Generate statistics and adds them into a list. Each list entry represents one column of the raw trace
                 if amount_tracedata > 4:
@@ -449,8 +449,8 @@ class TraceConvertingToolGUI:
                     mb.showinfo("Statistics won't be computed", "Tracedata only contains " + str(amount_tracedata) +
                                 " elements per column. Computing statistics requires five or more.")
                 # Save trace to file
-                filename = config.get('directories',
-                                      'converted_traces_dir') + '/' + result_filename_entry_ct.get() + '_sf.json'
+                filename = config.get('directories', 'converted_traces_dir') + '/' + result_filename_entry_ct.get() + \
+                           config.get('files', 'trace_file_suffix')
                 dont_overwrite = 0
                 if os.path.exists(filename):
                     dont_overwrite = not mb.askyesno("File already exists",
@@ -543,7 +543,7 @@ class TraceConvertingToolGUI:
                 df = pd.DataFrame(tracedata)
                 dont_overwrite = 0
                 result_filename = config.get('directories', 'profido_traces_dir') + profido_filename_entry_ct.get() + \
-                                  '_dat.trace'
+                                  config.get('files', 'tracedata_file_suffix')
                 if os.path.exists(result_filename):
                     dont_overwrite = not mb.askyesno("File already exists",
                                                      os.path.basename(result_filename) +
