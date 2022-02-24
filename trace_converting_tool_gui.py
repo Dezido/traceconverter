@@ -557,10 +557,15 @@ class TraceConvertingToolGUI:
                                                      "\n Would you like to overwrite it?")
                 if not dont_overwrite:
                     try:
-                        df.transpose().to_csv(result_filename,
-                                              sep='\t',
-                                              float_format=float_format_entry_ct.get(),
-                                              index=False, header=False)
+                        if len(float_format_entry_ct.get()) > 0:
+                            df.transpose().to_csv(result_filename,
+                                                  sep='\t',
+                                                  float_format=float_format_entry_ct.get(),
+                                                  index=False, header=False)
+                        if len(float_format_entry_ct.get()) == 0:
+                            df.transpose().to_csv(result_filename,
+                                                  sep='\t',
+                                                  index=False, header=False)
                     except TypeError:
                         mb.showerror('Invalid float format string', 'Please enter a valid format string')
                     except ValueError:
@@ -590,6 +595,7 @@ class TraceConvertingToolGUI:
                                              config.get('tooltips', 'browse_file_button'))
         numerical_format_tooltip_ct = Hovertip(statistics_format_label_ct,
                                                config.get('tooltips', 'statistics_format_string'))
+        float_format_tooltip_ct = Hovertip(float_format_label_ct, config.get('tooltips', 'float_format'))
 
         # Filter Tab
         selected_traces_label_ft = Label(filter_traces_tab, text="Selected Traces")
@@ -767,8 +773,15 @@ class TraceConvertingToolGUI:
                         if not dont_overwrite:
                             df = df.transpose().dropna()
                             try:
-                                df.to_csv(filename, sep='\t', float_format=float_format_entry_pt.get(),
-                                          index=False, header=False)
+                                if len(float_format_entry_pt.get()) > 0:
+                                    df.to_csv(filename,
+                                              sep='\t',
+                                              float_format=float_format_entry_pt.get(),
+                                              index=False, header=False)
+                                if len(float_format_entry_pt.get()) == 0:
+                                    df.to_csv(filename,
+                                              sep='\t',
+                                              index=False, header=False)
                             except TypeError:
                                 mb.showerror('Invalid float format string', 'Please enter a valid format string')
                             except ValueError:
