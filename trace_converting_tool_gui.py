@@ -383,27 +383,27 @@ class TraceConvertingToolGUI:
         original_tracefile_button_ctt = Button(convert_trace_tab, text="Choose File", command=browse_file_ctt)
 
         columns_entry_ctt = Entry(convert_trace_tab, width=config.get('entries', 'entry_width'))
-        columns_entry_ctt.insert(END, config.get('entries', 'default_columns_entry'))
+        columns_entry_ctt.insert(END, config.get('entries', 'default_columns_entry_ctt'))
 
         source_entry_ctt = Entry(convert_trace_tab, width=config.get('entries', 'entry_width'))
-        source_entry_ctt.insert(END, config.get('entries', 'default_source_entry'))
+        source_entry_ctt.insert(END, config.get('entries', 'default_trace_source_entry_ctt'))
 
         description_entry_ctt = Entry(convert_trace_tab, width=config.get('entries', 'entry_width'))
-        description_entry_ctt.insert(END, config.get('entries', 'default_description_entry'))
+        description_entry_ctt.insert(END, config.get('entries', 'default_description_entry_ctt'))
 
         tracedatadescription_entry_ctt = Entry(convert_trace_tab, width=config.get('entries', 'entry_width'))
-        tracedatadescription_entry_ctt.insert(END, config.get('entries', 'default_tracedatadescription_entry'))
+        tracedatadescription_entry_ctt.insert(END, config.get('entries', 'default_tracedatadescription_entry_ctt'))
 
         username_entry_ctt = Entry(convert_trace_tab, width=config.get('entries', 'entry_width'))
-        username_entry_ctt.insert(END, config.get('entries', 'default_username_entry'))
+        username_entry_ctt.insert(END, config.get('entries', 'default_username_entry_ctt'))
 
         additional_information_entry_ctt = Text(convert_trace_tab, width=config.get('entries', 'entry_width'),
                                                 height=25,
                                                 font=config.get('fonts', 'default_font_text_widget'))
-        additional_information_entry_ctt.insert(END, config.get('entries', 'default_additional_information_entry'))
+        additional_information_entry_ctt.insert(END, config.get('entries', 'default_additional_information_entry_ctt'))
 
         result_filename_entry_ctt = Entry(convert_trace_tab, width=config.get('entries', 'entry_width'))
-        result_filename_entry_ctt.insert(END, config.get('entries', 'default_filename_entry'))
+        result_filename_entry_ctt.insert(END, config.get('entries', 'default_filename_entry_ctt'))
 
         # Place Entries
         original_tracefile_button_ctt.grid(row=1, column=0)
