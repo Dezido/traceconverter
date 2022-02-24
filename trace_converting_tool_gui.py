@@ -592,7 +592,7 @@ class TraceConvertingToolGUI:
                                              config.get('tooltips', 'browse_file_button'))
         numerical_format_tooltip_ct = Hovertip(statistics_format_label_ct,
                                                config.get('tooltips', 'statistics_format_string'))
-        float_format_tooltip_ct = Hovertip(float_format_label_ct, config.get('tooltips', 'float_format_ett'))
+        float_format_tooltip_ct = Hovertip(float_format_label_ct, config.get('tooltips', 'float_format_label_ett'))
 
         # Filter Tab
         selected_traces_label_ftt = Label(filter_traces_tab, text="Selected Traces")
@@ -708,7 +708,8 @@ class TraceConvertingToolGUI:
         browse_button_ftt.grid(column=1, row=2)
 
         # Tooltips
-        selected_traces_tooltip_ftt = Hovertip(selected_traces_label_ftt, config.get('tooltips', 'selected_traces_ftt'))
+        selected_traces_label_tooltip_ftt = Hovertip(selected_traces_label_ftt,
+                                                     config.get('tooltips', 'selected_traces_label_ftt'))
         browse_files_button_tooltip_ftt = Hovertip(browse_button_ftt, config.get('tooltips', 'browse_files_button_ftt'))
         filter_button_tooltip_ftt = Hovertip(filter_button_ftt, config.get('tooltips', 'filter_button_ftt'))
         expression_label_tooltip_ftt = Hovertip(expression_label_ftt, config.get('tooltips', 'expression_label_ftt'))
@@ -797,13 +798,13 @@ class TraceConvertingToolGUI:
 
         # Tooltips
         converted_trace_label_tooltip_ett = Hovertip(converted_trace_label_ett,
-                                                     config.get('tooltips', 'converted_trace_ett'))
+                                                     config.get('tooltips', 'converted_trace_label_ett'))
         tracedata_filename_entry_tooltip_ett = Hovertip(tracedata_filename_label_ett,
-                                                        config.get('tooltips', 'tracedata_filename_ett'))
+                                                        config.get('tooltips', 'tracedata_filename_label_ett'))
         browse_trace_button_tooltip_ett = Hovertip(choose_trace_button_ett,
                                                    config.get('tooltips', 'browse_trace_button_ett'))
-        extract_button_tooltip_ett = Hovertip(extract_columns_button_ett, config.get('tooltips', 'extract_button_ett'))
-        float_format_tooltip_ett = Hovertip(float_format_label_ett, config.get('tooltips', 'float_format_ett'))
+        extract_button_tooltip_ett = Hovertip(extract_columns_button_ett, config.get('tooltips', 'extract_tracedata_button_ett'))
+        float_format_label_tooltip_ett = Hovertip(float_format_label_ett, config.get('tooltips', 'float_format_label_ett'))
 
         # Validation tab
 
