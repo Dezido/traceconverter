@@ -599,7 +599,8 @@ class TraceConvertingToolGUI:
                                      height=config.get('listbox', 'listbox_height'))
 
         treeview_columns = ['name', 'mean', 'median', 'skew', 'kurtosis', 'autocorrelation', 'variance']
-        filter_results_tv = ttk.Treeview(filter_traces_tab, columns=treeview_columns, show='headings')
+        filter_results_tv = ttk.Treeview(filter_traces_tab, columns=treeview_columns, show='headings',
+                                         height=config.get('treeview', 'filter_treeview_height'))
         vsb_filter_results_tv = ttk.Scrollbar(filter_traces_tab, orient="vertical", command=filter_results_tv.yview)
         filter_results_tv.configure(yscrollcommand=vsb_filter_results_tv.set)
         filter_results_tv.heading('name', text='Name')
