@@ -340,21 +340,27 @@ class TraceConvertingToolGUI:
         profido_filename_label_ct = Label(convert_trace_tab, text="Filename")
         profido_filename_entry_ct = Entry(convert_trace_tab)
 
+        float_format_label_ct = Label(convert_trace_tab, text="Float Format String")
+        float_format_entry_ct = Entry(convert_trace_tab)
+        float_format_entry_ct.insert(END, config.get('entries', 'default_float_format_entry_pt'))
+
         def show_name_entry():
             """Puts the profido_filename_label on the grid if the checkbox is selected"""
             if extract_profido_checkbutton_var_ct.get() == 0:
                 profido_filename_label_ct.grid_forget()
                 profido_filename_entry_ct.grid_forget()
             if extract_profido_checkbutton_var_ct.get() == 1:
-                profido_filename_label_ct.grid(column=4, row=4)
-                profido_filename_entry_ct.grid(column=4, row=5)
+                profido_filename_label_ct.grid(column=4, row=3)
+                profido_filename_entry_ct.grid(column=4, row=4)
+                float_format_label_ct.grid(column=4, row=5)
+                float_format_entry_ct.grid(column=4, row=6)
 
         extract_profido_checkbutton_var_ct = IntVar()
         extract_profido_checkbutton_ct = Checkbutton(convert_trace_tab,
                                                      text="Extract Tracedata for Usage in ProFiDo after Conversion",
                                                      variable=extract_profido_checkbutton_var_ct, onvalue=1,
                                                      offvalue=0, command=show_name_entry)
-        extract_profido_checkbutton_ct.grid(column=4, row=3)
+        extract_profido_checkbutton_ct.grid(column=4, row=2)
 
         statistics_format_label_ct = Label(convert_trace_tab, text="Statistics Format String")
         statistics_format_label_ct.grid(row=12, column=0)
@@ -550,10 +556,15 @@ class TraceConvertingToolGUI:
                                                      " already exists. "
                                                      "\n Would you like to overwrite it?")
                 if not dont_overwrite:
-                    df.transpose().to_csv(result_filename,
-                                          sep='\t',
-                                          float_format="%e",
-                                          index=False, header=False)
+                    try:
+                        df.transpose().to_csv(result_filename,
+                                              sep='\t',
+                                              float_format=float_format_entry_ct.get(),
+                                              index=False, header=False)
+                    except TypeError:
+                        mb.showerror('Invalid float format string', 'Please enter a valid format string')
+                    except ValueError:
+                        mb.showerror('Invalid float format string', 'Please enter a valid format string')
 
         convert_button_ct = Button(convert_trace_tab, text='Convert Trace', command=convert_trace)
         convert_button_ct.grid(row=13, column=1)
@@ -758,6 +769,8 @@ class TraceConvertingToolGUI:
                                 df.to_csv(filename, sep='\t', float_format=float_format_entry_pt.get(),
                                           index=False, header=False)
                             except TypeError:
+                                mb.showerror('Invalid float format string', 'Please enter a valid format string')
+                            except ValueError:
                                 mb.showerror('Invalid float format string', 'Please enter a valid format string')
                         display_file_pt(filename)
                         mb.showinfo("Data extracted", "Displaying extracted columns")
