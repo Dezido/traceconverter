@@ -792,31 +792,31 @@ class TraceConvertingToolGUI:
         tracedata_filename_entry_ett.grid(row=1, column=1)
 
         extract_columns_button_ett = Button(extract_tracedata_tab, text="Extract Tracedata for Usage in ProFiDo",
-                                           command=extract_tracedata_ett)
+                                            command=extract_tracedata_ett)
         extract_columns_button_ett.grid(row=2, column=2)
 
         # Tooltips
         converted_trace_label_tooltip_ett = Hovertip(converted_trace_label_ett,
-                                                    config.get('tooltips', 'converted_trace_ett'))
+                                                     config.get('tooltips', 'converted_trace_ett'))
         tracedata_filename_entry_tooltip_ett = Hovertip(tracedata_filename_label_ett,
-                                                       config.get('tooltips', 'tracedata_filename_ett'))
+                                                        config.get('tooltips', 'tracedata_filename_ett'))
         browse_trace_button_tooltip_ett = Hovertip(choose_trace_button_ett,
-                                                  config.get('tooltips', 'browse_trace_button_ett'))
+                                                   config.get('tooltips', 'browse_trace_button_ett'))
         extract_button_tooltip_ett = Hovertip(extract_columns_button_ett, config.get('tooltips', 'extract_button_ett'))
         float_format_tooltip_ett = Hovertip(float_format_label_ett, config.get('tooltips', 'float_format_ett'))
 
         # Validation tab
 
-        def browse_file_vt():
+        def browse_file_vtt():
             """Opens file explorer to select a file"""
-            file_entry_vt.delete(0, END)
+            file_entry_vtt.delete(0, END)
             selected_trace = fd.askopenfilename(initialdir=config.get('directories', 'converted_traces_dir'),
                                                 title="Select a File",
                                                 filetypes=(("JSON files", "*.json*"),))
             if not selected_trace:
                 mb.showinfo('No file selected', 'Please select a valid file')
-            file_entry_vt.insert(END, selected_trace)
-            file_entry_vt.grid(row=0, column=0)
+            file_entry_vtt.insert(END, selected_trace)
+            file_entry_vtt.grid(row=0, column=0)
 
         def restore_traceheader(filename):
             """
@@ -827,7 +827,7 @@ class TraceConvertingToolGUI:
                 try:
                     with open(filename) as tr:
                         tracedata = json.load(tr)
-                        trace = generate_statistic(tracedata, statistics_format_string_entry_vt.get())
+                        trace = generate_statistic(tracedata, statistics_format_string_entry_vtt.get())
                     dont_overwrite = 0
                     if os.path.exists(filename):
                         dont_overwrite = not mb.askyesno("Overwriting File",
@@ -841,48 +841,49 @@ class TraceConvertingToolGUI:
             else:
                 mb.showerror("Trace invalid", "Please check if the file is valid")
 
-        file_entry_vt = Entry(validate_trace_tab, width=config.get('entries', 'entry_width'))
+        file_entry_vtt = Entry(validate_trace_tab, width=config.get('entries', 'entry_width'))
 
-        relative_tolerance_label_vt = Label(validate_trace_tab, text="Relative Tolerance")
-        relative_tolerance_label_vt.grid(column=1, row=2)
+        relative_tolerance_label_vtt = Label(validate_trace_tab, text="Relative Tolerance")
+        relative_tolerance_label_vtt.grid(column=1, row=2)
 
-        relative_tolerance_entry_vt = Entry(validate_trace_tab, width=config.get('entries', 'entry_width'))
-        relative_tolerance_entry_vt.grid(column=2, row=2)
+        relative_tolerance_entry_vtt = Entry(validate_trace_tab, width=config.get('entries', 'entry_width'))
+        relative_tolerance_entry_vtt.grid(column=2, row=2)
 
-        browse_file_button_vt = Button(validate_trace_tab, text="Choose File", command=browse_file_vt)
-        browse_file_button_vt.grid(row=1, column=0)
+        browse_file_button_vtt = Button(validate_trace_tab, text="Choose File", command=browse_file_vtt)
+        browse_file_button_vtt.grid(row=1, column=0)
 
-        validate_statistics_button_vt = Button(validate_trace_tab, text="Validate Statistics",
-                                               command=lambda: model.verify_statistics(file_entry_vt.get(),
-                                                                                       relative_tolerance_entry_vt.get()))
-        validate_statistics_button_vt.grid(row=2, column=0)
+        validate_statistics_button_vtt = Button(validate_trace_tab, text="Validate Statistics",
+                                                command=lambda: model.verify_statistics(file_entry_vtt.get(),
+                                                                                        relative_tolerance_entry_vtt.get()))
+        validate_statistics_button_vtt.grid(row=2, column=0)
 
-        validate_hash_button_vt = Button(validate_trace_tab, text="Validate Hash",
-                                         command=lambda: model.hash_check(file_entry_vt.get()))
-        validate_hash_button_vt.grid(row=3, column=0)
+        validate_hash_button_vtt = Button(validate_trace_tab, text="Validate Hash",
+                                          command=lambda: model.hash_check(file_entry_vtt.get()))
+        validate_hash_button_vtt.grid(row=3, column=0)
 
-        restore_traceheader_button_vt = Button(validate_trace_tab, text="Restore Traceheader",
-                                               command=lambda: restore_traceheader(file_entry_vt.get()))
-        restore_traceheader_button_vt.grid(row=4, column=0)
+        restore_traceheader_button_vtt = Button(validate_trace_tab, text="Restore Traceheader",
+                                                command=lambda: restore_traceheader(file_entry_vtt.get()))
+        restore_traceheader_button_vtt.grid(row=4, column=0)
 
-        statistics_format_string_label_vt = Label(validate_trace_tab, text="Statistics Format String")
-        statistics_format_string_label_vt.grid(column=1, row=4)
+        statistics_format_string_label_vtt = Label(validate_trace_tab, text="Statistics Format String")
+        statistics_format_string_label_vtt.grid(column=1, row=4)
 
-        statistics_format_string_entry_vt = Entry(validate_trace_tab, width=config.get('entries', 'entry_width'))
-        statistics_format_string_entry_vt.grid(column=2, row=4)
+        statistics_format_string_entry_vtt = Entry(validate_trace_tab, width=config.get('entries', 'entry_width'))
+        statistics_format_string_entry_vtt.grid(column=2, row=4)
 
         # Tooltips
-        browse_file_button_tooltip_vt = Hovertip(browse_file_button_vt, config.get('tooltips', 'browse_file_button_vt'))
-        validate_statistics_button_tooltip_vt = Hovertip(validate_statistics_button_vt,
-                                                         config.get('tooltips', 'validate_statistics_button'))
-        relative_tolerance_tooltip_vt = Hovertip(relative_tolerance_label_vt,
-                                                 config.get('tooltips', 'relative_tolerance_vt'))
-        validate_hash_button_tooltip_vt = Hovertip(validate_hash_button_vt,
-                                                   config.get('tooltips', 'validate_hash_button'))
-        restore_traceheader_button_tooltip_vt = Hovertip(restore_traceheader_button_vt,
-                                                         config.get('tooltips', 'restore_traceheader_button'))
-        numerical_format_tooltip_vt = Hovertip(statistics_format_string_label_vt,
-                                               config.get('tooltips', 'statistics_format_string'))
+        browse_file_button_tooltip_vtt = Hovertip(browse_file_button_vtt,
+                                                  config.get('tooltips', 'browse_file_button_vtt'))
+        validate_statistics_button_tooltip_vtt = Hovertip(validate_statistics_button_vtt,
+                                                          config.get('tooltips', 'validate_statistics_button_vtt'))
+        relative_tolerance_tooltip_vtt = Hovertip(relative_tolerance_label_vtt,
+                                                  config.get('tooltips', 'relative_tolerance_vtt'))
+        validate_hash_button_tooltip_vtt = Hovertip(validate_hash_button_vtt,
+                                                    config.get('tooltips', 'validate_hash_button_vtt'))
+        restore_traceheader_button_tooltip_vtt = Hovertip(restore_traceheader_button_vtt,
+                                                          config.get('tooltips', 'restore_traceheader_button_vtt'))
+        numerical_format_tooltip_vtt = Hovertip(statistics_format_string_label_vtt,
+                                                config.get('tooltips', 'statistics_format_string'))
 
 
 # Create TCGUI instance and run mainloop
