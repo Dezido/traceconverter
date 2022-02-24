@@ -595,8 +595,8 @@ class TraceConvertingToolGUI:
         float_format_tooltip_ct = Hovertip(float_format_label_ct, config.get('tooltips', 'float_format_ett'))
 
         # Filter Tab
-        selected_traces_label_ft = Label(filter_traces_tab, text="Selected Traces")
-        selected_traces_label_ft.grid(column=1, row=1)
+        selected_traces_label_ftt = Label(filter_traces_tab, text="Selected Traces")
+        selected_traces_label_ftt.grid(column=1, row=1)
 
         selected_traces_lb = Listbox(filter_traces_tab, width=config.get('listbox', 'listbox_width'),
                                      height=config.get('listbox', 'listbox_height'))
@@ -619,7 +619,7 @@ class TraceConvertingToolGUI:
         selected_files = []
         filter_result = []
 
-        def browse_files_ft():
+        def browse_files_ftt():
             """Opens file explorer to select files for filtering"""
             try:
                 file_tuple = ()
@@ -644,11 +644,11 @@ class TraceConvertingToolGUI:
                 for i in range(len(selected_filenames)):
                     selected_traces_lb.insert(i, selected_filenames[i])
                 selected_traces_lb.grid(column=1, row=2, rowspan=5)
-                browse_button_ft.grid(column=1, row=8)
+                browse_button_ftt.grid(column=1, row=8)
             except json.decoder.JSONDecodeError:
                 mb.showerror("Invalid Trace", "Invalid/corrupted traces were selected")
 
-        def filter_traces(expression):
+        def filter_traces_ftt(expression):
             """Evaluates the expression for the selected traces"""
             filter_result.clear()
             for i in filter_results_tv.get_children():
@@ -693,25 +693,25 @@ class TraceConvertingToolGUI:
             filter_results_tv.grid(column=1, row=11, columnspan=10)
             vsb_filter_results_tv.grid(column=11, row=11, sticky=N + S)
 
-        expression_label_ft = Label(filter_traces_tab, text="Boolean Expression")
-        expression_label_ft.grid(column=3, row=2)
+        expression_label_ftt = Label(filter_traces_tab, text="Boolean Expression")
+        expression_label_ftt.grid(column=3, row=2)
 
-        expression_entry_ft = Entry(filter_traces_tab, width=config.get('entries', 'entry_width'))
-        expression_entry_ft.grid(column=4, row=2)
+        expression_entry_ftt = Entry(filter_traces_tab, width=config.get('entries', 'entry_width'))
+        expression_entry_ftt.grid(column=4, row=2)
 
         # Label and Buttons
-        filter_button_ft = Button(filter_traces_tab, text="Filter Traces",
-                                  command=lambda: filter_traces(expression_entry_ft.get()))
-        filter_button_ft.grid(column=5, row=2)
+        filter_button_ftt = Button(filter_traces_tab, text="Filter Traces",
+                                  command=lambda: filter_traces_ftt(expression_entry_ftt.get()))
+        filter_button_ftt.grid(column=5, row=2)
 
-        browse_button_ft = Button(filter_traces_tab, text="Choose Files", command=browse_files_ft)
-        browse_button_ft.grid(column=1, row=2)
+        browse_button_ftt = Button(filter_traces_tab, text="Choose Files", command=browse_files_ftt)
+        browse_button_ftt.grid(column=1, row=2)
 
         # Tooltips
-        selected_traces_tooltip_ft = Hovertip(selected_traces_label_ft, config.get('tooltips', 'selected_traces'))
-        browse_files_button_tooltip_ft = Hovertip(browse_button_ft, config.get('tooltips', 'browse_files_button'))
-        filter_button_tooltip_ft = Hovertip(filter_button_ft, config.get('tooltips', 'filter_button'))
-        expression_label_tooltip_ft = Hovertip(expression_label_ft, config.get('tooltips', 'expression_label'))
+        selected_traces_tooltip_ftt = Hovertip(selected_traces_label_ftt, config.get('tooltips', 'selected_traces_ftt'))
+        browse_files_button_tooltip_ftt = Hovertip(browse_button_ftt, config.get('tooltips', 'browse_files_button_ftt'))
+        filter_button_tooltip_ftt = Hovertip(filter_button_ftt, config.get('tooltips', 'filter_button_ftt'))
+        expression_label_tooltip_ftt = Hovertip(expression_label_ftt, config.get('tooltips', 'expression_label_ftt'))
 
         # Extract tracedata Tab
         converted_trace_label_ett = Label(extract_tracedata_tab, text="Trace")
@@ -752,7 +752,7 @@ class TraceConvertingToolGUI:
                 trace_column_display_ett.grid(column=0, row=6, columnspan=4)
 
         def extract_tracedata_ett():
-            """Extracts the tracedata so the trace can be used in ProFiDo"""
+            """Extracts the tracedata so it can be used in ProFiDo"""
             org_filename = input_trace_entry_ett.get()
             if os.path.isfile(org_filename) and pathlib.Path(org_filename).suffix == ".json":
                 try:
