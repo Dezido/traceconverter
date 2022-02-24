@@ -140,3 +140,6 @@ dmypy.json
 
 # unformatted traces
 /unformatted_tracefiles/
+
+# traces
+/traces/
