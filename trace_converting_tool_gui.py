@@ -492,22 +492,22 @@ class TraceConvertingToolGUI:
             trace["traceheader"]["statistical characteristics"]["kurtosis"] = []
             trace["traceheader"]["statistical characteristics"]["autocorrelation"] = []
             trace["traceheader"]["statistical characteristics"]["variance"] = []
-            formatstring = '{' + formatstring + '}'
+            # formatstring = '{' + formatstring + '}'
             try:
                 for i in range(len(trace["tracebody"]["tracedata"])):
                     df = pd.DataFrame(trace["tracebody"]["tracedata"][i])
                     trace["traceheader"]["statistical characteristics"]["mean"].append(
-                        formatstring.format(df[0].mean()))
+                        format(df[0].mean(), formatstring))
                     trace["traceheader"]["statistical characteristics"]["median"].append(
-                        formatstring.format(df[0].median()))
+                        format(df[0].median(), formatstring))
                     trace["traceheader"]["statistical characteristics"]["skew"].append(
-                        formatstring.format(df[0].skew()))
+                        format(df[0].skew(), formatstring))
                     trace["traceheader"]["statistical characteristics"]["kurtosis"].append(
-                        formatstring.format(df[0].kurtosis()))
+                        format(df[0].kurtosis(), formatstring))
                     trace["traceheader"]["statistical characteristics"]["autocorrelation"].append(
-                        formatstring.format(df[0].autocorr()))
+                        format(df[0].autocorr(), formatstring))
                     trace["traceheader"]["statistical characteristics"]["variance"].append(
-                        formatstring.format(df[0].var()))
+                        format(df[0].var(), formatstring))
                 return trace
             except TypeError:
                 mb.showerror("Type Error", "One of the selected columns does not contain valid data")
