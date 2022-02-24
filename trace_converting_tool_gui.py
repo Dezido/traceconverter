@@ -51,8 +51,7 @@ class TraceConvertingToolGUI:
                                                    title="Select a File",
                                                    filetypes=(("CSV files", "*.csv*"), ("all files", "*.*")))
                 if not selected_file:
-                    mb.showinfo(config.get('browse_file', 'no_file_selected_window'),
-                                config.get('browse_file', 'no_file_selected_message'))
+                    mb.showinfo('No file selected', 'Please select a valid file')
                 file_entry_prt.insert(END, selected_file)
                 file_entry_prt.grid(row=0, column=1)
                 file_button_prt.grid(row=0, column=0)
@@ -174,7 +173,7 @@ class TraceConvertingToolGUI:
         date_format_label_prt.grid(column=2, row=4)
         date_format_entry_prt = Entry(prepare_file_tab, width=config.get('entries', 'entry_width'))
         date_format_entry_prt.grid(column=3, row=4)
-        date_format_entry_prt.insert(END, config.get('entries', 'default_date_format_entry_prt'))
+        date_format_entry_prt.insert(END, config.get('entries', 'default_date_format_entry_pt'))
 
         date_columns_label_prt = Label(prepare_file_tab, text="Column Indexes")
         date_columns_label_prt.grid(column=0, row=4)
@@ -337,30 +336,30 @@ class TraceConvertingToolGUI:
         result_filename_label_ct = Label(convert_trace_tab, text="Result Filename")
         result_filename_label_ct.grid(row=8)
 
-        profido_filename_label_ct = Label(convert_trace_tab, text="Filename")
-        profido_filename_entry_ct = Entry(convert_trace_tab)
+        tracedata_filename_label_ct = Label(convert_trace_tab, text="Filename")
+        tracedata_filename_entry_ct = Entry(convert_trace_tab)
 
         float_format_label_ct = Label(convert_trace_tab, text="Float Format String")
         float_format_entry_ct = Entry(convert_trace_tab)
-        float_format_entry_ct.insert(END, config.get('entries', 'default_float_format_entry_pt'))
+        float_format_entry_ct.insert(END, config.get('entries', 'default_float_format_entry_ett'))
 
         def show_name_entry():
-            """Puts the profido_filename_label on the grid if the checkbox is selected"""
-            if extract_profido_checkbutton_var_ct.get() == 0:
-                profido_filename_label_ct.grid_forget()
-                profido_filename_entry_ct.grid_forget()
-            if extract_profido_checkbutton_var_ct.get() == 1:
-                profido_filename_label_ct.grid(column=4, row=3)
-                profido_filename_entry_ct.grid(column=4, row=4)
+            """Puts the tracedata_filename_label on the grid if the checkbox is selected"""
+            if extract_tracedata_checkbutton_var_ct.get() == 0:
+                tracedata_filename_label_ct.grid_forget()
+                tracedata_filename_entry_ct.grid_forget()
+            if extract_tracedata_checkbutton_var_ct.get() == 1:
+                tracedata_filename_label_ct.grid(column=4, row=3)
+                tracedata_filename_entry_ct.grid(column=4, row=4)
                 float_format_label_ct.grid(column=4, row=5)
                 float_format_entry_ct.grid(column=4, row=6)
 
-        extract_profido_checkbutton_var_ct = IntVar()
-        extract_profido_checkbutton_ct = Checkbutton(convert_trace_tab,
-                                                     text="Extract Tracedata for Usage in ProFiDo after Conversion",
-                                                     variable=extract_profido_checkbutton_var_ct, onvalue=1,
-                                                     offvalue=0, command=show_name_entry)
-        extract_profido_checkbutton_ct.grid(column=4, row=2)
+        extract_tracedata_checkbutton_var_ct = IntVar()
+        extract_tracedata_checkbutton_ct = Checkbutton(convert_trace_tab,
+                                                       text="Extract Tracedata for Usage in ProFiDo after Conversion",
+                                                       variable=extract_tracedata_checkbutton_var_ct, onvalue=1,
+                                                       offvalue=0, command=show_name_entry)
+        extract_tracedata_checkbutton_ct.grid(column=4, row=2)
 
         statistics_format_label_ct = Label(convert_trace_tab, text="Statistics Format String")
         statistics_format_label_ct.grid(row=12, column=0)
@@ -377,8 +376,7 @@ class TraceConvertingToolGUI:
                                                title="Select a File",
                                                filetypes=(("CSV files", "*.csv*"),))
             if not selected_file:
-                mb.showinfo(config.get('browse_file', 'no_file_selected_window'),
-                            config.get('browse_file', 'no_file_selected_message'))
+                mb.showinfo('No file selected', 'Please select a valid file')
             original_tracefile_entry_ct.insert(END, selected_file)
             original_tracefile_entry_ct.grid(row=1, column=1)
             if selected_file:
@@ -403,7 +401,7 @@ class TraceConvertingToolGUI:
         username_entry_ct.insert(END, config.get('entries', 'default_username_entry'))
 
         additional_information_entry_ct = Text(convert_trace_tab, width=config.get('entries', 'entry_width'), height=25,
-                                               font=config.get('fonts', 'default_font'))
+                                               font=config.get('fonts', 'default_font_text_widget'))
         additional_information_entry_ct.insert(END, config.get('entries', 'default_additional_information_entry'))
 
         result_filename_entry_ct = Entry(convert_trace_tab, width=config.get('entries', 'entry_width'))
@@ -466,8 +464,8 @@ class TraceConvertingToolGUI:
                     with open(filename, 'w') as fp:
                         json.dump(trace, fp, indent=4)
                     add_hash_value_to_trace(filename)
-                    # If profido checkbox is selected the columns will also be extracted for profido use
-                    if extract_profido_checkbutton_var_ct.get() == 1:
+                    # If tracedata checkbox is selected the data will also be extracted
+                    if extract_tracedata_checkbutton_var_ct.get() == 1:
                         extract_tracedata_after_conversion(
                             filename)
                     mb.showinfo("Trace successfully converted", "Displaying converted Trace")
@@ -476,8 +474,7 @@ class TraceConvertingToolGUI:
                 # Display the created traces
                 display_file_ct(filename)
             else:
-                mb.showinfo(config.get('browse_file', 'no_file_selected_window'),
-                            config.get('browse_file', 'no_file_selected_message'))
+                mb.showinfo('No file selected', 'Please select a valid file')
 
         def generate_statistic(trace, formatstring):
             """
@@ -541,14 +538,14 @@ class TraceConvertingToolGUI:
 
         def extract_tracedata_after_conversion(filename):
             """
-            Extracts columns for ProFiDo usage from the trace
+            Extracts tracedata from the file can be used for ProFiDo
             :param filename: Name of the converted tracefile
             """
             with open(filename) as tr:
                 tracedata = json.load(tr)["tracebody"]["tracedata"]
                 df = pd.DataFrame(tracedata)
                 dont_overwrite = 0
-                result_filename = config.get('directories', 'profido_traces_dir') + profido_filename_entry_ct.get() + \
+                result_filename = config.get('directories', 'profido_traces_dir') + tracedata_filename_entry_ct.get() + \
                                   config.get('files', 'tracedata_file_suffix')
                 if os.path.exists(result_filename):
                     dont_overwrite = not mb.askyesno("File already exists",
@@ -585,17 +582,17 @@ class TraceConvertingToolGUI:
                                                      config.get('tooltips', 'additional_information'))
         result_filename_tooltip_ct = Hovertip(result_filename_label_ct,
                                               config.get('tooltips', 'result_filename'))
-        profido_checkbutton_tooltip_ct = Hovertip(extract_profido_checkbutton_ct,
-                                                  config.get('tooltips', 'profido_checkbutton'))
-        profido_filename_tooltip_ct = Hovertip(profido_filename_label_ct,
-                                               config.get('tooltips', 'profido_filename_ct'))
+        tracedata_checkbutton_tooltip_ct = Hovertip(extract_tracedata_checkbutton_ct,
+                                                    config.get('tooltips', 'tracedata_checkbutton'))
+        tracedata_filename_tooltip_ct = Hovertip(tracedata_filename_label_ct,
+                                                 config.get('tooltips', 'tracedata_filename_ct'))
         browse_file_button_tooltip_ct = Hovertip(original_tracefile_button_ct,
                                                  config.get('tooltips', 'browse_file_button'))
         convert_button_tooltip_ct = Hovertip(convert_button_ct,
                                              config.get('tooltips', 'browse_file_button'))
         numerical_format_tooltip_ct = Hovertip(statistics_format_label_ct,
                                                config.get('tooltips', 'statistics_format_string'))
-        float_format_tooltip_ct = Hovertip(float_format_label_ct, config.get('tooltips', 'float_format'))
+        float_format_tooltip_ct = Hovertip(float_format_label_ct, config.get('tooltips', 'float_format_ett'))
 
         # Filter Tab
         selected_traces_label_ft = Label(filter_traces_tab, text="Selected Traces")
@@ -636,8 +633,7 @@ class TraceConvertingToolGUI:
                     additional_files = mb.askyesno('Select additional files',
                                                    'Do you want to add more files to the selection?')
                 if len(file_tuple) == 0:
-                    mb.showinfo(config.get('browse_file', 'no_files_selected_window'),
-                                config.get('browse_file', 'no_files_selected_message'))
+                    mb.showinfo('No files selected', 'Please select at least one valid file')
                 selected_traces_lb.delete(0, 'end')
                 selected_files.clear()
                 selected_filenames.clear()
@@ -717,55 +713,54 @@ class TraceConvertingToolGUI:
         filter_button_tooltip_ft = Hovertip(filter_button_ft, config.get('tooltips', 'filter_button'))
         expression_label_tooltip_ft = Hovertip(expression_label_ft, config.get('tooltips', 'expression_label'))
 
-        # ===ProFiDo format Tab
-        converted_trace_label_pt = Label(extract_tracedata_tab, text="Trace")
-        converted_trace_label_pt.grid(row=0)
-        profido_filename_label_pt = Label(extract_tracedata_tab, text="Result Filename")
-        profido_filename_label_pt.grid(row=1, column=0)
-        float_format_label_pt = Label(extract_tracedata_tab, text="Float Format String")
-        float_format_label_pt.grid(row=2, column=0)
-        float_format_entry_pt = Entry(extract_tracedata_tab, width=config.get('entries', 'entry_width'))
-        float_format_entry_pt.grid(row=2, column=1)
-        float_format_entry_pt.insert(END, config.get('entries', 'default_float_format_entry_pt'))
-        input_trace_entry_pt = Entry(extract_tracedata_tab, width=config.get('entries', 'entry_width'))
+        # Extract tracedata Tab
+        converted_trace_label_ett = Label(extract_tracedata_tab, text="Trace")
+        converted_trace_label_ett.grid(row=0)
+        tracedata_filename_label_ett = Label(extract_tracedata_tab, text="Result Filename")
+        tracedata_filename_label_ett.grid(row=1, column=0)
+        float_format_label_ett = Label(extract_tracedata_tab, text="Float Format String")
+        float_format_label_ett.grid(row=2, column=0)
+        float_format_entry_ett = Entry(extract_tracedata_tab, width=config.get('entries', 'entry_width'))
+        float_format_entry_ett.grid(row=2, column=1)
+        float_format_entry_ett.insert(END, config.get('entries', 'default_float_format_entry_ett'))
+        input_trace_entry_ett = Entry(extract_tracedata_tab, width=config.get('entries', 'entry_width'))
 
-        trace_column_display_pt = scrolledtext.ScrolledText(extract_tracedata_tab, width=100, height=33)
+        trace_column_display_ett = scrolledtext.ScrolledText(extract_tracedata_tab, width=100, height=33)
 
-        def browse_file_pt():
+        def browse_file_ett():
             """Opens file explorer to select a file"""
-            input_trace_entry_pt.delete(0, END)
+            input_trace_entry_ett.delete(0, END)
             selected_trace = fd.askopenfilename(initialdir=config.get('directories', 'converted_traces_dir'),
                                                 title="Select a File",
                                                 filetypes=(("JSON files", "*.json*"),))
             if not selected_trace:
-                mb.showinfo(config.get('browse_file', 'no_file_selected_window'),
-                            config.get('browse_file', 'no_file_selected_message'))
-            input_trace_entry_pt.insert(END, selected_trace)
-            input_trace_entry_pt.grid(row=0, column=1)
-            display_file_pt(selected_trace)
+                mb.showinfo('No file selected', 'Please select a valid file')
+            input_trace_entry_ett.insert(END, selected_trace)
+            input_trace_entry_ett.grid(row=0, column=1)
+            display_file_ett(selected_trace)
 
-        def display_file_pt(filename):
+        def display_file_ett(filename):
             """
-            Displays the selected file in the profido tab
+            Displays the selected file in the extract tracedata tab
             :param filename: File that will be displayed
             """
             with open(filename, 'r') as f:
-                trace_column_display_pt.config(state=NORMAL)
-                trace_column_display_pt.delete("1.0", "end")
-                trace_column_display_pt.insert(INSERT, f.read())
-                trace_column_display_pt.config(state=DISABLED)
-                trace_column_display_pt.grid(column=0, row=6, columnspan=4)
+                trace_column_display_ett.config(state=NORMAL)
+                trace_column_display_ett.delete("1.0", "end")
+                trace_column_display_ett.insert(INSERT, f.read())
+                trace_column_display_ett.config(state=DISABLED)
+                trace_column_display_ett.grid(column=0, row=6, columnspan=4)
 
-        def extract_columns():
+        def extract_tracedata_ett():
             """Extracts the tracedata so the trace can be used in ProFiDo"""
-            org_filename = input_trace_entry_pt.get()
+            org_filename = input_trace_entry_ett.get()
             if os.path.isfile(org_filename) and pathlib.Path(org_filename).suffix == ".json":
                 try:
-                    with open(input_trace_entry_pt.get()) as trace_in:
+                    with open(input_trace_entry_ett.get()) as trace_in:
                         tracedata = json.load(trace_in)["tracebody"]["tracedata"]
                         df = pd.DataFrame(tracedata)
                         filename = config.get('directories', 'profido_traces_dir') \
-                                   + profido_filename_entry_pt.get() + '_dat.trace'
+                                   + tracedata_filename_entry_ett.get() + '_dat.trace'
                         dont_overwrite = 0
                         if os.path.exists(filename):
                             dont_overwrite = not mb.askyesno("File already exists", os.path.basename(filename) +
@@ -773,46 +768,42 @@ class TraceConvertingToolGUI:
                         if not dont_overwrite:
                             df = df.transpose().dropna()
                             try:
-                                if len(float_format_entry_pt.get()) > 0:
-                                    df.to_csv(filename,
-                                              sep='\t',
-                                              float_format=float_format_entry_pt.get(),
+                                if len(float_format_entry_ett.get()) > 0:
+                                    df.to_csv(filename, sep='\t', float_format=float_format_entry_ett.get(),
                                               index=False, header=False)
-                                if len(float_format_entry_pt.get()) == 0:
-                                    df.to_csv(filename,
-                                              sep='\t',
-                                              index=False, header=False)
+                                if len(float_format_entry_ett.get()) == 0:
+                                    df.to_csv(filename, sep='\t', index=False, header=False)
                             except TypeError:
                                 mb.showerror('Invalid float format string', 'Please enter a valid format string')
                             except ValueError:
                                 mb.showerror('Invalid float format string', 'Please enter a valid format string')
-                        display_file_pt(filename)
+                        display_file_ett(filename)
                         mb.showinfo("Data extracted", "Displaying extracted columns")
                 except json.decoder.JSONDecodeError:
                     mb.showerror('Invalid Trace', 'The selected file is not a valid Trace')
 
             else:
-                mb.showinfo(config.get('browse_file', 'no_file_selected_window'),
-                            config.get('browse_file', 'no_file_selected_message'))
+                mb.showinfo('No file selected', 'Please select a valid file')
 
-        choose_trace_button_pt = Button(extract_tracedata_tab, text="Choose File", command=browse_file_pt)
-        choose_trace_button_pt.grid(row=0, column=0)
+        choose_trace_button_ett = Button(extract_tracedata_tab, text="Choose File", command=browse_file_ett)
+        choose_trace_button_ett.grid(row=0, column=0)
 
-        profido_filename_entry_pt = Entry(extract_tracedata_tab, width=config.get('entries', 'entry_width'))
-        profido_filename_entry_pt.grid(row=1, column=1)
+        tracedata_filename_entry_ett = Entry(extract_tracedata_tab, width=config.get('entries', 'entry_width'))
+        tracedata_filename_entry_ett.grid(row=1, column=1)
 
-        extract_columns_button_pt = Button(extract_tracedata_tab, text="Extract Tracedata for Usage in ProFiDo",
-                                           command=extract_columns)
-        extract_columns_button_pt.grid(row=2, column=2)
+        extract_columns_button_ett = Button(extract_tracedata_tab, text="Extract Tracedata for Usage in ProFiDo",
+                                           command=extract_tracedata_ett)
+        extract_columns_button_ett.grid(row=2, column=2)
 
         # Tooltips
-        converted_trace_label_tooltip_pt = Hovertip(converted_trace_label_pt,
-                                                    config.get('tooltips', 'converted_trace'))
-        profido_filename_entry_tooltip_pt = Hovertip(profido_filename_label_pt,
-                                                     config.get('tooltips', 'profido_filename'))
-        browse_trace_button_tooltip_pt = Hovertip(choose_trace_button_pt, config.get('tooltips', 'browse_trace_button'))
-        extract_button_tooltip_pt = Hovertip(extract_columns_button_pt, config.get('tooltips', 'extract_button'))
-        float_format_tooltip_pt = Hovertip(float_format_label_pt, config.get('tooltips', 'float_format'))
+        converted_trace_label_tooltip_ett = Hovertip(converted_trace_label_ett,
+                                                    config.get('tooltips', 'converted_trace_ett'))
+        tracedata_filename_entry_tooltip_ett = Hovertip(tracedata_filename_label_ett,
+                                                       config.get('tooltips', 'tracedata_filename_ett'))
+        browse_trace_button_tooltip_ett = Hovertip(choose_trace_button_ett,
+                                                  config.get('tooltips', 'browse_trace_button_ett'))
+        extract_button_tooltip_ett = Hovertip(extract_columns_button_ett, config.get('tooltips', 'extract_button_ett'))
+        float_format_tooltip_ett = Hovertip(float_format_label_ett, config.get('tooltips', 'float_format_ett'))
 
         # Validation tab
 
@@ -823,8 +814,7 @@ class TraceConvertingToolGUI:
                                                 title="Select a File",
                                                 filetypes=(("JSON files", "*.json*"),))
             if not selected_trace:
-                mb.showinfo(config.get('browse_file', 'no_file_selected_window'),
-                            config.get('browse_file', 'no_file_selected_message'))
+                mb.showinfo('No file selected', 'Please select a valid file')
             file_entry_vt.insert(END, selected_trace)
             file_entry_vt.grid(row=0, column=0)
 
