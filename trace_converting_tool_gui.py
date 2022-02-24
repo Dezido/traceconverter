@@ -42,26 +42,25 @@ class TraceConvertingToolGUI:
         tab_parent.add(validate_trace_tab, text="Validate Trace")
         tab_parent.pack(expand=1, fill='both')
 
-        # Preparation Tab
-        def browse_file_prt():
+        # Prepare File Tab
+        def browse_file_pft():
             """Opens file explorer to select a file"""
             try:
-                file_entry_prt.delete(0, END)  # removes previously selected file
+                file_entry_pft.delete(0, END)  # removes previously selected file
                 selected_file = fd.askopenfilename(initialdir=config.get('directories', 'raw_traces_dir'),
                                                    title="Select a File",
                                                    filetypes=(("CSV files", "*.csv*"), ("all files", "*.*")))
                 if not selected_file:
                     mb.showinfo('No file selected', 'Please select a valid file')
-                file_entry_prt.insert(END, selected_file)
-                file_entry_prt.grid(row=0, column=1)
-                file_button_prt.grid(row=0, column=0)
+                file_entry_pft.insert(END, selected_file)
+                file_entry_pft.grid(row=0, column=1)
+                browse_file_button_pft.grid(row=0, column=0)
                 if selected_file:
-                    display_file_prt(file_entry_prt.get())
-                first_line_is_header_checkbutton_prt.grid(row=4, column=3)
+                    display_file_pft(file_entry_pft.get())
             except UnicodeDecodeError:
                 mb.showerror('Invalid file selected', 'The selected file seems to invalid. Please try a different file')
 
-        def calculate_timestamp_prt(file, date_and_time_column_index_list, date_and_time_format_list):
+        def calculate_timestamp_pft(file, date_and_time_column_index_list, date_and_time_format_list):
             """
             Overwrites timestamps in passed columns to unix timestamps
             :param file: Input file
@@ -75,7 +74,7 @@ class TraceConvertingToolGUI:
                 df = model.df_columns_to_epoch(df, columns_list, format_list)
                 df.to_csv(file, index=False, sep=',')
                 mb.showinfo('Timestamps successfully calculated', 'Displaying file')
-                display_file_prt(file)
+                display_file_pft(file)
             except IndexError:
                 mb.showerror('Error during timestamp conversion', 'Column indexes invalid')
             except TypeError:
@@ -86,24 +85,24 @@ class TraceConvertingToolGUI:
                              ' passed the same number of format strings and column indexes '
                              'or if the timestamps need further preparation')
 
-        def calculate_difference_rows_prt(file):
+        def calculate_difference_rows_pft(file):
             """
             Creates/overwrites column with the row-wise difference for a passed column index
             :param file: Input file
             """
             df = pd.read_csv(file)
             try:
-                df[row_wise_difference_result_column_entry_prt.get()] = df[
-                    df.columns[int(row_wise_difference_entry_prt.get())]].diff()
+                df[row_wise_difference_result_column_entry_pft.get()] = df[
+                    df.columns[int(row_wise_difference_entry_pft.get())]].diff()
                 df.to_csv(file, index=False, sep=',')
                 mb.showinfo('Inter arrival time successfully calculated', 'Displaying file')
-                display_file_prt(file)
+                display_file_pft(file)
             except (IndexError, ValueError):
                 mb.showerror('Error during calculation', 'Column index invalid')
             except TypeError:
                 mb.showerror('Error during calculation', 'Columns needs to contain numbers')
 
-        def calculate_difference_columns_prt(file, columns):
+        def calculate_difference_columns_pft(file, columns):
             """
             Adds or overwrites a column with inter arrival times. Calculated by subtracting two columns
             :param file: Input file
@@ -119,151 +118,147 @@ class TraceConvertingToolGUI:
                 return
             df = pd.read_csv(file)
             try:
-                df[columns_wise_difference_result_column_entry_prt.get()] = df[df.columns[columns[0]]] - df[
+                df[column_wise_difference_result_column_entry_pft.get()] = df[df.columns[columns[0]]] - df[
                     df.columns[columns[1]]]
                 df.to_csv(file, index=False, sep=',')
                 mb.showinfo('Inter arrival time successfully calculated', 'Displaying file')
-                display_file_prt(file)
+                display_file_pft(file)
             except IndexError:
                 mb.showerror('Error during calculation', 'Column indexes invalid')
             except TypeError:
                 mb.showerror('Error during calculation', 'Both columns need to contain numbers')
 
-        first_line_is_header_checkbutton_var_prt = IntVar()
-        first_line_is_header_checkbutton_prt = Checkbutton(prepare_file_tab, text="First line is header",
-                                                           variable=first_line_is_header_checkbutton_var_prt,
-                                                           onvalue=1, offvalue=0)
 
-        file_entry_prt = Entry(prepare_file_tab, width=config.get('entries', 'entry_width'))
+        file_entry_pft = Entry(prepare_file_tab, width=config.get('entries', 'entry_width'))
 
-        file_button_prt = Button(prepare_file_tab, text="Choose File", command=browse_file_prt)
-        file_button_prt.grid(column=1, row=0)
+        browse_file_button_pft = Button(prepare_file_tab, text="Choose File", command=browse_file_pft)
+        browse_file_button_pft.grid(column=1, row=0)
 
-        remove_rows_label_prt = Label(prepare_file_tab, text="Amount of Rows")
-        remove_rows_label_prt.grid(column=0, row=2)
+        remove_rows_label_pft = Label(prepare_file_tab, text="Amount of Rows")
+        remove_rows_label_pft.grid(column=0, row=2)
 
-        remove_rows_entry_prt = Entry(prepare_file_tab, width=config.get('entries', 'entry_width'))
-        remove_rows_entry_prt.grid(column=1, row=2)
+        remove_rows_entry_pft = Entry(prepare_file_tab, width=config.get('entries', 'entry_width'))
+        remove_rows_entry_pft.grid(column=1, row=2)
 
-        remove_rows_button_prt = Button(prepare_file_tab, text="Remove Rows",
-                                        command=lambda: [model.remove_lines_from_csv(file_entry_prt.get(),
-                                                                                     remove_rows_entry_prt.get()),
-                                                         display_file_prt(file_entry_prt.get())])
-        remove_rows_button_prt.grid(column=2, row=2)
+        remove_rows_button_pft = Button(prepare_file_tab, text="Remove Rows",
+                                        command=lambda: [model.remove_lines_from_csv(file_entry_pft.get(),
+                                                                                     remove_rows_entry_pft.get()),
+                                                         display_file_pft(file_entry_pft.get())])
+        remove_rows_button_pft.grid(column=2, row=2)
 
-        add_header_label_prt = Label(prepare_file_tab, text="Header")
-        add_header_label_prt.grid(column=0, row=3)
+        add_header_label_pft = Label(prepare_file_tab, text="Header")
+        add_header_label_pft.grid(column=0, row=3)
 
-        add_header_entry_prt = Entry(prepare_file_tab, width=config.get('entries', 'entry_width'))
-        add_header_entry_prt.grid(column=1, row=3)
+        add_header_entry_pft = Entry(prepare_file_tab, width=config.get('entries', 'entry_width'))
+        add_header_entry_pft.grid(column=1, row=3)
 
-        add_header_button_prt = Button(prepare_file_tab, text="Add Header to CSV",
-                                       command=lambda: [model.add_header_to_csv(file_entry_prt.get(),
+        add_header_button_pft = Button(prepare_file_tab, text="Add Header to CSV",
+                                       command=lambda: [model.add_header_to_csv(file_entry_pft.get(),
                                                                                 list(
-                                                                                    add_header_entry_prt.get().split(
+                                                                                    add_header_entry_pft.get().split(
                                                                                         ","))),
-                                                        display_file_prt(file_entry_prt.get())])
-        add_header_button_prt.grid(column=2, row=3)
+                                                        display_file_pft(file_entry_pft.get())])
+        add_header_button_pft.grid(column=2, row=3)
 
-        file_displayer_label_prt = Label(prepare_file_tab)
-        file_displayer_label_prt.grid(column=0, row=8)
-        file_displayer_prt = scrolledtext.ScrolledText(prepare_file_tab, width=200, height=33)
+        file_displayer_label_pft = Label(prepare_file_tab)
+        file_displayer_label_pft.grid(column=0, row=8)
+        file_displayer_pft = scrolledtext.ScrolledText(prepare_file_tab, width=200, height=33)
 
-        date_format_label_prt = Label(prepare_file_tab, text="Timestamp Format Strings")
-        date_format_label_prt.grid(column=2, row=4)
-        date_format_entry_prt = Entry(prepare_file_tab, width=config.get('entries', 'entry_width'))
-        date_format_entry_prt.grid(column=3, row=4)
-        date_format_entry_prt.insert(END, config.get('entries', 'default_date_format_entry_pt'))
+        date_format_label_pft = Label(prepare_file_tab, text="Timestamp Format Strings")
+        date_format_label_pft.grid(column=2, row=4)
+        date_format_entry_pft = Entry(prepare_file_tab, width=config.get('entries', 'entry_width'))
+        date_format_entry_pft.grid(column=3, row=4)
+        date_format_entry_pft.insert(END, config.get('entries', 'default_date_format_entry_pft'))
 
-        date_columns_label_prt = Label(prepare_file_tab, text="Column Indexes")
-        date_columns_label_prt.grid(column=0, row=4)
-        date_columns_entry_prt = Entry(prepare_file_tab, width=config.get('entries', 'entry_width'))
-        date_columns_entry_prt.grid(column=1, row=4)
+        date_columns_label_pft = Label(prepare_file_tab, text="Column Indexes")
+        date_columns_label_pft.grid(column=0, row=4)
+        date_columns_entry_pft = Entry(prepare_file_tab, width=config.get('entries', 'entry_width'))
+        date_columns_entry_pft.grid(column=1, row=4)
 
-        columns_wise_difference_label_prt = Label(prepare_file_tab, text="Column Indexes")
-        columns_wise_difference_label_prt.grid(column=0, row=5)
-        columns_wise_difference_entry_prt = Entry(prepare_file_tab, width=config.get('entries', 'entry_width'))
-        columns_wise_difference_entry_prt.grid(column=1, row=5)
+        column_wise_difference_label_pft = Label(prepare_file_tab, text="Column Indexes")
+        column_wise_difference_label_pft.grid(column=0, row=5)
+        column_wise_difference_entry_pft = Entry(prepare_file_tab, width=config.get('entries', 'entry_width'))
+        column_wise_difference_entry_pft.grid(column=1, row=5)
 
-        columns_wise_difference_result_column_label_prt = Label(prepare_file_tab, text="Result Column Name")
-        columns_wise_difference_result_column_label_prt.grid(column=2, row=5)
-        columns_wise_difference_result_column_entry_prt = Entry(prepare_file_tab,
-                                                                width=config.get('entries', 'entry_width'))
-        columns_wise_difference_result_column_entry_prt.grid(column=3, row=5)
+        column_wise_difference_result_column_label_pft = Label(prepare_file_tab, text="Result Column Name")
+        column_wise_difference_result_column_label_pft.grid(column=2, row=5)
+        column_wise_difference_result_column_entry_pft = Entry(prepare_file_tab,
+                                                               width=config.get('entries', 'entry_width'))
+        column_wise_difference_result_column_entry_pft.grid(column=3, row=5)
 
-        row_wise_difference_label_prt = Label(prepare_file_tab, text="Column Index")
-        row_wise_difference_label_prt.grid(column=0, row=6)
-        row_wise_difference_entry_prt = Entry(prepare_file_tab, width=config.get('entries', 'entry_width'))
-        row_wise_difference_entry_prt.grid(column=1, row=6)
+        row_wise_difference_label_pft = Label(prepare_file_tab, text="Column Index")
+        row_wise_difference_label_pft.grid(column=0, row=6)
+        row_wise_difference_entry_pft = Entry(prepare_file_tab, width=config.get('entries', 'entry_width'))
+        row_wise_difference_entry_pft.grid(column=1, row=6)
 
-        row_wise_difference_result_column_label_prt = Label(prepare_file_tab, text="Result Column Name")
-        row_wise_difference_result_column_label_prt.grid(column=2, row=6)
-        row_wise_difference_result_column_entry_prt = Entry(prepare_file_tab,
+        row_wise_difference_result_column_label_pft = Label(prepare_file_tab, text="Result Column Name")
+        row_wise_difference_result_column_label_pft.grid(column=2, row=6)
+        row_wise_difference_result_column_entry_pft = Entry(prepare_file_tab,
                                                             width=config.get('entries', 'entry_width'))
-        row_wise_difference_result_column_entry_prt.grid(column=3, row=6)
+        row_wise_difference_result_column_entry_pft.grid(column=3, row=6)
 
-        calculate_timestamp_button_prt = Button(prepare_file_tab, text="Calculate Unix Time",
-                                                command=lambda: calculate_timestamp_prt(
-                                                    file_entry_prt.get(),
-                                                    date_columns_entry_prt.get(),
-                                                    date_format_entry_prt.get()))
-        calculate_timestamp_button_prt.grid(column=4, row=4)
+        calculate_timestamp_button_pft = Button(prepare_file_tab, text="Calculate Unix Time",
+                                                command=lambda: calculate_timestamp_pft(
+                                                    file_entry_pft.get(),
+                                                    date_columns_entry_pft.get(),
+                                                    date_format_entry_pft.get()))
+        calculate_timestamp_button_pft.grid(column=4, row=4)
 
-        column_wise_difference_button_prt = Button(prepare_file_tab, text="Calculate column-wise Difference",
-                                                   command=lambda: calculate_difference_columns_prt(
-                                                       file_entry_prt.get(),
-                                                       columns_wise_difference_entry_prt.get()))
-        column_wise_difference_button_prt.grid(column=4, row=5)
+        column_wise_difference_button_pft = Button(prepare_file_tab, text="Calculate column-wise Difference",
+                                                   command=lambda: calculate_difference_columns_pft(
+                                                       file_entry_pft.get(),
+                                                       column_wise_difference_entry_pft.get()))
+        column_wise_difference_button_pft.grid(column=4, row=5)
 
-        row_wise_difference_button_prt = Button(prepare_file_tab, text="Calculate row-wise Difference",
-                                                command=lambda: calculate_difference_rows_prt(
-                                                    file_entry_prt.get()))
-        row_wise_difference_button_prt.grid(column=4, row=6)
+        row_wise_difference_button_pft = Button(prepare_file_tab, text="Calculate row-wise Difference",
+                                                command=lambda: calculate_difference_rows_pft(
+                                                    file_entry_pft.get()))
+        row_wise_difference_button_pft.grid(column=4, row=6)
 
-        delimiter_label_prt = Label(prepare_file_tab, text="Delimiter")
-        delimiter_label_prt.grid(column=0, row=7)
-        delimiter_entry_prt = Entry(prepare_file_tab, width=config.get('entries', 'entry_width'))
-        delimiter_entry_prt.grid(column=1, row=7)
-        header_label_prt = Label(prepare_file_tab, text="Header")
-        header_label_prt.grid(column=2, row=7)
-        header_entry_prt = Entry(prepare_file_tab, width=config.get('entries', 'entry_width'))
-        header_entry_prt.grid(column=3, row=7)
+        delimiter_label_pft = Label(prepare_file_tab, text="Delimiter")
+        delimiter_label_pft.grid(column=0, row=7)
+        delimiter_entry_pft = Entry(prepare_file_tab, width=config.get('entries', 'entry_width'))
+        delimiter_entry_pft.grid(column=1, row=7)
+        header_label_pft = Label(prepare_file_tab, text="Header")
+        header_label_pft.grid(column=2, row=7)
+        header_entry_pft = Entry(prepare_file_tab, width=config.get('entries', 'entry_width'))
+        header_entry_pft.grid(column=3, row=7)
 
-        keep_header_checkbutton_var_pt = IntVar()
-        keep_header_checkbutton_pt = Checkbutton(prepare_file_tab, text="Use first Line as Header",
-                                                 variable=keep_header_checkbutton_var_pt, onvalue=1,
-                                                 offvalue=0)
-        keep_header_checkbutton_pt.grid(column=5, row=7)
+        keep_header_checkbutton_var_pft = IntVar()
+        keep_header_checkbutton_pft = Checkbutton(prepare_file_tab, text="Use first Line as Header",
+                                                  variable=keep_header_checkbutton_var_pft, onvalue=1,
+                                                  offvalue=0)
+        keep_header_checkbutton_pft.grid(column=5, row=7)
 
-        transform_filetype_button_prt = Button(prepare_file_tab,
+        transform_filetype_button_pft = Button(prepare_file_tab,
                                                text="Convert to CSV",
                                                command=lambda:
-                                               convert_file_to_csv_prt(file_entry_prt.get(),
-                                                                       delimiter_entry_prt.get()))
-        transform_filetype_button_prt.grid(column=4, row=7)
+                                               convert_file_to_csv_pft(file_entry_pft.get(),
+                                                                       delimiter_entry_pft.get()))
+        transform_filetype_button_pft.grid(column=4, row=7)
 
-        def display_file_prt(filename):
+        def display_file_pft(filename):
             """
             Displays the selected file in the preparation tab
             :param filename: File that will be displayed
             """
             if os.path.isfile(filename):
                 with open(filename, 'r') as file:
-                    file_displayer_label_prt.configure(text=os.path.basename(filename))
-                    file_displayer_prt.grid(column=0, row=9, columnspan=12, rowspan=10)
-                    file_displayer_prt.config(state=NORMAL)
-                    file_displayer_prt.delete("1.0", "end")
-                    file_displayer_prt.insert(INSERT, file.read())
-                    file_displayer_prt.config(state=DISABLED)
+                    file_displayer_label_pft.configure(text=os.path.basename(filename))
+                    file_displayer_pft.grid(column=0, row=9, columnspan=12, rowspan=10)
+                    file_displayer_pft.config(state=NORMAL)
+                    file_displayer_pft.delete("1.0", "end")
+                    file_displayer_pft.insert(INSERT, file.read())
+                    file_displayer_pft.config(state=DISABLED)
 
-        def convert_file_to_csv_prt(filename, delimiter):
+        def convert_file_to_csv_pft(filename, delimiter):
             """
             Converts file to csv format
             :param filename:Input file
             :param delimiter:Delimiter of the file. For example regex
             """
             try:
-                if keep_header_checkbutton_var_pt.get() == 1:
+                if keep_header_checkbutton_var_pft.get() == 1:
                     df = pd.read_csv(filename, header=0, sep=delimiter)
                 else:
                     df = pd.read_csv(filename, header=None, sep=delimiter)
@@ -276,49 +271,52 @@ class TraceConvertingToolGUI:
                                                  " already exists. \n Would you like to overwrite it?")
             try:
                 if not dont_overwrite:
-                    if header_entry_prt.get() == "":
+                    if header_entry_pft.get() == "":
                         df.to_csv(result_filename, index=False, sep=',')
                     else:
-                        df.to_csv(result_filename, index=False, sep=',', header=header_entry_prt.get().split(','))
+                        df.to_csv(result_filename, index=False, sep=',', header=header_entry_pft.get().split(','))
                     mb.showinfo('File successfully converted', 'Displaying file')
-                    display_file_prt(result_filename)
-                    file_entry_prt.delete(0, END)
-                    file_entry_prt.insert(END, result_filename)
+                    display_file_pft(result_filename)
+                    file_entry_pft.delete(0, END)
+                    file_entry_pft.insert(END, result_filename)
             except ValueError:
                 mb.showerror("Error while converting file", "Please check if the file and the header are valid")
 
         # Tooltips
-        file_button_tooltip_prt = Hovertip(file_button_prt, config.get('tooltips', 'file_button'))
-        remove_rows_tooltip_prt = Hovertip(remove_rows_label_prt, config.get('tooltips', 'remove_rows'))
-        remove_rows_button_tooltip_prt = Hovertip(remove_rows_button_prt, config.get('tooltips', 'remove_rows_button'))
-        add_header_tooltip_prt = Hovertip(add_header_label_prt, config.get('tooltips', 'add_header'))
-        add_header_button_tooltip_prt = Hovertip(add_header_button_prt, config.get('tooltips', 'add_header_button'))
-        delimiter_tooltip_prt = Hovertip(delimiter_label_prt, config.get('tooltips', 'delimiter'))
-        transform_button_tooltip_prt = Hovertip(transform_filetype_button_prt,
-                                                config.get('tooltips', 'transform_button'))
-        header_checkbutton_tooltip_prt = Hovertip(first_line_is_header_checkbutton_prt,
-                                                  config.get('tooltips', 'header_checkbutton'))
-        timestamp_format_tooltip_prt = Hovertip(date_format_label_prt, config.get('tooltips', 'timestamp_format'))
-        timestamp_columns_tooltip_prt = Hovertip(date_columns_label_prt, config.get('tooltips', 'timestamp_columns'))
-        calc_epoch_button_tooltip_prt = Hovertip(calculate_timestamp_button_prt,
-                                                 config.get('tooltips', 'calc_epoch_button'))
-        columns_wise_difference_tooltip_prt = Hovertip(columns_wise_difference_label_prt,
-                                                       config.get('tooltips', 'columns_wise_difference'))
-        columns_wise_difference_result_column_tooltip_prt = Hovertip(
-            columns_wise_difference_result_column_label_prt,
-            config.get('tooltips', 'columns_wise_difference_result_column'))
-        columns_wise_difference_button_tooltip_prt = Hovertip(column_wise_difference_button_prt,
+        browse_file_button_tooltip_pft = Hovertip(browse_file_button_pft,
+                                                  config.get('tooltips', 'browse_file_button_pft'))
+        remove_rows_label_tooltip_pft = Hovertip(remove_rows_label_pft, config.get('tooltips', 'remove_rows_label_pft'))
+        remove_rows_button_tooltip_pft = Hovertip(remove_rows_button_pft,
+                                                  config.get('tooltips', 'remove_rows_button_pft'))
+        add_header_label_tooltip_pft = Hovertip(add_header_label_pft, config.get('tooltips', 'add_header_label_pft'))
+        add_header_button_tooltip_pft = Hovertip(add_header_button_pft, config.get('tooltips', 'add_header_button_pft'))
+        delimiter_tooltip_label_pft = Hovertip(delimiter_label_pft, config.get('tooltips', 'delimiter_label_pft'))
+        transform_button_tooltip_pft = Hovertip(transform_filetype_button_pft,
+                                                config.get('tooltips', 'transform_button_pft'))
+        timestamp_format_label_tooltip_pft = Hovertip(date_format_label_pft,
+                                                      config.get('tooltips', 'timestamp_format_label_pft'))
+        timestamp_columns_label_tooltip_pft = Hovertip(date_columns_label_pft,
+                                                       config.get('tooltips', 'timestamp_columns_label_pft'))
+        calculate_timestamp_button_tooltip_pft = Hovertip(calculate_timestamp_button_pft,
+                                                          config.get('tooltips', 'calculate_timestamp_button_pft'))
+        columns_wise_difference_label_tooltip_pft = Hovertip(
+            column_wise_difference_label_pft, config.get('tooltips', 'columns_wise_difference_label_pft'))
+        columns_wise_difference_result_column_label_tooltip_pft = Hovertip(
+            column_wise_difference_result_column_label_pft,
+            config.get('tooltips', 'columns_wise_difference_result_column_label_pft'))
+        columns_wise_difference_button_tooltip_pft = Hovertip(column_wise_difference_button_pft,
                                                               config.get('tooltips', 'columns_wise_difference_button'))
-        row_wise_difference_tooltip_prt = Hovertip(row_wise_difference_label_prt,
-                                                   config.get('tooltips', 'row_wise_difference'))
-        row_wise_difference_result_column_tooltip_prt = Hovertip(row_wise_difference_result_column_label_prt,
-                                                                 config.get('tooltips',
-                                                                            'row_wise_difference_result_column'))
-        row_wise_difference_button_tooltip_prt = Hovertip(row_wise_difference_button_prt,
+        row_wise_difference_label_tooltip_pft = Hovertip(row_wise_difference_label_pft,
+                                                         config.get('tooltips', 'row_wise_difference_label_pft'))
+        row_wise_difference_result_column_tooltip_pft = Hovertip(row_wise_difference_result_column_label_pft,
+                                                                 config.get(
+                                                                     'tooltips',
+                                                                     'row_wise_difference_result_column_label_pft'))
+        row_wise_difference_button_tooltip_pft = Hovertip(row_wise_difference_button_pft,
                                                           config.get('tooltips', 'row_wise_difference_button'))
-        header_tooltip_prt = Hovertip(header_label_prt, config.get('tooltips', 'header'))
-        header_checkbutton_tooltip_prt = Hovertip(first_line_is_header_checkbutton_prt,
-                                                  config.get('tooltips', 'header_checkbutton'))
+        header_label_tooltip_pft = Hovertip(header_label_pft, config.get('tooltips', 'header_label_pft'))
+        header_checkbutton_tooltip_pft = Hovertip(keep_header_checkbutton_pft,
+                                                  config.get('tooltips', 'keep_header_checkbutton_pft'))
 
         # Converting Tab
         columns_label_ct = Label(convert_trace_tab, text="Column Indexes for Tracedata")
@@ -701,7 +699,7 @@ class TraceConvertingToolGUI:
 
         # Label and Buttons
         filter_button_ftt = Button(filter_traces_tab, text="Filter Traces",
-                                  command=lambda: filter_traces_ftt(expression_entry_ftt.get()))
+                                   command=lambda: filter_traces_ftt(expression_entry_ftt.get()))
         filter_button_ftt.grid(column=5, row=2)
 
         browse_button_ftt = Button(filter_traces_tab, text="Choose Files", command=browse_files_ftt)
@@ -803,8 +801,10 @@ class TraceConvertingToolGUI:
                                                         config.get('tooltips', 'tracedata_filename_label_ett'))
         browse_trace_button_tooltip_ett = Hovertip(choose_trace_button_ett,
                                                    config.get('tooltips', 'browse_trace_button_ett'))
-        extract_button_tooltip_ett = Hovertip(extract_columns_button_ett, config.get('tooltips', 'extract_tracedata_button_ett'))
-        float_format_label_tooltip_ett = Hovertip(float_format_label_ett, config.get('tooltips', 'float_format_label_ett'))
+        extract_button_tooltip_ett = Hovertip(extract_columns_button_ett,
+                                              config.get('tooltips', 'extract_tracedata_button_ett'))
+        float_format_label_tooltip_ett = Hovertip(float_format_label_ett,
+                                                  config.get('tooltips', 'float_format_label_ett'))
 
         # Validation tab
 
