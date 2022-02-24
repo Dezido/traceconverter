@@ -128,7 +128,6 @@ class TraceConvertingToolGUI:
             except TypeError:
                 mb.showerror('Error during calculation', 'Both columns need to contain numbers')
 
-
         file_entry_pft = Entry(prepare_file_tab, width=config.get('entries', 'entry_width'))
 
         browse_file_button_pft = Button(prepare_file_tab, text="Choose File", command=browse_file_pft)
@@ -319,139 +318,140 @@ class TraceConvertingToolGUI:
                                                   config.get('tooltips', 'keep_header_checkbutton_pft'))
 
         # Converting Tab
-        columns_label_ct = Label(convert_trace_tab, text="Column Indexes for Tracedata")
-        columns_label_ct.grid(row=2)
-        source_label_ct = Label(convert_trace_tab, text="Tracesource")
-        source_label_ct.grid(row=3)
-        tracedescription_label_ct = Label(convert_trace_tab, text="Tracedescription")
-        tracedescription_label_ct.grid(row=4)
-        tracedatadescription_label_ct = Label(convert_trace_tab, text="Tracedatadescription")
-        tracedatadescription_label_ct.grid(row=5)
-        username_label_ct = Label(convert_trace_tab, text="Username")
-        username_label_ct.grid(row=6)
-        additional_information_label_ct = Label(convert_trace_tab, text="Additional Information")
-        additional_information_label_ct.grid(row=7)
-        result_filename_label_ct = Label(convert_trace_tab, text="Result Filename")
-        result_filename_label_ct.grid(row=8)
+        columns_label_ctt = Label(convert_trace_tab, text="Column Indexes for Tracedata")
+        columns_label_ctt.grid(row=2)
+        source_label_ctt = Label(convert_trace_tab, text="Tracesource")
+        source_label_ctt.grid(row=3)
+        tracedescription_label_ctt = Label(convert_trace_tab, text="Tracedescription")
+        tracedescription_label_ctt.grid(row=4)
+        tracedatadescription_label_ctt = Label(convert_trace_tab, text="Tracedatadescription")
+        tracedatadescription_label_ctt.grid(row=5)
+        username_label_ctt = Label(convert_trace_tab, text="Username")
+        username_label_ctt.grid(row=6)
+        additional_information_label_ctt = Label(convert_trace_tab, text="Additional Information")
+        additional_information_label_ctt.grid(row=7)
+        result_filename_label_ctt = Label(convert_trace_tab, text="Result Filename")
+        result_filename_label_ctt.grid(row=8)
 
-        tracedata_filename_label_ct = Label(convert_trace_tab, text="Filename")
-        tracedata_filename_entry_ct = Entry(convert_trace_tab)
+        tracedata_filename_label_ctt = Label(convert_trace_tab, text="Filename")
+        tracedata_filename_entry_ctt = Entry(convert_trace_tab)
 
-        float_format_label_ct = Label(convert_trace_tab, text="Float Format String")
-        float_format_entry_ct = Entry(convert_trace_tab)
-        float_format_entry_ct.insert(END, config.get('entries', 'default_float_format_entry_ett'))
+        float_format_label_ctt = Label(convert_trace_tab, text="Float Format String")
+        float_format_entry_ctt = Entry(convert_trace_tab)
+        float_format_entry_ctt.insert(END, config.get('entries', 'default_float_format_entry_ett'))
 
         def show_name_entry():
             """Puts the tracedata_filename_label on the grid if the checkbox is selected"""
-            if extract_tracedata_checkbutton_var_ct.get() == 0:
-                tracedata_filename_label_ct.grid_forget()
-                tracedata_filename_entry_ct.grid_forget()
-            if extract_tracedata_checkbutton_var_ct.get() == 1:
-                tracedata_filename_label_ct.grid(column=4, row=3)
-                tracedata_filename_entry_ct.grid(column=4, row=4)
-                float_format_label_ct.grid(column=4, row=5)
-                float_format_entry_ct.grid(column=4, row=6)
+            if extract_tracedata_checkbutton_var_ctt.get() == 0:
+                tracedata_filename_label_ctt.grid_forget()
+                tracedata_filename_entry_ctt.grid_forget()
+            if extract_tracedata_checkbutton_var_ctt.get() == 1:
+                tracedata_filename_label_ctt.grid(column=4, row=3)
+                tracedata_filename_entry_ctt.grid(column=4, row=4)
+                float_format_label_ctt.grid(column=4, row=5)
+                float_format_entry_ctt.grid(column=4, row=6)
 
-        extract_tracedata_checkbutton_var_ct = IntVar()
-        extract_tracedata_checkbutton_ct = Checkbutton(convert_trace_tab,
-                                                       text="Extract Tracedata for Usage in ProFiDo after Conversion",
-                                                       variable=extract_tracedata_checkbutton_var_ct, onvalue=1,
-                                                       offvalue=0, command=show_name_entry)
-        extract_tracedata_checkbutton_ct.grid(column=4, row=2)
+        extract_tracedata_checkbutton_var_ctt = IntVar()
+        extract_tracedata_checkbutton_ctt = Checkbutton(convert_trace_tab,
+                                                        text="Extract Tracedata for Usage in ProFiDo after Conversion",
+                                                        variable=extract_tracedata_checkbutton_var_ctt, onvalue=1,
+                                                        offvalue=0, command=show_name_entry)
+        extract_tracedata_checkbutton_ctt.grid(column=4, row=2)
 
-        statistics_format_label_ct = Label(convert_trace_tab, text="Statistics Format String")
-        statistics_format_label_ct.grid(row=12, column=0)
+        statistics_format_label_ctt = Label(convert_trace_tab, text="Statistics Format String")
+        statistics_format_label_ctt.grid(row=12, column=0)
 
-        statistics_format_entry_ct = Entry(convert_trace_tab, width=config.get('entries', 'entry_width'))
-        statistics_format_entry_ct.grid(row=12, column=1)
+        statistics_format_entry_ctt = Entry(convert_trace_tab, width=config.get('entries', 'entry_width'))
+        statistics_format_entry_ctt.grid(row=12, column=1)
 
-        original_tracefile_entry_ct = Entry(convert_trace_tab, width=config.get('entries', 'entry_width'))
+        original_tracefile_entry_ctt = Entry(convert_trace_tab, width=config.get('entries', 'entry_width'))
 
-        def browse_file_ct():
+        def browse_file_ctt():
             """Opens file explorer to select a file"""
-            original_tracefile_entry_ct.delete(0, END)  # removes previously selected file
+            original_tracefile_entry_ctt.delete(0, END)  # removes previously selected file
             selected_file = fd.askopenfilename(initialdir=config.get('directories', 'raw_traces_dir'),
                                                title="Select a File",
                                                filetypes=(("CSV files", "*.csv*"),))
             if not selected_file:
                 mb.showinfo('No file selected', 'Please select a valid file')
-            original_tracefile_entry_ct.insert(END, selected_file)
-            original_tracefile_entry_ct.grid(row=1, column=1)
+            original_tracefile_entry_ctt.insert(END, selected_file)
+            original_tracefile_entry_ctt.grid(row=1, column=1)
             if selected_file:
-                display_file_ct(selected_file)
+                display_file_ctt(selected_file)
 
         # Create entries and set default values
-        original_tracefile_button_ct = Button(convert_trace_tab, text="Choose File", command=browse_file_ct)
+        original_tracefile_button_ctt = Button(convert_trace_tab, text="Choose File", command=browse_file_ctt)
 
-        columns_entry_ct = Entry(convert_trace_tab, width=config.get('entries', 'entry_width'))
-        columns_entry_ct.insert(END, config.get('entries', 'default_columns_entry'))
+        columns_entry_ctt = Entry(convert_trace_tab, width=config.get('entries', 'entry_width'))
+        columns_entry_ctt.insert(END, config.get('entries', 'default_columns_entry'))
 
-        source_entry_ct = Entry(convert_trace_tab, width=config.get('entries', 'entry_width'))
-        source_entry_ct.insert(END, config.get('entries', 'default_source_entry'))
+        source_entry_ctt = Entry(convert_trace_tab, width=config.get('entries', 'entry_width'))
+        source_entry_ctt.insert(END, config.get('entries', 'default_source_entry'))
 
-        description_entry_ct = Entry(convert_trace_tab, width=config.get('entries', 'entry_width'))
-        description_entry_ct.insert(END, config.get('entries', 'default_description_entry'))
+        description_entry_ctt = Entry(convert_trace_tab, width=config.get('entries', 'entry_width'))
+        description_entry_ctt.insert(END, config.get('entries', 'default_description_entry'))
 
-        tracedatadescription_entry_ct = Entry(convert_trace_tab, width=config.get('entries', 'entry_width'))
-        tracedatadescription_entry_ct.insert(END, config.get('entries', 'default_tracedatadescription_entry'))
+        tracedatadescription_entry_ctt = Entry(convert_trace_tab, width=config.get('entries', 'entry_width'))
+        tracedatadescription_entry_ctt.insert(END, config.get('entries', 'default_tracedatadescription_entry'))
 
-        username_entry_ct = Entry(convert_trace_tab, width=config.get('entries', 'entry_width'))
-        username_entry_ct.insert(END, config.get('entries', 'default_username_entry'))
+        username_entry_ctt = Entry(convert_trace_tab, width=config.get('entries', 'entry_width'))
+        username_entry_ctt.insert(END, config.get('entries', 'default_username_entry'))
 
-        additional_information_entry_ct = Text(convert_trace_tab, width=config.get('entries', 'entry_width'), height=25,
-                                               font=config.get('fonts', 'default_font_text_widget'))
-        additional_information_entry_ct.insert(END, config.get('entries', 'default_additional_information_entry'))
+        additional_information_entry_ctt = Text(convert_trace_tab, width=config.get('entries', 'entry_width'),
+                                                height=25,
+                                                font=config.get('fonts', 'default_font_text_widget'))
+        additional_information_entry_ctt.insert(END, config.get('entries', 'default_additional_information_entry'))
 
-        result_filename_entry_ct = Entry(convert_trace_tab, width=config.get('entries', 'entry_width'))
-        result_filename_entry_ct.insert(END, config.get('entries', 'default_filename_entry'))
+        result_filename_entry_ctt = Entry(convert_trace_tab, width=config.get('entries', 'entry_width'))
+        result_filename_entry_ctt.insert(END, config.get('entries', 'default_filename_entry'))
 
         # Place Entries
-        original_tracefile_button_ct.grid(row=1, column=0)
-        columns_entry_ct.grid(row=2, column=1)
-        source_entry_ct.grid(row=3, column=1)
-        description_entry_ct.grid(row=4, column=1)
-        tracedatadescription_entry_ct.grid(row=5, column=1)
-        username_entry_ct.grid(row=6, column=1)
-        additional_information_entry_ct.grid(row=7, column=1)
-        result_filename_entry_ct.grid(row=8, column=1)
+        original_tracefile_button_ctt.grid(row=1, column=0)
+        columns_entry_ctt.grid(row=2, column=1)
+        source_entry_ctt.grid(row=3, column=1)
+        description_entry_ctt.grid(row=4, column=1)
+        tracedatadescription_entry_ctt.grid(row=5, column=1)
+        username_entry_ctt.grid(row=6, column=1)
+        additional_information_entry_ctt.grid(row=7, column=1)
+        result_filename_entry_ctt.grid(row=8, column=1)
 
         # Text widget to display the converted trace
-        file_displayer_ct = scrolledtext.ScrolledText(convert_trace_tab, width=100, height=33)
+        file_displayer_ctt = scrolledtext.ScrolledText(convert_trace_tab, width=100, height=33)
 
         def convert_trace():
             """Takes the user input from the entry fields and converts the selected trace to the standard format"""
-            org_filename = original_tracefile_entry_ct.get()
+            org_filename = original_tracefile_entry_ctt.get()
             if os.path.isfile(org_filename) and pathlib.Path(org_filename).suffix == ".csv":
                 try:
-                    col = list(map(int, (columns_entry_ct.get().split(";"))))
+                    col = list(map(int, (columns_entry_ctt.get().split(";"))))
                 except ValueError:
                     mb.showerror("Columns to keep entry invalid",
                                  "Columns need to be integers seperated by a semicolon [;]")
                 trace_template["tracebody"]["tracedata"] = \
-                    model.get_tracedata_from_file(original_tracefile_entry_ct.get(), col)
+                    model.get_tracedata_from_file(original_tracefile_entry_ctt.get(), col)
                 amount_tracedata = len(trace_template["tracebody"]["tracedata"][0])
-                trace_template["tracebody"]["tracedatadescription"] = tracedatadescription_entry_ct.get().split(";")
+                trace_template["tracebody"]["tracedatadescription"] = tracedatadescription_entry_ctt.get().split(";")
                 trace_template["traceheader"]["metainformation"]["name"] = os.path.basename(
-                    original_tracefile_entry_ct.get())
-                trace_template["traceheader"]["metainformation"]["source"] = source_entry_ct.get()
-                trace_template["traceheader"]["metainformation"]["description"] = description_entry_ct.get()
+                    original_tracefile_entry_ctt.get())
+                trace_template["traceheader"]["metainformation"]["source"] = source_entry_ctt.get()
+                trace_template["traceheader"]["metainformation"]["description"] = description_entry_ctt.get()
                 trace_template["traceheader"]["metainformation"]["creation timestamp"] = str(datetime.datetime.now())
-                trace_template["traceheader"]["metainformation"]["user"] = username_entry_ct.get()
-                if len(additional_information_entry_ct.get('1.0', 'end-1c')) != 0:
+                trace_template["traceheader"]["metainformation"]["user"] = username_entry_ctt.get()
+                if len(additional_information_entry_ctt.get('1.0', 'end-1c')) != 0:
                     trace_template["traceheader"]["metainformation"]["additional information"] = \
-                        additional_information_entry_ct.get('1.0', 'end-1c').replace("\n", "").split(";")
+                        additional_information_entry_ctt.get('1.0', 'end-1c').replace("\n", "").split(";")
                 else:
                     trace_template["traceheader"]["metainformation"].pop("additional information", None)
 
                 #  Generate statistics and adds them into a list. Each list entry represents one column of the raw trace
                 if amount_tracedata > 4:
-                    trace = generate_statistic(trace_template, statistics_format_entry_ct.get())
+                    trace = generate_statistic(trace_template, statistics_format_entry_ctt.get())
                 else:
                     trace = trace_template
                     mb.showinfo("Statistics won't be computed", "Tracedata only contains " + str(amount_tracedata) +
                                 " elements per column. Computing statistics requires five or more.")
                 # Save trace to file
-                filename = config.get('directories', 'converted_traces_dir') + '/' + result_filename_entry_ct.get() + \
+                filename = config.get('directories', 'converted_traces_dir') + '/' + result_filename_entry_ctt.get() + \
                            config.get('files', 'trace_file_suffix')
                 dont_overwrite = 0
                 if os.path.exists(filename):
@@ -463,14 +463,14 @@ class TraceConvertingToolGUI:
                         json.dump(trace, fp, indent=4)
                     add_hash_value_to_trace(filename)
                     # If tracedata checkbox is selected the data will also be extracted
-                    if extract_tracedata_checkbutton_var_ct.get() == 1:
+                    if extract_tracedata_checkbutton_var_ctt.get() == 1:
                         extract_tracedata_after_conversion(
                             filename)
                     mb.showinfo("Trace successfully converted", "Displaying converted Trace")
                 else:
                     mb.showinfo("File already exists", "Displaying existing File")
                 # Display the created traces
-                display_file_ct(filename)
+                display_file_ctt(filename)
             else:
                 mb.showinfo('No file selected', 'Please select a valid file')
 
@@ -522,17 +522,17 @@ class TraceConvertingToolGUI:
             with open(filename, 'w') as fp:
                 json.dump(tracedata, fp, indent=4)
 
-        def display_file_ct(filename):
+        def display_file_ctt(filename):
             """
             Displays the selected file in the convert tab
             :param filename: File that will be displayed
             """
             with open(filename, 'r') as f:
-                file_displayer_ct.config(state=NORMAL)
-                file_displayer_ct.delete("1.0", "end")
-                file_displayer_ct.insert(INSERT, f.read())
-                file_displayer_ct.config(state=DISABLED)
-                file_displayer_ct.grid(column=5, row=1, columnspan=12, rowspan=10)
+                file_displayer_ctt.config(state=NORMAL)
+                file_displayer_ctt.delete("1.0", "end")
+                file_displayer_ctt.insert(INSERT, f.read())
+                file_displayer_ctt.config(state=DISABLED)
+                file_displayer_ctt.grid(column=5, row=1, columnspan=12, rowspan=10)
 
         def extract_tracedata_after_conversion(filename):
             """
@@ -543,7 +543,7 @@ class TraceConvertingToolGUI:
                 tracedata = json.load(tr)["tracebody"]["tracedata"]
                 df = pd.DataFrame(tracedata)
                 dont_overwrite = 0
-                result_filename = config.get('directories', 'profido_traces_dir') + tracedata_filename_entry_ct.get() + \
+                result_filename = config.get('directories', 'profido_traces_dir') + tracedata_filename_entry_ctt.get() + \
                                   config.get('files', 'tracedata_file_suffix')
                 if os.path.exists(result_filename):
                     dont_overwrite = not mb.askyesno("File already exists",
@@ -552,12 +552,12 @@ class TraceConvertingToolGUI:
                                                      "\n Would you like to overwrite it?")
                 if not dont_overwrite:
                     try:
-                        if len(float_format_entry_ct.get()) > 0:
+                        if len(float_format_entry_ctt.get()) > 0:
                             df.transpose().to_csv(result_filename,
                                                   sep='\t',
-                                                  float_format=float_format_entry_ct.get(),
+                                                  float_format=float_format_entry_ctt.get(),
                                                   index=False, header=False)
-                        if len(float_format_entry_ct.get()) == 0:
+                        if len(float_format_entry_ctt.get()) == 0:
                             df.transpose().to_csv(result_filename,
                                                   sep='\t',
                                                   index=False, header=False)
@@ -566,31 +566,32 @@ class TraceConvertingToolGUI:
                     except ValueError:
                         mb.showerror('Invalid float format string', 'Please enter a valid format string')
 
-        convert_button_ct = Button(convert_trace_tab, text='Convert Trace', command=convert_trace)
-        convert_button_ct.grid(row=13, column=1)
+        convert_button_ctt = Button(convert_trace_tab, text='Convert Trace', command=convert_trace)
+        convert_button_ctt.grid(row=13, column=1)
 
         # Tooltips
-        columns_tooltip_ct = Hovertip(columns_label_ct, config.get('tooltips', 'columns'))
-        source_tooltip_ct = Hovertip(source_label_ct, config.get('tooltips', 'source'))
-        description_tooltip_ct = Hovertip(tracedescription_label_ct, config.get('tooltips', 'tracedescription'))
-        tracedatadescription_tooltip_ct = Hovertip(tracedatadescription_label_ct,
-                                                   config.get('tooltips', 'tracedatadescription'))
-        username_tooltip_ct = Hovertip(username_label_ct, config.get('tooltips', 'username'))
-        additional_information_tooltip_ct = Hovertip(additional_information_label_ct,
-                                                     config.get('tooltips', 'additional_information'))
-        result_filename_tooltip_ct = Hovertip(result_filename_label_ct,
-                                              config.get('tooltips', 'result_filename'))
-        tracedata_checkbutton_tooltip_ct = Hovertip(extract_tracedata_checkbutton_ct,
-                                                    config.get('tooltips', 'tracedata_checkbutton'))
-        tracedata_filename_tooltip_ct = Hovertip(tracedata_filename_label_ct,
-                                                 config.get('tooltips', 'tracedata_filename_ct'))
-        browse_file_button_tooltip_ct = Hovertip(original_tracefile_button_ct,
-                                                 config.get('tooltips', 'browse_file_button'))
-        convert_button_tooltip_ct = Hovertip(convert_button_ct,
-                                             config.get('tooltips', 'browse_file_button'))
-        numerical_format_tooltip_ct = Hovertip(statistics_format_label_ct,
-                                               config.get('tooltips', 'statistics_format_string'))
-        float_format_tooltip_ct = Hovertip(float_format_label_ct, config.get('tooltips', 'float_format_label_ett'))
+        columns_label_tooltip_ctt = Hovertip(columns_label_ctt, config.get('tooltips', 'columns_label_ctt'))
+        source_label_tooltip_ctt = Hovertip(source_label_ctt, config.get('tooltips', 'source_label_ctt'))
+        description_label_tooltip_ctt = Hovertip(tracedescription_label_ctt, config.get('tooltips', 'tracedescription_label_ctt'))
+        tracedatadescription_label_tooltip_ctt = Hovertip(tracedatadescription_label_ctt,
+                                                          config.get('tooltips', 'tracedatadescription_label_ctt'))
+        username_label_tooltip_ctt = Hovertip(username_label_ctt, config.get('tooltips', 'username_label_ctt'))
+        additional_information_label_tooltip_ctt = Hovertip(additional_information_label_ctt,
+                                                            config.get('tooltips', 'additional_information_label_ctt'))
+        result_filename_label_tooltip_ctt = Hovertip(result_filename_label_ctt,
+                                                     config.get('tooltips', 'result_filename_label_ctt'))
+        tracedata_checkbutton_tooltip_ctt = Hovertip(extract_tracedata_checkbutton_ctt,
+                                                     config.get('tooltips', 'tracedata_checkbutton'))
+        tracedata_filename_label_tooltip_ctt = Hovertip(tracedata_filename_label_ctt,
+                                                        config.get('tooltips', 'tracedata_filename_label_ctt'))
+        browse_file_button_tooltip_ctt = Hovertip(original_tracefile_button_ctt,
+                                                  config.get('tooltips', 'browse_file_button'))
+        convert_button_tooltip_ctt = Hovertip(convert_button_ctt,
+                                              config.get('tooltips', 'browse_file_button'))
+        numerical_format_label_tooltip_ctt = Hovertip(statistics_format_label_ctt,
+                                                      config.get('tooltips', 'statistics_format_string'))
+        float_format_label_tooltip_ctt = Hovertip(float_format_label_ctt,
+                                                  config.get('tooltips', 'float_format_label_ett'))
 
         # Filter Tab
         selected_traces_label_ftt = Label(filter_traces_tab, text="Selected Traces")
