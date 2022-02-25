@@ -270,10 +270,10 @@ class TraceConvertingToolGUI:
                                                  " already exists. \n Would you like to overwrite it?")
             try:
                 if not dont_overwrite:
-                    if header_entry_pft.get() == "":
-                        df.to_csv(result_filename, index=False, sep=',')
-                    else:
+                    if header_entry_pft.get() != "" and keep_header_checkbutton_var_pft.get() == 0:
                         df.to_csv(result_filename, index=False, sep=',', header=header_entry_pft.get().split(','))
+                    else:
+                        df.to_csv(result_filename, index=False, sep=',')
                     mb.showinfo('File successfully converted', 'Displaying file')
                     display_file_pft(result_filename)
                     file_entry_pft.delete(0, END)
