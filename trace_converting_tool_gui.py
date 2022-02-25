@@ -38,7 +38,7 @@ class TraceConvertingToolGUI:
         tab_parent.add(prepare_file_tab, text="Prepare File")
         tab_parent.add(convert_trace_tab, text="Convert Trace")
         tab_parent.add(filter_traces_tab, text="Filter Traces")
-        tab_parent.add(extract_tracedata_tab, text="Extract Tracedata for Usage in ProFiDo")
+        tab_parent.add(extract_tracedata_tab, text="Extract Tracedata")
         tab_parent.add(validate_trace_tab, text="Validate Trace")
         tab_parent.pack(expand=1, fill='both')
 
@@ -353,7 +353,7 @@ class TraceConvertingToolGUI:
 
         extract_tracedata_checkbutton_var_ctt = IntVar()
         extract_tracedata_checkbutton_ctt = Checkbutton(convert_trace_tab,
-                                                        text="Extract Tracedata for Usage in ProFiDo after Conversion",
+                                                        text="Extract Tracedata after Conversion",
                                                         variable=extract_tracedata_checkbutton_var_ctt, onvalue=1,
                                                         offvalue=0, command=show_name_entry)
         extract_tracedata_checkbutton_ctt.grid(column=4, row=2)
@@ -543,7 +543,7 @@ class TraceConvertingToolGUI:
                 tracedata = json.load(tr)["tracebody"]["tracedata"]
                 df = pd.DataFrame(tracedata)
                 dont_overwrite = 0
-                result_filename = config.get('directories', 'profido_traces_dir') + tracedata_filename_entry_ctt.get() + \
+                result_filename = config.get('directories', 'tracedata_dir') + tracedata_filename_entry_ctt.get() + \
                                   config.get('files', 'tracedata_file_suffix')
                 if os.path.exists(result_filename):
                     dont_overwrite = not mb.askyesno("File already exists",
@@ -759,7 +759,7 @@ class TraceConvertingToolGUI:
                     with open(input_trace_entry_ett.get()) as trace_in:
                         tracedata = json.load(trace_in)["tracebody"]["tracedata"]
                         df = pd.DataFrame(tracedata)
-                        filename = config.get('directories', 'profido_traces_dir') \
+                        filename = config.get('directories', 'tracedata_dir') \
                                    + tracedata_filename_entry_ett.get() + '_dat.trace'
                         dont_overwrite = 0
                         if os.path.exists(filename):
@@ -791,7 +791,7 @@ class TraceConvertingToolGUI:
         tracedata_filename_entry_ett = Entry(extract_tracedata_tab, width=config.get('entries', 'entry_width'))
         tracedata_filename_entry_ett.grid(row=1, column=1)
 
-        extract_columns_button_ett = Button(extract_tracedata_tab, text="Extract Tracedata for Usage in ProFiDo",
+        extract_columns_button_ett = Button(extract_tracedata_tab, text="Extract Tracedata",
                                             command=extract_tracedata_ett)
         extract_columns_button_ett.grid(row=2, column=2)
 
