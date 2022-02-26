@@ -345,6 +345,8 @@ class TraceConvertingToolGUI:
             if extract_tracedata_checkbutton_var_ctt.get() == 0:
                 tracedata_filename_label_ctt.grid_forget()
                 tracedata_filename_entry_ctt.grid_forget()
+                float_format_label_ctt.grid_forget()
+                float_format_entry_ctt.grid_forget()
             if extract_tracedata_checkbutton_var_ctt.get() == 1:
                 tracedata_filename_label_ctt.grid(column=4, row=3)
                 tracedata_filename_entry_ctt.grid(column=4, row=4)
@@ -487,7 +489,6 @@ class TraceConvertingToolGUI:
             trace["traceheader"]["statistical characteristics"]["kurtosis"] = []
             trace["traceheader"]["statistical characteristics"]["autocorrelation"] = []
             trace["traceheader"]["statistical characteristics"]["variance"] = []
-            # formatstring = '{' + formatstring + '}'
             try:
                 for i in range(len(trace["tracebody"]["tracedata"])):
                     df = pd.DataFrame(trace["tracebody"]["tracedata"][i])
@@ -565,6 +566,8 @@ class TraceConvertingToolGUI:
                         mb.showerror('Invalid float format string', 'Please enter a valid format string')
                     except ValueError:
                         mb.showerror('Invalid float format string', 'Please enter a valid format string')
+                    except FileNotFoundError:
+                        mb.showerror('Invalid Path or Filename', 'Please check if path and filename are valid')
 
         convert_button_ctt = Button(convert_trace_tab, text='Convert Trace', command=convert_trace)
         convert_button_ctt.grid(row=13, column=1)
@@ -777,6 +780,8 @@ class TraceConvertingToolGUI:
                                 mb.showerror('Invalid float format string', 'Please enter a valid format string')
                             except ValueError:
                                 mb.showerror('Invalid float format string', 'Please enter a valid format string')
+                            except FileNotFoundError:
+                                mb.showerror('Invalid Path or Filename', 'Please check if path and filename are valid')
                         display_file_ett(filename)
                         mb.showinfo("Data extracted", "Displaying extracted columns")
                 except json.decoder.JSONDecodeError:
