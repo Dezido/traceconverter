@@ -45,20 +45,20 @@ def date_time_to_epoch(date_time, time_format):
     return time.mktime(datetime.datetime.strptime(date_time, time_format).timetuple())
 
 
-def get_tracedata_from_file(file, keep_cols):
+def get_tracedata_from_file(file, column_indexes):
     """
     Gets the relevant columns and adds each column as a separate list into the result list
     :param file: Tracefile the data shall be extracted from
-    :param keep_cols: List of column numbers that shall be kept
+    :param column_indexes: List of column indexes that shall be kept
     :return: Columns of the original trace as lists
     """
     df = pd.read_csv(file, header=0, delimiter=',')
-    if columns_valid(keep_cols, len(df.columns)):
+    if columns_valid(column_indexes, len(df.columns)):
         tracedata_list = []
-        relevant_column_numbers = list(range(0, len(df.columns)))
-        for i in range(len(keep_cols)):
-            relevant_column_numbers.remove(keep_cols[i])
-        df.drop(df.columns[relevant_column_numbers], axis=1, inplace=True)
+        column_names = []
+        for i in range(len(column_indexes)):
+            column_names.append(df.columns[column_indexes[i]])
+        df = df[column_names].copy()
         for column in df:
             tracedata_list.append(df[column].values.reshape(1, -1).ravel().tolist())
         return tracedata_list
