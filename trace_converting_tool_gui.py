@@ -320,12 +320,12 @@ class TraceConvertingToolGUI:
         # Converting Tab
         columns_label_ctt = Label(convert_trace_tab, text="Column Indexes for Tracedata")
         columns_label_ctt.grid(row=2)
-        source_label_ctt = Label(convert_trace_tab, text="Tracesource")
-        source_label_ctt.grid(row=3)
+        tracedata_description_label_ctt = Label(convert_trace_tab, text="Tracedata description")
+        tracedata_description_label_ctt.grid(row=3)
         tracedescription_label_ctt = Label(convert_trace_tab, text="Tracedescription")
         tracedescription_label_ctt.grid(row=4)
-        tracedatadescription_label_ctt = Label(convert_trace_tab, text="Tracedatadescription")
-        tracedatadescription_label_ctt.grid(row=5)
+        source_label_ctt = Label(convert_trace_tab, text="Tracesource")
+        source_label_ctt.grid(row=5)
         username_label_ctt = Label(convert_trace_tab, text="Username")
         username_label_ctt.grid(row=6)
         additional_information_label_ctt = Label(convert_trace_tab, text="Additional Information")
@@ -384,8 +384,8 @@ class TraceConvertingToolGUI:
         # Create entries and set default values
         original_tracefile_button_ctt = Button(convert_trace_tab, text="Choose File", command=browse_file_ctt)
 
-        columns_entry_ctt = Entry(convert_trace_tab, width=config.get('entries', 'entry_width'))
-        columns_entry_ctt.insert(END, config.get('entries', 'default_columns_entry_ctt'))
+        column_indexes_entry_ctt = Entry(convert_trace_tab, width=config.get('entries', 'entry_width'))
+        column_indexes_entry_ctt.insert(END, config.get('entries', 'default_columns_entry_ctt'))
 
         source_entry_ctt = Entry(convert_trace_tab, width=config.get('entries', 'entry_width'))
         source_entry_ctt.insert(END, config.get('entries', 'default_trace_source_entry_ctt'))
@@ -393,8 +393,8 @@ class TraceConvertingToolGUI:
         description_entry_ctt = Entry(convert_trace_tab, width=config.get('entries', 'entry_width'))
         description_entry_ctt.insert(END, config.get('entries', 'default_description_entry_ctt'))
 
-        tracedatadescription_entry_ctt = Entry(convert_trace_tab, width=config.get('entries', 'entry_width'))
-        tracedatadescription_entry_ctt.insert(END, config.get('entries', 'default_tracedatadescription_entry_ctt'))
+        tracedata_description_entry_ctt = Entry(convert_trace_tab, width=config.get('entries', 'entry_width'))
+        tracedata_description_entry_ctt.insert(END, config.get('entries', 'default_tracedata_description_entry_ctt'))
 
         username_entry_ctt = Entry(convert_trace_tab, width=config.get('entries', 'entry_width'))
         username_entry_ctt.insert(END, config.get('entries', 'default_username_entry_ctt'))
@@ -409,10 +409,10 @@ class TraceConvertingToolGUI:
 
         # Place Entries
         original_tracefile_button_ctt.grid(row=1, column=0)
-        columns_entry_ctt.grid(row=2, column=1)
-        source_entry_ctt.grid(row=3, column=1)
+        column_indexes_entry_ctt.grid(row=2, column=1)
+        tracedata_description_entry_ctt.grid(row=3, column=1)
         description_entry_ctt.grid(row=4, column=1)
-        tracedatadescription_entry_ctt.grid(row=5, column=1)
+        source_entry_ctt.grid(row=5, column=1)
         username_entry_ctt.grid(row=6, column=1)
         additional_information_entry_ctt.grid(row=7, column=1)
         result_filename_entry_ctt.grid(row=8, column=1)
@@ -425,25 +425,26 @@ class TraceConvertingToolGUI:
             org_filename = original_tracefile_entry_ctt.get()
             if os.path.isfile(org_filename) and pathlib.Path(org_filename).suffix == ".csv":
                 try:
-                    col = list(map(int, (columns_entry_ctt.get().split(";"))))
+                    col = list(map(int, (column_indexes_entry_ctt.get().split(";"))))
                 except ValueError:
-                    mb.showerror("Columns to keep entry invalid",
-                                 "Columns need to be integers seperated by a semicolon [;]")
+                    mb.showerror("Column indexes invalid",
+                                 "Indexes need to be integers seperated by a semicolon [;]")
+                    return
                 trace_template["tracebody"]["tracedata"] = \
                     model.get_tracedata_from_file(original_tracefile_entry_ctt.get(), col)
                 amount_tracedata = len(trace_template["tracebody"]["tracedata"][0])
-                trace_template["tracebody"]["tracedatadescription"] = tracedatadescription_entry_ctt.get().split(";")
-                trace_template["traceheader"]["metainformation"]["name"] = os.path.basename(
+                trace_template["tracebody"]["tracedata description"] = tracedata_description_entry_ctt.get().split(";")
+                trace_template["traceheader"]["metainformation"]["original name"] = os.path.basename(
                     original_tracefile_entry_ctt.get())
-                trace_template["traceheader"]["metainformation"]["source"] = source_entry_ctt.get()
                 trace_template["traceheader"]["metainformation"]["description"] = description_entry_ctt.get()
-                trace_template["traceheader"]["metainformation"]["creation timestamp"] = str(datetime.datetime.now())
+                trace_template["traceheader"]["metainformation"]["source"] = source_entry_ctt.get()
                 trace_template["traceheader"]["metainformation"]["user"] = username_entry_ctt.get()
                 if len(additional_information_entry_ctt.get('1.0', 'end-1c')) != 0:
                     trace_template["traceheader"]["metainformation"]["additional information"] = \
                         additional_information_entry_ctt.get('1.0', 'end-1c').replace("\n", "").split(";")
                 else:
                     trace_template["traceheader"]["metainformation"].pop("additional information", None)
+                trace_template["traceheader"]["metainformation"]["creation time"] = str(datetime.datetime.now())
 
                 #  Generate statistics and adds them into a list. Each list entry represents one column of the raw trace
                 if amount_tracedata > 4:
@@ -485,7 +486,7 @@ class TraceConvertingToolGUI:
             # Clear statistic lists so the next trace won't have old values
             trace["traceheader"]["statistical characteristics"]["mean"] = []
             trace["traceheader"]["statistical characteristics"]["median"] = []
-            trace["traceheader"]["statistical characteristics"]["skew"] = []
+            trace["traceheader"]["statistical characteristics"]["skewness"] = []
             trace["traceheader"]["statistical characteristics"]["kurtosis"] = []
             trace["traceheader"]["statistical characteristics"]["autocorrelation"] = []
             trace["traceheader"]["statistical characteristics"]["variance"] = []
@@ -496,7 +497,7 @@ class TraceConvertingToolGUI:
                         format(df[0].mean(), formatstring))
                     trace["traceheader"]["statistical characteristics"]["median"].append(
                         format(df[0].median(), formatstring))
-                    trace["traceheader"]["statistical characteristics"]["skew"].append(
+                    trace["traceheader"]["statistical characteristics"]["skewness"].append(
                         format(df[0].skew(), formatstring))
                     trace["traceheader"]["statistical characteristics"]["kurtosis"].append(
                         format(df[0].kurtosis(), formatstring))
@@ -576,8 +577,8 @@ class TraceConvertingToolGUI:
         columns_label_tooltip_ctt = Hovertip(columns_label_ctt, config.get('tooltips', 'columns_label_ctt'))
         source_label_tooltip_ctt = Hovertip(source_label_ctt, config.get('tooltips', 'source_label_ctt'))
         description_label_tooltip_ctt = Hovertip(tracedescription_label_ctt, config.get('tooltips', 'tracedescription_label_ctt'))
-        tracedatadescription_label_tooltip_ctt = Hovertip(tracedatadescription_label_ctt,
-                                                          config.get('tooltips', 'tracedatadescription_label_ctt'))
+        tracedata_description_label_tooltip_ctt = Hovertip(tracedata_description_label_ctt,
+                                                          config.get('tooltips', 'tracedata_description_label_ctt'))
         username_label_tooltip_ctt = Hovertip(username_label_ctt, config.get('tooltips', 'username_label_ctt'))
         additional_information_label_tooltip_ctt = Hovertip(additional_information_label_ctt,
                                                             config.get('tooltips', 'additional_information_label_ctt'))
@@ -603,7 +604,7 @@ class TraceConvertingToolGUI:
         selected_traces_lb = Listbox(filter_traces_tab, width=config.get('listbox', 'listbox_width'),
                                      height=config.get('listbox', 'listbox_height'))
 
-        treeview_columns = ['name', 'mean', 'median', 'skew', 'kurtosis', 'autocorrelation', 'variance']
+        treeview_columns = ['name', 'mean', 'median', 'skewness', 'kurtosis', 'autocorrelation', 'variance']
         filter_results_tv = ttk.Treeview(filter_traces_tab, columns=treeview_columns, show='headings',
                                          height=config.get('treeview', 'filter_treeview_height'))
         vsb_filter_results_tv = ttk.Scrollbar(filter_traces_tab, orient="vertical", command=filter_results_tv.yview)
@@ -612,7 +613,7 @@ class TraceConvertingToolGUI:
         filter_results_tv.column('name', width=300)
         filter_results_tv.heading('mean', text='Mean')
         filter_results_tv.heading('median', text='Median')
-        filter_results_tv.heading('skew', text='Skew')
+        filter_results_tv.heading('skewness', text='Skewness')
         filter_results_tv.heading('kurtosis', text='Kurtosis')
         filter_results_tv.heading('autocorrelation', text='Autocorrelation')
         filter_results_tv.heading('variance', text='Variance')
@@ -658,14 +659,14 @@ class TraceConvertingToolGUI:
             for i in range(len(selected_files)):
                 mean_list = selected_files[i]["mean"]
                 median_list = selected_files[i]["median"]
-                skew_list = selected_files[i]["skew"]
+                skewness_list = selected_files[i]["skewness"]
                 kurtosis_list = selected_files[i]["kurtosis"]
                 autocorrelation_list = selected_files[i]["autocorrelation"]
                 variance_list = selected_files[i]["variance"]
                 for j in range(len(selected_files[i]["mean"])):
                     mean = float(mean_list[j])
                     median = float(median_list[j])
-                    skew = float(skew_list[j])
+                    skewness = float(skewness_list[j])
                     kurtosis = float(kurtosis_list[j])
                     autocorrelation = float(autocorrelation_list[j])
                     variance = float(variance_list[j])
@@ -674,7 +675,7 @@ class TraceConvertingToolGUI:
                             trace = [os.path.basename(selected_filenames[i]),
                                      mean,
                                      median,
-                                     skew,
+                                     skewness,
                                      kurtosis,
                                      autocorrelation,
                                      variance

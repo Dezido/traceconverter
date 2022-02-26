@@ -114,10 +114,10 @@ def verify_statistics(converted_trace_file, tolerance):
                                 "Median [" + str(i) + "] not equal. Should be: " + str(df.median()[0]) + " but is " +
                                 str(statistics["median"][i]) + "\n")
                         statistics_valid = False
-                    if not math.isclose(float(df.skew()[0]), float(statistics["skew"][i]), rel_tol=tolerance):
+                    if not math.isclose(float(df.skew()[0]), float(statistics["skewness"][i]), rel_tol=tolerance):
                         invalid_statistics += (
-                                "Skew [" + str(i) + "] not equal. Should be: " + str(df.skew()[0]) + " but is " +
-                                str(statistics["skew"][i]) + "\n")
+                                "Skewness [" + str(i) + "] not equal. Should be: " + str(df.skew()[0]) + " but is " +
+                                str(statistics["skewness"][i]) + "\n")
                         statistics_valid = False
                     if not math.isclose(float(df.kurtosis()[0]), float(statistics["kurtosis"][i]), rel_tol=tolerance):
                         invalid_statistics += (
@@ -228,25 +228,25 @@ def hash_check(filename):
 
 trace_template = {"traceheader": {
     "metainformation": {
-        "name": "",
-        "source": "",
+        "original name": "",
         "description": "",
-        "creation timestamp": "",
+        "source": "",
         "user": "",
         "additional information": "",
+        "creation time": "",
         "hash value": ""
     },
     "statistical characteristics": {
         "mean": [],
         "median": [],
-        "skew": [],
+        "skewness": [],
         "kurtosis": [],
         "autocorrelation": [],
         "variance": []
     }
 },
     "tracebody": {
-        "tracedatadescription": [],
+        "tracedata description": [],
         "tracedata": []
     }
 }
