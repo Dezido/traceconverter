@@ -318,13 +318,13 @@ class TraceConvertingToolGUI:
                                                   config.get('tooltips', 'keep_header_checkbutton_pft'))
 
         # Converting Tab
-        columns_label_ctt = Label(convert_trace_tab, text="Column Indexes for Tracedata")
+        columns_label_ctt = Label(convert_trace_tab, text="Tracedata Column Indexes")
         columns_label_ctt.grid(row=2)
-        tracedata_description_label_ctt = Label(convert_trace_tab, text="Tracedata description")
+        tracedata_description_label_ctt = Label(convert_trace_tab, text="Tracedata Description")
         tracedata_description_label_ctt.grid(row=3)
-        tracedescription_label_ctt = Label(convert_trace_tab, text="Tracedescription")
-        tracedescription_label_ctt.grid(row=4)
-        source_label_ctt = Label(convert_trace_tab, text="Tracesource")
+        trace_description_label_ctt = Label(convert_trace_tab, text="Trace Description")
+        trace_description_label_ctt.grid(row=4)
+        source_label_ctt = Label(convert_trace_tab, text="Trace Source")
         source_label_ctt.grid(row=5)
         username_label_ctt = Label(convert_trace_tab, text="Username")
         username_label_ctt.grid(row=6)
@@ -360,7 +360,7 @@ class TraceConvertingToolGUI:
                                                         offvalue=0, command=show_name_entry)
         extract_tracedata_checkbutton_ctt.grid(column=4, row=2)
 
-        statistics_format_label_ctt = Label(convert_trace_tab, text="Statistics Format String")
+        statistics_format_label_ctt = Label(convert_trace_tab, text="Statistic Format String")
         statistics_format_label_ctt.grid(row=12, column=0)
 
         statistics_format_entry_ctt = Entry(convert_trace_tab, width=config.get('entries', 'entry_width'))
@@ -576,7 +576,7 @@ class TraceConvertingToolGUI:
         # Tooltips
         columns_label_tooltip_ctt = Hovertip(columns_label_ctt, config.get('tooltips', 'columns_label_ctt'))
         source_label_tooltip_ctt = Hovertip(source_label_ctt, config.get('tooltips', 'source_label_ctt'))
-        description_label_tooltip_ctt = Hovertip(tracedescription_label_ctt, config.get('tooltips', 'tracedescription_label_ctt'))
+        description_label_tooltip_ctt = Hovertip(trace_description_label_ctt, config.get('tooltips', 'trace_description_label_ctt'))
         tracedata_description_label_tooltip_ctt = Hovertip(tracedata_description_label_ctt,
                                                           config.get('tooltips', 'tracedata_description_label_ctt'))
         username_label_tooltip_ctt = Hovertip(username_label_ctt, config.get('tooltips', 'username_label_ctt'))
