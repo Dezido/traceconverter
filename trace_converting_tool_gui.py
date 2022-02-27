@@ -133,13 +133,13 @@ class TraceConvertingToolGUI:
         browse_file_button_pft = Button(prepare_file_tab, text="Choose File", command=browse_file_pft)
         browse_file_button_pft.grid(column=1, row=0)
 
-        remove_rows_label_pft = Label(prepare_file_tab, text="Amount of Rows")
+        remove_rows_label_pft = Label(prepare_file_tab, text="Number of Lines")
         remove_rows_label_pft.grid(column=0, row=2)
 
         remove_rows_entry_pft = Entry(prepare_file_tab, width=config.get('entries', 'entry_width'))
         remove_rows_entry_pft.grid(column=1, row=2)
 
-        remove_rows_button_pft = Button(prepare_file_tab, text="Remove Rows",
+        remove_rows_button_pft = Button(prepare_file_tab, text="Remove Lines",
                                         command=lambda: [model.remove_lines_from_csv(file_entry_pft.get(),
                                                                                      remove_rows_entry_pft.get()),
                                                          display_file_pft(file_entry_pft.get())])
@@ -163,34 +163,35 @@ class TraceConvertingToolGUI:
         file_displayer_label_pft.grid(column=0, row=8)
         file_displayer_pft = scrolledtext.ScrolledText(prepare_file_tab, width=200, height=33)
 
-        date_format_label_pft = Label(prepare_file_tab, text="Timestamp Format Strings")
+        date_format_label_pft = Label(prepare_file_tab, text="Format Strings of Timestamps")
         date_format_label_pft.grid(column=2, row=4)
         date_format_entry_pft = Entry(prepare_file_tab, width=config.get('entries', 'entry_width'))
         date_format_entry_pft.grid(column=3, row=4)
         date_format_entry_pft.insert(END, config.get('entries', 'default_date_format_entry_pft'))
 
-        date_columns_label_pft = Label(prepare_file_tab, text="Column Indexes")
+        date_columns_label_pft = Label(prepare_file_tab, text="Indexes of Columns with Timestamps")
+        date_columns_label_pft = Label(prepare_file_tab, text="Indexes of Columns with Timestamps")
         date_columns_label_pft.grid(column=0, row=4)
         date_columns_entry_pft = Entry(prepare_file_tab, width=config.get('entries', 'entry_width'))
         date_columns_entry_pft.grid(column=1, row=4)
 
-        column_wise_difference_label_pft = Label(prepare_file_tab, text="Column Indexes")
+        column_wise_difference_label_pft = Label(prepare_file_tab, text="Column Indexes Column Difference")
         column_wise_difference_label_pft.grid(column=0, row=5)
         column_wise_difference_entry_pft = Entry(prepare_file_tab, width=config.get('entries', 'entry_width'))
         column_wise_difference_entry_pft.grid(column=1, row=5)
 
-        column_wise_difference_result_column_label_pft = Label(prepare_file_tab, text="Result Column Name")
+        column_wise_difference_result_column_label_pft = Label(prepare_file_tab, text="Result Column Name Column Difference")
         column_wise_difference_result_column_label_pft.grid(column=2, row=5)
         column_wise_difference_result_column_entry_pft = Entry(prepare_file_tab,
                                                                width=config.get('entries', 'entry_width'))
         column_wise_difference_result_column_entry_pft.grid(column=3, row=5)
 
-        row_wise_difference_label_pft = Label(prepare_file_tab, text="Column Index")
+        row_wise_difference_label_pft = Label(prepare_file_tab, text="Column Index Row Difference")
         row_wise_difference_label_pft.grid(column=0, row=6)
         row_wise_difference_entry_pft = Entry(prepare_file_tab, width=config.get('entries', 'entry_width'))
         row_wise_difference_entry_pft.grid(column=1, row=6)
 
-        row_wise_difference_result_column_label_pft = Label(prepare_file_tab, text="Result Column Name")
+        row_wise_difference_result_column_label_pft = Label(prepare_file_tab, text="Result Column Name Row Difference")
         row_wise_difference_result_column_label_pft.grid(column=2, row=6)
         row_wise_difference_result_column_entry_pft = Entry(prepare_file_tab,
                                                             width=config.get('entries', 'entry_width'))
@@ -220,13 +221,15 @@ class TraceConvertingToolGUI:
         delimiter_entry_pft.grid(column=1, row=7)
         header_label_pft = Label(prepare_file_tab, text="Header")
         header_label_pft.grid(column=2, row=7)
-        header_entry_pft = Entry(prepare_file_tab, width=config.get('entries', 'entry_width'))
+        header_entry_pft = Entry(prepare_file_tab, width=config.get('entries', 'entry_width'),
+                                 bg=config.get('entries', 'background_colour_optional_entries'))
         header_entry_pft.grid(column=3, row=7)
 
         keep_header_checkbutton_var_pft = IntVar()
         keep_header_checkbutton_pft = Checkbutton(prepare_file_tab, text="Use first Line as Header",
                                                   variable=keep_header_checkbutton_var_pft, onvalue=1,
-                                                  offvalue=0)
+                                                  offvalue=0,selectcolor=
+                                                  config.get('entries', 'background_colour_optional_entries'))
         keep_header_checkbutton_pft.grid(column=5, row=7)
 
         transform_filetype_button_pft = Button(prepare_file_tab,
@@ -337,7 +340,8 @@ class TraceConvertingToolGUI:
         tracedata_filename_entry_ctt = Entry(convert_trace_tab)
 
         float_format_label_ctt = Label(convert_trace_tab, text="Float Format String")
-        float_format_entry_ctt = Entry(convert_trace_tab)
+        float_format_entry_ctt = Entry(convert_trace_tab,
+                                       bg=config.get('entries', 'background_colour_optional_entries'))
         float_format_entry_ctt.insert(END, config.get('entries', 'default_float_format_entry_ett'))
 
         def show_name_entry():
@@ -357,13 +361,15 @@ class TraceConvertingToolGUI:
         extract_tracedata_checkbutton_ctt = Checkbutton(convert_trace_tab,
                                                         text="Extract Tracedata after Conversion",
                                                         variable=extract_tracedata_checkbutton_var_ctt, onvalue=1,
-                                                        offvalue=0, command=show_name_entry)
+                                                        offvalue=0, command=show_name_entry,selectcolor=
+                                                        config.get('entries', 'background_colour_optional_entries'))
         extract_tracedata_checkbutton_ctt.grid(column=4, row=2)
 
         statistics_format_label_ctt = Label(convert_trace_tab, text="Statistic Format String")
         statistics_format_label_ctt.grid(row=12, column=0)
 
-        statistics_format_entry_ctt = Entry(convert_trace_tab, width=config.get('entries', 'entry_width'))
+        statistics_format_entry_ctt = Entry(convert_trace_tab, width=config.get('entries', 'entry_width'),
+                                            bg=config.get('entries', 'background_colour_optional_entries'))
         statistics_format_entry_ctt.grid(row=12, column=1)
 
         original_tracefile_entry_ctt = Entry(convert_trace_tab, width=config.get('entries', 'entry_width'))
@@ -724,7 +730,8 @@ class TraceConvertingToolGUI:
         tracedata_filename_label_ett.grid(row=1, column=0)
         float_format_label_ett = Label(extract_tracedata_tab, text="Float Format String")
         float_format_label_ett.grid(row=2, column=0)
-        float_format_entry_ett = Entry(extract_tracedata_tab, width=config.get('entries', 'entry_width'))
+        float_format_entry_ett = Entry(extract_tracedata_tab, width=config.get('entries', 'entry_width'),
+                                       bg=config.get('entries', 'background_colour_optional_entries'))
         float_format_entry_ett.grid(row=2, column=1)
         float_format_entry_ett.insert(END, config.get('entries', 'default_float_format_entry_ett'))
         input_trace_entry_ett = Entry(extract_tracedata_tab, width=config.get('entries', 'entry_width'))
@@ -876,7 +883,8 @@ class TraceConvertingToolGUI:
         statistics_format_string_label_vtt = Label(validate_trace_tab, text="Statistics Format String")
         statistics_format_string_label_vtt.grid(column=1, row=4)
 
-        statistics_format_string_entry_vtt = Entry(validate_trace_tab, width=config.get('entries', 'entry_width'))
+        statistics_format_string_entry_vtt = Entry(validate_trace_tab, width=config.get('entries', 'entry_width'),
+                                                   bg=config.get('entries', 'background_colour_optional_entries'))
         statistics_format_string_entry_vtt.grid(column=2, row=4)
 
         # Tooltips

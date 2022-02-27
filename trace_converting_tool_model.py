@@ -164,9 +164,9 @@ def remove_lines_from_csv(filename, line_amount):
                     mb.showinfo('Removing successfully', 'Removed the first ' + str(line_amount) + ' rows from ' +
                                 os.path.basename(filename))
             except (EmptyDataError, ValueError):
-                mb.showerror('Invalid amount of Rows', 'Please specify a valid amount of rows to remove')
+                mb.showerror('Invalid number of Lines', 'Please specify a valid number of lines to remove')
         except ValueError:
-            mb.showerror('Integer needed', 'Please enter an integer amount of rows')
+            mb.showerror('Integer needed', 'Please enter an integer number of lines')
     except FileNotFoundError:
         mb.showinfo(config.get('browse_file', 'no_file_selected_window'),
                     config.get('browse_file', 'no_file_selected_message'))
