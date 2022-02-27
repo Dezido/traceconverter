@@ -133,7 +133,7 @@ class TraceConvertingToolGUI:
         browse_file_button_pft = Button(prepare_file_tab, text="Choose File", command=browse_file_pft)
         browse_file_button_pft.grid(column=1, row=0)
 
-        remove_rows_label_pft = Label(prepare_file_tab, text="Number of Lines")
+        remove_rows_label_pft = Label(prepare_file_tab, text="Number of Lines to Be Removed")
         remove_rows_label_pft.grid(column=0, row=2)
 
         remove_rows_entry_pft = Entry(prepare_file_tab, width=config.get('entries', 'entry_width'))
@@ -151,7 +151,7 @@ class TraceConvertingToolGUI:
         add_header_entry_pft = Entry(prepare_file_tab, width=config.get('entries', 'entry_width'))
         add_header_entry_pft.grid(column=1, row=3)
 
-        add_header_button_pft = Button(prepare_file_tab, text="Add Header to CSV",
+        add_header_button_pft = Button(prepare_file_tab, text="Add Header to CSV File",
                                        command=lambda: [model.add_header_to_csv(file_entry_pft.get(),
                                                                                 list(
                                                                                     add_header_entry_pft.get().split(
@@ -169,29 +169,30 @@ class TraceConvertingToolGUI:
         date_format_entry_pft.grid(column=3, row=4)
         date_format_entry_pft.insert(END, config.get('entries', 'default_date_format_entry_pft'))
 
-        date_columns_label_pft = Label(prepare_file_tab, text="Indexes of Columns with Timestamps")
-        date_columns_label_pft = Label(prepare_file_tab, text="Indexes of Columns with Timestamps")
+        date_columns_label_pft = Label(prepare_file_tab, text="Timestamp Column Indexes")
         date_columns_label_pft.grid(column=0, row=4)
         date_columns_entry_pft = Entry(prepare_file_tab, width=config.get('entries', 'entry_width'))
         date_columns_entry_pft.grid(column=1, row=4)
 
-        column_wise_difference_label_pft = Label(prepare_file_tab, text="Column Indexes Column Difference")
+        column_wise_difference_label_pft = Label(prepare_file_tab, text="Difference between Columns: Indexes")
         column_wise_difference_label_pft.grid(column=0, row=5)
         column_wise_difference_entry_pft = Entry(prepare_file_tab, width=config.get('entries', 'entry_width'))
         column_wise_difference_entry_pft.grid(column=1, row=5)
 
-        column_wise_difference_result_column_label_pft = Label(prepare_file_tab, text="Result Column Name Column Difference")
+        column_wise_difference_result_column_label_pft = Label(prepare_file_tab,
+                                                               text="Difference between Columns: Result Column Name")
         column_wise_difference_result_column_label_pft.grid(column=2, row=5)
         column_wise_difference_result_column_entry_pft = Entry(prepare_file_tab,
                                                                width=config.get('entries', 'entry_width'))
         column_wise_difference_result_column_entry_pft.grid(column=3, row=5)
 
-        row_wise_difference_label_pft = Label(prepare_file_tab, text="Column Index Row Difference")
+        row_wise_difference_label_pft = Label(prepare_file_tab, text="Difference over Rows: Column Index")
         row_wise_difference_label_pft.grid(column=0, row=6)
         row_wise_difference_entry_pft = Entry(prepare_file_tab, width=config.get('entries', 'entry_width'))
         row_wise_difference_entry_pft.grid(column=1, row=6)
 
-        row_wise_difference_result_column_label_pft = Label(prepare_file_tab, text="Result Column Name Row Difference")
+        row_wise_difference_result_column_label_pft = Label(prepare_file_tab,
+                                                            text="Difference over Rows: Result Column Name")
         row_wise_difference_result_column_label_pft.grid(column=2, row=6)
         row_wise_difference_result_column_entry_pft = Entry(prepare_file_tab,
                                                             width=config.get('entries', 'entry_width'))
@@ -204,22 +205,22 @@ class TraceConvertingToolGUI:
                                                     date_format_entry_pft.get()))
         calculate_timestamp_button_pft.grid(column=4, row=4)
 
-        column_wise_difference_button_pft = Button(prepare_file_tab, text="Calculate column-wise Difference",
+        column_wise_difference_button_pft = Button(prepare_file_tab, text="Calculate Difference between Columns",
                                                    command=lambda: calculate_difference_columns_pft(
                                                        file_entry_pft.get(),
                                                        column_wise_difference_entry_pft.get()))
         column_wise_difference_button_pft.grid(column=4, row=5)
 
-        row_wise_difference_button_pft = Button(prepare_file_tab, text="Calculate row-wise Difference",
+        row_wise_difference_button_pft = Button(prepare_file_tab, text="Calculate Difference over Rows",
                                                 command=lambda: calculate_difference_rows_pft(
                                                     file_entry_pft.get()))
         row_wise_difference_button_pft.grid(column=4, row=6)
 
-        delimiter_label_pft = Label(prepare_file_tab, text="Delimiter")
+        delimiter_label_pft = Label(prepare_file_tab, text="Delimiter of the Input File")
         delimiter_label_pft.grid(column=0, row=7)
         delimiter_entry_pft = Entry(prepare_file_tab, width=config.get('entries', 'entry_width'))
         delimiter_entry_pft.grid(column=1, row=7)
-        header_label_pft = Label(prepare_file_tab, text="Header")
+        header_label_pft = Label(prepare_file_tab, text="Header of the New CSV File")
         header_label_pft.grid(column=2, row=7)
         header_entry_pft = Entry(prepare_file_tab, width=config.get('entries', 'entry_width'),
                                  bg=config.get('entries', 'background_colour_optional_entries'))
@@ -228,12 +229,12 @@ class TraceConvertingToolGUI:
         keep_header_checkbutton_var_pft = IntVar()
         keep_header_checkbutton_pft = Checkbutton(prepare_file_tab, text="Use first Line as Header",
                                                   variable=keep_header_checkbutton_var_pft, onvalue=1,
-                                                  offvalue=0,selectcolor=
+                                                  offvalue=0, selectcolor=
                                                   config.get('entries', 'background_colour_optional_entries'))
         keep_header_checkbutton_pft.grid(column=5, row=7)
 
         transform_filetype_button_pft = Button(prepare_file_tab,
-                                               text="Convert to CSV",
+                                               text="Convert File to CSV",
                                                command=lambda:
                                                convert_file_to_csv_pft(file_entry_pft.get(),
                                                                        delimiter_entry_pft.get()))
@@ -361,7 +362,7 @@ class TraceConvertingToolGUI:
         extract_tracedata_checkbutton_ctt = Checkbutton(convert_trace_tab,
                                                         text="Extract Tracedata after Conversion",
                                                         variable=extract_tracedata_checkbutton_var_ctt, onvalue=1,
-                                                        offvalue=0, command=show_name_entry,selectcolor=
+                                                        offvalue=0, command=show_name_entry, selectcolor=
                                                         config.get('entries', 'background_colour_optional_entries'))
         extract_tracedata_checkbutton_ctt.grid(column=4, row=2)
 
@@ -582,9 +583,10 @@ class TraceConvertingToolGUI:
         # Tooltips
         columns_label_tooltip_ctt = Hovertip(columns_label_ctt, config.get('tooltips', 'columns_label_ctt'))
         source_label_tooltip_ctt = Hovertip(source_label_ctt, config.get('tooltips', 'source_label_ctt'))
-        description_label_tooltip_ctt = Hovertip(trace_description_label_ctt, config.get('tooltips', 'trace_description_label_ctt'))
+        description_label_tooltip_ctt = Hovertip(trace_description_label_ctt,
+                                                 config.get('tooltips', 'trace_description_label_ctt'))
         tracedata_description_label_tooltip_ctt = Hovertip(tracedata_description_label_ctt,
-                                                          config.get('tooltips', 'tracedata_description_label_ctt'))
+                                                           config.get('tooltips', 'tracedata_description_label_ctt'))
         username_label_tooltip_ctt = Hovertip(username_label_ctt, config.get('tooltips', 'username_label_ctt'))
         additional_information_label_tooltip_ctt = Hovertip(additional_information_label_ctt,
                                                             config.get('tooltips', 'additional_information_label_ctt'))
