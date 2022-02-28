@@ -261,6 +261,8 @@ class TraceConvertingToolGUI:
             :param delimiter:Delimiter of the file. For example regex
             """
             try:
+                if len(delimiter) == 0:
+                    delimiter = None
                 if keep_header_checkbutton_var_pft.get() == 1:
                     df = pd.read_csv(filename, header=0, sep=delimiter)
                 else:
