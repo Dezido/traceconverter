@@ -84,6 +84,9 @@ class TraceConvertingToolGUI:
                              'Timestamp could not be converted with the passed format strings.\nPlease check if you'
                              ' passed the same number of format strings and column indexes '
                              'or if the timestamps need further preparation')
+            except PermissionError:
+                mb.showerror('Permission to edit file denied',
+                             'Please check if the file is used by another application')
 
         def calculate_difference_rows_pft(file):
             """
@@ -270,7 +273,9 @@ class TraceConvertingToolGUI:
                 result_filename = filename.split('.')[0] + '.csv'
                 dont_overwrite = 0
             except ValueError:
-                mb.showerror("Error while reading file", "Please check if the file and the delimiter are valid")
+                mb.showerror("Error while reading file", "Please check if the file and the delimiter are valid."
+                                                         "Note: The '\s+' delimiter also does not work if values in a "
+                                                         "column are also seperated by whitespaces.")
             if os.path.exists(result_filename):
                 dont_overwrite = not mb.askyesno("File already exists", result_filename +
                                                  " already exists. \n Would you like to overwrite it?")
@@ -286,6 +291,9 @@ class TraceConvertingToolGUI:
                     file_entry_pft.insert(END, result_filename)
             except ValueError:
                 mb.showerror("Error while converting file", "Please check if the file and the header are valid")
+            except PermissionError:
+                mb.showerror('Permission to edit file denied',
+                             'Please check if the file is used by another application')
 
         # Tooltips
         browse_file_button_tooltip_pft = Hovertip(browse_file_button_pft,
@@ -563,15 +571,16 @@ class TraceConvertingToolGUI:
                                                      "\n Would you like to overwrite it?")
                 if not dont_overwrite:
                     try:
+                        df = df.transpose().dropna()
                         if len(float_format_entry_ctt.get()) > 0:
-                            df.transpose().to_csv(result_filename,
-                                                  sep='\t',
-                                                  float_format=float_format_entry_ctt.get(),
-                                                  index=False, header=False)
+                            df.to_csv(result_filename,
+                                      sep='\t',
+                                      float_format=float_format_entry_ctt.get(),
+                                      index=False, header=False)
                         if len(float_format_entry_ctt.get()) == 0:
-                            df.transpose().to_csv(result_filename,
-                                                  sep='\t',
-                                                  index=False, header=False)
+                            df.to_csv(result_filename,
+                                      sep='\t',
+                                      index=False, header=False)
                     except TypeError:
                         mb.showerror('Invalid float format string', 'Please enter a valid format string')
                     except ValueError:
@@ -855,6 +864,7 @@ class TraceConvertingToolGUI:
                         with open(filename, 'w') as fp:
                             json.dump(trace, fp, indent=4)
                     add_hash_value_to_trace(filename)
+                    mb.showinfo('Traceheader restored', 'Statistics and has value restored successfully')
                 except json.decoder.JSONDecodeError:
                     mb.showerror("Trace content invalid", "Please check if the trace content is valid")
             else:
