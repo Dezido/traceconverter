@@ -131,6 +131,7 @@ class TraceConvertingToolGUI:
             :param filename:Input file
             :param delimiter:Delimiter of the file. For example regex
             """
+            write_file = 1
             try:
                 if len(delimiter) == 0:
                     delimiter = None
@@ -139,16 +140,16 @@ class TraceConvertingToolGUI:
                 else:
                     df = pd.read_csv(filename, header=None, sep=delimiter)
                 result_filename = filename.split('.')[0] + '.csv'
-                dont_overwrite = 0
             except ValueError:
                 mb.showerror("Error while reading file", "Please check if the file and the delimiter are valid."
                                                          "Note: The '\s+' delimiter also does not work if values in a "
                                                          "column are also seperated by whitespaces.")
+                return
             if os.path.exists(result_filename):
-                dont_overwrite = not mb.askyesno("File already exists", result_filename +
+                write_file = mb.askyesno("File already exists", result_filename +
                                                  " already exists. \n Would you like to overwrite it?")
             try:
-                if not dont_overwrite:
+                if write_file:
                     if header_entry_pft.get() != "" and keep_header_checkbutton_var_pft.get() == 0:
                         df.to_csv(result_filename, index=False, sep=',', header=header_entry_pft.get().split(','))
                     else:
@@ -163,7 +164,7 @@ class TraceConvertingToolGUI:
                 mb.showerror('Permission to edit file denied',
                              'Please check if the file is used by another application')
 
-        def show_name_entry():
+        def show_tracedata_filename_entry_ctt():
             """Puts the tracedata_filename_label on the grid if the checkbox is selected"""
             if extract_tracedata_checkbutton_var_ctt.get() == 0:
                 tracedata_filename_label_ctt.grid_forget()
@@ -226,12 +227,12 @@ class TraceConvertingToolGUI:
                 # Save trace to file
                 filename = config.get('directories', 'converted_traces_dir') + \
                            '/' + result_filename_entry_ctt.get() + config.get('files', 'trace_file_suffix')
-                dont_overwrite = 0
+                write_file = 1
                 if os.path.exists(filename):
-                    dont_overwrite = not mb.askyesno("File already exists",
+                    write_file = mb.askyesno("File already exists",
                                                      os.path.basename(filename) + " already exists. \n "
                                                                                   "Would you like to overwrite it?")
-                if not dont_overwrite:
+                if write_file:
                     with open(filename, 'w') as fp:
                         json.dump(trace, fp, indent=4)
                     add_hash_value_to_trace(filename)
@@ -314,15 +315,15 @@ class TraceConvertingToolGUI:
             with open(filename) as tr:
                 tracedata = json.load(tr)["tracebody"]["tracedata"]
                 df = pd.DataFrame(tracedata)
-                dont_overwrite = 0
+                write_file = 1
                 result_filename = config.get('directories', 'tracedata_dir') + tracedata_filename_entry_ctt.get() + \
                                   config.get('files', 'tracedata_file_suffix')
                 if os.path.exists(result_filename):
-                    dont_overwrite = not mb.askyesno("File already exists",
+                    write_file = mb.askyesno("File already exists",
                                                      os.path.basename(result_filename) +
                                                      " already exists. "
                                                      "\n Would you like to overwrite it?")
-                if not dont_overwrite:
+                if write_file:
                     try:
                         df = df.transpose().dropna()
                         if len(float_format_entry_ctt.get()) > 0:
@@ -449,11 +450,11 @@ class TraceConvertingToolGUI:
                         df = pd.DataFrame(tracedata)
                         filename = config.get('directories', 'tracedata_dir') \
                                    + tracedata_filename_entry_ett.get() + '_dat.trace'
-                        dont_overwrite = 0
+                        write_file = 1
                         if os.path.exists(filename):
-                            dont_overwrite = not mb.askyesno("File already exists", os.path.basename(filename) +
+                            write_file = mb.askyesno("File already exists", os.path.basename(filename) +
                                                              " already exists. \n Would you like to overwrite it?")
-                        if not dont_overwrite:
+                        if write_file:
                             df = df.transpose().dropna()
                             try:
                                 if len(float_format_entry_ett.get()) > 0:
@@ -496,11 +497,11 @@ class TraceConvertingToolGUI:
                     with open(filename) as tr:
                         tracedata = json.load(tr)
                         trace = generate_statistic(tracedata, statistics_format_string_entry_vtt.get())
-                    dont_overwrite = 0
+                    write_file = 1
                     if os.path.exists(filename):
-                        dont_overwrite = not mb.askyesno("Overwriting File",
+                        write_file = mb.askyesno("Overwriting File",
                                                          "Restoring the traceheader will overwrite the file. Continue?")
-                    if not dont_overwrite:
+                    if write_file:
                         with open(filename, 'w') as fp:
                             json.dump(trace, fp, indent=4)
                     add_hash_value_to_trace(filename)
@@ -672,7 +673,7 @@ class TraceConvertingToolGUI:
         extract_tracedata_checkbutton_ctt = Checkbutton(convert_trace_tab,
                                                         text="Extract Tracedata after Conversion",
                                                         variable=extract_tracedata_checkbutton_var_ctt, onvalue=1,
-                                                        offvalue=0, command=show_name_entry,
+                                                        offvalue=0, command=show_tracedata_filename_entry_ctt,
                                                         selectcolor=config.get('entries',
                                                                                'background_colour_optional_entries'))
         extract_tracedata_checkbutton_ctt.grid(column=4, row=2)
@@ -826,6 +827,7 @@ class TraceConvertingToolGUI:
         statistics_format_string_entry_vtt.grid(column=2, row=4)
 
         # Tooltips
+
         # Prepare File Tab
         browse_file_button_tooltip_pft = Hovertip(browse_file_button_pft,
                                                   config.get('tooltips', 'browse_file_button_pft'))
@@ -861,6 +863,7 @@ class TraceConvertingToolGUI:
         header_label_tooltip_pft = Hovertip(header_label_pft, config.get('tooltips', 'header_label_pft'))
         header_checkbutton_tooltip_pft = Hovertip(keep_header_checkbutton_pft,
                                                   config.get('tooltips', 'keep_header_checkbutton_pft'))
+
         # Convert Trace Tab
         columns_label_tooltip_ctt = Hovertip(columns_label_ctt, config.get('tooltips', 'columns_label_ctt'))
         source_label_tooltip_ctt = Hovertip(source_label_ctt, config.get('tooltips', 'source_label_ctt'))
@@ -885,12 +888,14 @@ class TraceConvertingToolGUI:
                                                       config.get('tooltips', 'statistics_format_string'))
         float_format_label_tooltip_ctt = Hovertip(float_format_label_ctt,
                                                   config.get('tooltips', 'float_format_label_ett'))
+
         # Filter Traces Tab
         selected_traces_label_tooltip_ftt = Hovertip(selected_traces_label_ftt,
                                                      config.get('tooltips', 'selected_traces_label_ftt'))
         browse_files_button_tooltip_ftt = Hovertip(browse_button_ftt, config.get('tooltips', 'browse_files_button_ftt'))
         filter_button_tooltip_ftt = Hovertip(filter_button_ftt, config.get('tooltips', 'filter_button_ftt'))
         expression_label_tooltip_ftt = Hovertip(expression_label_ftt, config.get('tooltips', 'expression_label_ftt'))
+
         # Extract Tracedata Tab
         converted_trace_label_tooltip_ett = Hovertip(converted_trace_label_ett,
                                                      config.get('tooltips', 'converted_trace_label_ett'))
@@ -902,6 +907,7 @@ class TraceConvertingToolGUI:
                                               config.get('tooltips', 'extract_tracedata_button_ett'))
         float_format_label_tooltip_ett = Hovertip(float_format_label_ett,
                                                   config.get('tooltips', 'float_format_label_ett'))
+
         # Validate Trace Tab
         browse_file_button_tooltip_vtt = Hovertip(browse_file_button_vtt,
                                                   config.get('tooltips', 'browse_file_button_vtt'))
