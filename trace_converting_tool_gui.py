@@ -20,9 +20,6 @@ config = configparser.RawConfigParser()
 config.read('config.properties')
 
 
-
-
-
 class TraceConvertingToolGUI:
     def __init__(self, master):
 
@@ -372,66 +369,6 @@ class TraceConvertingToolGUI:
             filter_results_tv.grid(column=1, row=11, columnspan=10)
             vsb_filter_results_tv.grid(column=11, row=11, sticky=N + S)
 
-        def browse_file_ett():
-            """Opens file explorer to select a file"""
-            input_trace_entry_ett.delete(0, END)
-            selected_trace = fd.askopenfilename(initialdir=config.get('directories', 'converted_traces_dir'),
-                                                title="Select a File",
-                                                filetypes=(("JSON files", "*.json*"),))
-            if not selected_trace:
-                mb.showinfo('No file selected', 'Please select a valid file')
-            input_trace_entry_ett.insert(END, selected_trace)
-            input_trace_entry_ett.grid(row=0, column=1)
-            display_file_ett(selected_trace)
-
-        def display_file_ett(filename):
-            """
-            Displays the selected file in the extract tracedata tab
-            :param filename: File that will be displayed
-            """
-            with open(filename, 'r') as f:
-                trace_column_display_ett.config(state=NORMAL)
-                trace_column_display_ett.delete("1.0", "end")
-                trace_column_display_ett.insert(INSERT, f.read())
-                trace_column_display_ett.config(state=DISABLED)
-                trace_column_display_ett.grid(column=0, row=6, columnspan=4)
-
-        def extract_tracedata_ett():
-            """Extracts the tracedata so it can be used in ProFiDo"""
-            org_filename = input_trace_entry_ett.get()
-            if os.path.isfile(org_filename) and pathlib.Path(org_filename).suffix == ".json":
-                try:
-                    with open(input_trace_entry_ett.get()) as trace_in:
-                        tracedata = json.load(trace_in)["tracebody"]["tracedata"]
-                        df = pd.DataFrame(tracedata)
-                        filename = config.get('directories', 'tracedata_dir') \
-                                   + tracedata_filename_entry_ett.get() + '_dat.trace'
-                        write_file = 1
-                        if os.path.exists(filename):
-                            write_file = mb.askyesno("File already exists", os.path.basename(filename) +
-                                                     " already exists. \n Would you like to overwrite it?")
-                        if write_file:
-                            df = df.transpose().dropna()
-                            try:
-                                if len(float_format_entry_ett.get()) > 0:
-                                    df.to_csv(filename, sep='\t', float_format=float_format_entry_ett.get(),
-                                              index=False, header=False)
-                                if len(float_format_entry_ett.get()) == 0:
-                                    df.to_csv(filename, sep='\t', index=False, header=False)
-                            except TypeError:
-                                mb.showerror('Invalid float format string', 'Please enter a valid format string')
-                            except ValueError:
-                                mb.showerror('Invalid float format string', 'Please enter a valid format string')
-                            except FileNotFoundError:
-                                mb.showerror('Invalid Path or Filename', 'Please check if path and filename are valid')
-                        display_file_ett(filename)
-                        mb.showinfo("Data extracted", "Displaying extracted columns")
-                except json.decoder.JSONDecodeError:
-                    mb.showerror('Invalid Trace', 'The selected file is not a valid Trace')
-
-            else:
-                mb.showinfo('No file selected', 'Please select a valid file')
-
         """Creates a GUI for the tool"""
         self.master = master
         master.title("Trace Converting Tool")
@@ -441,7 +378,7 @@ class TraceConvertingToolGUI:
         prepare_file_tab = ttk.Frame(tab_parent)
         convert_trace_tab = ttk.Frame(tab_parent)
         filter_traces_tab = ttk.Frame(tab_parent)
-        extract_tracedata_tab = ttk.Frame(tab_parent)
+        extract_tracedata_tab = ExtractTracedataTab(tab_parent)
         validate_trace_tab = ValidateTraceTab(tab_parent)
 
         # Add tabs to master
@@ -690,29 +627,6 @@ class TraceConvertingToolGUI:
         browse_button_ftt.grid(column=1, row=2)
 
         # Extract tracedata Tab
-        converted_trace_label_ett = Label(extract_tracedata_tab, text="Trace")
-        converted_trace_label_ett.grid(row=0)
-        tracedata_filename_label_ett = Label(extract_tracedata_tab, text="Result Filename")
-        tracedata_filename_label_ett.grid(row=1, column=0)
-        float_format_label_ett = Label(extract_tracedata_tab, text="Float Format String")
-        float_format_label_ett.grid(row=2, column=0)
-        float_format_entry_ett = Entry(extract_tracedata_tab, width=config.get('entries', 'entry_width'),
-                                       bg=config.get('entries', 'background_colour_optional_entries'))
-        float_format_entry_ett.grid(row=2, column=1)
-        float_format_entry_ett.insert(END, config.get('entries', 'default_float_format_entry_ett'))
-        input_trace_entry_ett = Entry(extract_tracedata_tab, width=config.get('entries', 'entry_width'))
-
-        trace_column_display_ett = scrolledtext.ScrolledText(extract_tracedata_tab, width=100, height=33)
-
-        choose_trace_button_ett = Button(extract_tracedata_tab, text="Choose File", command=browse_file_ett)
-        choose_trace_button_ett.grid(row=0, column=0)
-
-        tracedata_filename_entry_ett = Entry(extract_tracedata_tab, width=config.get('entries', 'entry_width'))
-        tracedata_filename_entry_ett.grid(row=1, column=1)
-
-        extract_columns_button_ett = Button(extract_tracedata_tab, text="Extract Tracedata",
-                                            command=extract_tracedata_ett)
-        extract_columns_button_ett.grid(row=2, column=2)
 
         # Tooltips
 
@@ -784,16 +698,105 @@ class TraceConvertingToolGUI:
         filter_button_tooltip_ftt = Hovertip(filter_button_ftt, config.get('tooltips', 'filter_button_ftt'))
         expression_label_tooltip_ftt = Hovertip(expression_label_ftt, config.get('tooltips', 'expression_label_ftt'))
 
-        # Extract Tracedata Tab
-        converted_trace_label_tooltip_ett = Hovertip(converted_trace_label_ett,
+
+class ExtractTracedataTab(Frame):
+    def __init__(self, master):
+        """Creates a Extract Tracedata Tab"""
+        ttk.Frame.__init__(self, master)
+
+        def browse_file_ett():
+            """Opens file explorer to select a file"""
+            self.input_trace_entry_ett.delete(0, END)
+            selected_trace = fd.askopenfilename(initialdir=config.get('directories', 'converted_traces_dir'),
+                                                title="Select a File",
+                                                filetypes=(("JSON files", "*.json*"),))
+            if not selected_trace:
+                mb.showinfo('No file selected', 'Please select a valid file')
+            self.input_trace_entry_ett.insert(END, selected_trace)
+            self.input_trace_entry_ett.grid(row=0, column=1)
+            display_file_ett(selected_trace)
+
+        def display_file_ett(filename):
+            """
+            Displays the selected file in the extract tracedata tab
+            :param filename: File that will be displayed
+            """
+            with open(filename, 'r') as f:
+                self.trace_column_display_ett.config(state=NORMAL)
+                self.trace_column_display_ett.delete("1.0", "end")
+                self.trace_column_display_ett.insert(INSERT, f.read())
+                self.trace_column_display_ett.config(state=DISABLED)
+                self.trace_column_display_ett.grid(column=0, row=6, columnspan=4)
+
+        def extract_tracedata_ett():
+            """Extracts the tracedata so it can be used in ProFiDo"""
+            org_filename = self.input_trace_entry_ett.get()
+            if os.path.isfile(org_filename) and pathlib.Path(org_filename).suffix == ".json":
+                try:
+                    with open(self.input_trace_entry_ett.get()) as trace_in:
+                        tracedata = json.load(trace_in)["tracebody"]["tracedata"]
+                        df = pd.DataFrame(tracedata)
+                        filename = config.get('directories', 'tracedata_dir') \
+                                   + self.tracedata_filename_entry_ett.get() + '_dat.trace'
+                        write_file = 1
+                        if os.path.exists(filename):
+                            write_file = mb.askyesno("File already exists", os.path.basename(filename) +
+                                                     " already exists. \n Would you like to overwrite it?")
+                        if write_file:
+                            df = df.transpose().dropna()
+                            try:
+                                if len(self.float_format_entry_ett.get()) > 0:
+                                    df.to_csv(filename, sep='\t', float_format=self.float_format_entry_ett.get(),
+                                              index=False, header=False)
+                                if len(self.float_format_entry_ett.get()) == 0:
+                                    df.to_csv(filename, sep='\t', index=False, header=False)
+                            except TypeError:
+                                mb.showerror('Invalid float format string', 'Please enter a valid format string')
+                            except ValueError:
+                                mb.showerror('Invalid float format string', 'Please enter a valid format string')
+                            except FileNotFoundError:
+                                mb.showerror('Invalid Path or Filename', 'Please check if path and filename are valid')
+                        display_file_ett(filename)
+                        mb.showinfo("Data extracted", "Displaying extracted columns")
+                except json.decoder.JSONDecodeError:
+                    mb.showerror('Invalid Trace', 'The selected file is not a valid Trace')
+
+            else:
+                mb.showinfo('No file selected', 'Please select a valid file')
+
+        self.converted_trace_label_ett = Label(self, text="Trace")
+        self.converted_trace_label_ett.grid(row=0)
+        self.tracedata_filename_label_ett = Label(self, text="Result Filename")
+        self.tracedata_filename_label_ett.grid(row=1, column=0)
+        self.float_format_label_ett = Label(self, text="Float Format String")
+        self.float_format_label_ett.grid(row=2, column=0)
+        self.float_format_entry_ett = Entry(self, width=config.get('entries', 'entry_width'),
+                                            bg=config.get('entries', 'background_colour_optional_entries'))
+        self.float_format_entry_ett.grid(row=2, column=1)
+        self.float_format_entry_ett.insert(END, config.get('entries', 'default_float_format_entry_ett'))
+        self.input_trace_entry_ett = Entry(self, width=config.get('entries', 'entry_width'))
+
+        self.trace_column_display_ett = scrolledtext.ScrolledText(self, width=100, height=33)
+
+        self.choose_trace_button_ett = Button(self, text="Choose File", command=browse_file_ett)
+        self.choose_trace_button_ett.grid(row=0, column=0)
+
+        self.tracedata_filename_entry_ett = Entry(self, width=config.get('entries', 'entry_width'))
+        self.tracedata_filename_entry_ett.grid(row=1, column=1)
+
+        self.extract_columns_button_ett = Button(self, text="Extract Tracedata",
+                                                 command=extract_tracedata_ett)
+        self.extract_columns_button_ett.grid(row=2, column=2)
+
+        converted_trace_label_tooltip_ett = Hovertip(self.converted_trace_label_ett,
                                                      config.get('tooltips', 'converted_trace_label_ett'))
-        tracedata_filename_entry_tooltip_ett = Hovertip(tracedata_filename_label_ett,
+        tracedata_filename_entry_tooltip_ett = Hovertip(self.tracedata_filename_label_ett,
                                                         config.get('tooltips', 'tracedata_filename_label_ett'))
-        browse_trace_button_tooltip_ett = Hovertip(choose_trace_button_ett,
+        browse_trace_button_tooltip_ett = Hovertip(self.choose_trace_button_ett,
                                                    config.get('tooltips', 'browse_trace_button_ett'))
-        extract_button_tooltip_ett = Hovertip(extract_columns_button_ett,
+        extract_button_tooltip_ett = Hovertip(self.extract_columns_button_ett,
                                               config.get('tooltips', 'extract_tracedata_button_ett'))
-        float_format_label_tooltip_ett = Hovertip(float_format_label_ett,
+        float_format_label_tooltip_ett = Hovertip(self.float_format_label_ett,
                                                   config.get('tooltips', 'float_format_label_ett'))
 
 
@@ -886,10 +889,9 @@ class ValidateTraceTab(Frame):
         numerical_format_tooltip_vtt = Hovertip(self.statistics_format_string_label_vtt,
                                                 config.get('tooltips', 'statistics_format_string'))
 
+
 # Create TCGUI instance and run mainloop
 root = Tk()
 converting_tool_gui = TraceConvertingToolGUI(root)
 root.mainloop()
 sys.exit()
-
-
