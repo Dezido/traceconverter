@@ -420,7 +420,7 @@ class ConvertTraceTab(Frame):
                     # If tracedata checkbox is selected the data will also be extracted
                     if extract_tracedata_checkbutton_var_ctt.get() == 1:
                         tracedata_filename = config.get('directories',
-                                                        'tracedata_dir') + self.tracedata_filename_entry_ctt.get() + \
+                                                        'tracedata_dir') + tracedata_filename_entry_ctt.get() + \
                                              config.get('files', 'tracedata_file_suffix')
                         model.extract_tracedata(
                             filename, tracedata_filename, float_format_entry_ctt.get())
