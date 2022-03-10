@@ -217,30 +217,31 @@ def verify_statistics(converted_trace_file, tolerance):
     else:
         mb.showerror("Trace invalid", "Please check if the file is valid")
 
-        def restore_traceheader(filename, stat_format_string):
-            """
-            (Re)generates statistics and hash for the input trace
-            :param stat_format_string: format string for statistical characteristics
-            :param filename: Input file
-            """
-            if os.path.isfile(filename) and pathlib.Path(filename).suffix == ".json":
-                try:
-                    with open(filename) as tr:
-                        tracedata = json.load(tr)
-                        trace = model.generate_statistic(tracedata, stat_format_string)
-                    write_file = 1
-                    if os.path.exists(filename):
-                        write_file = mb.askyesno("Overwriting File",
-                                                 "Restoring the traceheader will overwrite the file. Continue?")
-                    if write_file:
-                        with open(filename, 'w') as fp:
-                            json.dump(trace, fp, indent=4)
-                    model.add_hash_value_to_trace(filename)
-                    mb.showinfo('Traceheader restored', 'Statistics and has value restored successfully')
-                except json.decoder.JSONDecodeError:
-                    mb.showerror("Trace content invalid", "Please check if the trace content is valid")
-            else:
-                mb.showerror("Trace invalid", "Please check if the file is valid")
+
+def restore_traceheader(filename, stat_format_string):
+    """
+    (Re)generates statistics and hash for the input trace
+    :param stat_format_string: format string for statistical characteristics
+    :param filename: Input file
+    """
+    if os.path.isfile(filename) and pathlib.Path(filename).suffix == ".json":
+        try:
+            with open(filename) as tr:
+                tracedata = json.load(tr)
+                trace = generate_statistic(tracedata, stat_format_string)
+            write_file = 1
+            if os.path.exists(filename):
+                write_file = mb.askyesno("Overwriting File",
+                                         "Restoring the traceheader will overwrite the file. Continue?")
+            if write_file:
+                with open(filename, 'w') as fp:
+                    json.dump(trace, fp, indent=4)
+            add_hash_value_to_trace(filename)
+            mb.showinfo('Traceheader restored', 'Statistics and has value restored successfully')
+        except json.decoder.JSONDecodeError:
+            mb.showerror("Trace content invalid", "Please check if the trace content is valid")
+    else:
+        mb.showerror("Trace invalid", "Please check if the file is valid")
 
 
 def remove_lines_from_csv(filename, line_amount):

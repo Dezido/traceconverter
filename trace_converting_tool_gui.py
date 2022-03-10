@@ -189,6 +189,7 @@ class PrepareFileTab(Frame):
                 mb.showerror('Permission to edit file denied',
                              'Please check if the file is used by another application')
 
+        # GUI Elements
         file_entry_pft = Entry(self, width=config.get('entries', 'entry_width'))
 
         browse_file_button_pft = Button(self, text="Choose File", command=browse_file_pft)
@@ -302,6 +303,7 @@ class PrepareFileTab(Frame):
                                                                        delimiter_entry_pft.get()))
         transform_filetype_button_pft.grid(column=4, row=7)
 
+        # Tooltips
         browse_file_button_tooltip_pft = Hovertip(browse_file_button_pft,
                                                   config.get('tooltips', 'browse_file_button_pft'))
         remove_rows_label_tooltip_pft = Hovertip(remove_rows_label_pft, config.get('tooltips', 'remove_rows_label_pft'))
@@ -442,6 +444,7 @@ class ConvertTraceTab(Frame):
                 file_displayer_ctt.config(state=DISABLED)
                 file_displayer_ctt.grid(column=5, row=1, columnspan=12, rowspan=10)
 
+        # GUI Elements
         columns_label_ctt = Label(self, text="Tracedata Column Indexes")
         columns_label_ctt.grid(row=2)
         tracedata_description_label_ctt = Label(self, text="Tracedata Description")
@@ -509,7 +512,6 @@ class ConvertTraceTab(Frame):
         result_filename_entry_ctt = Entry(self, width=config.get('entries', 'entry_width'))
         result_filename_entry_ctt.insert(END, config.get('entries', 'default_filename_entry_ctt'))
 
-        # Place Entries
         original_tracefile_button_ctt.grid(row=1, column=0)
         column_indexes_entry_ctt.grid(row=2, column=1)
         tracedata_description_entry_ctt.grid(row=3, column=1)
@@ -525,6 +527,7 @@ class ConvertTraceTab(Frame):
         convert_button_ctt = Button(self, text='Convert Trace', command=convert_trace)
         convert_button_ctt.grid(row=13, column=1)
 
+        # Tooltips
         columns_label_tooltip_ctt = Hovertip(columns_label_ctt, config.get('tooltips', 'columns_label_ctt'))
         source_label_tooltip_ctt = Hovertip(source_label_ctt, config.get('tooltips', 'source_label_ctt'))
         description_label_tooltip_ctt = Hovertip(trace_description_label_ctt,
@@ -629,6 +632,7 @@ class FilterTraceTab(Frame):
             filter_results_tv.grid(column=1, row=11, columnspan=10)
             vsb_filter_results_tv.grid(column=11, row=11, sticky=N + S)
 
+        # GUI Elements
         selected_traces_label_ftt = Label(self, text="Selected Traces")
         selected_traces_label_ftt.grid(column=1, row=1)
 
@@ -659,7 +663,6 @@ class FilterTraceTab(Frame):
         expression_entry_ftt = Entry(self, width=config.get('entries', 'entry_width'))
         expression_entry_ftt.grid(column=4, row=2)
 
-        # Label and Buttons
         filter_button_ftt = Button(self, text="Filter Traces",
                                    command=lambda: filter_traces_ftt(expression_entry_ftt.get()))
         filter_button_ftt.grid(column=5, row=2)
@@ -667,6 +670,7 @@ class FilterTraceTab(Frame):
         browse_button_ftt = Button(self, text="Choose Files", command=browse_files_ftt)
         browse_button_ftt.grid(column=1, row=2)
 
+        # Tooltips
         selected_traces_label_tooltip_ftt = Hovertip(selected_traces_label_ftt,
                                                      config.get('tooltips', 'selected_traces_label_ftt'))
         browse_files_button_tooltip_ftt = Hovertip(browse_button_ftt, config.get('tooltips', 'browse_files_button_ftt'))
@@ -719,6 +723,7 @@ class ExtractTracedataTab(Frame):
             else:
                 mb.showinfo('No file selected', 'Please select a valid file')
 
+        # GUI Elements
         self.converted_trace_label_ett = Label(self, text="Trace")
         self.converted_trace_label_ett.grid(row=0)
         self.tracedata_filename_label_ett = Label(self, text="Result Filename")
@@ -743,6 +748,7 @@ class ExtractTracedataTab(Frame):
                                                  command=extract_tracedata_ett)
         self.extract_columns_button_ett.grid(row=2, column=2)
 
+        # Tooltips
         converted_trace_label_tooltip_ett = Hovertip(self.converted_trace_label_ett,
                                                      config.get('tooltips', 'converted_trace_label_ett'))
         tracedata_filename_entry_tooltip_ett = Hovertip(self.tracedata_filename_label_ett,
@@ -770,8 +776,6 @@ class ValidateTraceTab(Frame):
                 mb.showinfo('No file selected', 'Please select a valid file')
             self.file_entry_vtt.insert(END, selected_trace)
             self.file_entry_vtt.grid(row=0, column=0)
-
-
 
         # GUI Elements
         self.file_entry_vtt = Entry(self, width=config.get('entries', 'entry_width'))
