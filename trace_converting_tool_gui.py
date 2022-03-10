@@ -22,6 +22,31 @@ config.read('config.properties')
 
 class TraceConvertingToolGUI:
     def __init__(self, master):
+        """Creates a GUI for the tool"""
+        self.master = master
+        master.title("Trace Converting Tool")
+        # Notebook and Tabs
+        tab_parent = ttk.Notebook(master)
+
+        prepare_file_tab = PrepareFileTab(tab_parent)
+        convert_trace_tab = ConvertTraceTab(tab_parent)
+        filter_traces_tab = FilterTraceTab(tab_parent)
+        extract_tracedata_tab = ExtractTracedataTab(tab_parent)
+        validate_trace_tab = ValidateTraceTab(tab_parent)
+
+        # Add tabs to master
+        tab_parent.add(prepare_file_tab, text="Prepare File")
+        tab_parent.add(convert_trace_tab, text="Convert Trace")
+        tab_parent.add(filter_traces_tab, text="Filter Traces")
+        tab_parent.add(extract_tracedata_tab, text="Extract Tracedata")
+        tab_parent.add(validate_trace_tab, text="Validate Trace")
+        tab_parent.pack(expand=1, fill='both')
+
+
+class PrepareFileTab(Frame):
+    def __init__(self, master):
+        """Creates a Prepare File Tab"""
+        ttk.Frame.__init__(self, master)
 
         def browse_file_pft():
             """Opens file explorer to select a file"""
@@ -164,51 +189,30 @@ class TraceConvertingToolGUI:
                 mb.showerror('Permission to edit file denied',
                              'Please check if the file is used by another application')
 
-        """Creates a GUI for the tool"""
-        self.master = master
-        master.title("Trace Converting Tool")
-        # Notebook and Tabs
-        tab_parent = ttk.Notebook(master)
+        file_entry_pft = Entry(self, width=config.get('entries', 'entry_width'))
 
-        prepare_file_tab = ttk.Frame(tab_parent)
-        convert_trace_tab = ConvertTraceTab(tab_parent)
-        filter_traces_tab = FilterTraceTab(tab_parent)
-        extract_tracedata_tab = ExtractTracedataTab(tab_parent)
-        validate_trace_tab = ValidateTraceTab(tab_parent)
-
-        # Add tabs to master
-        tab_parent.add(prepare_file_tab, text="Prepare File")
-        tab_parent.add(convert_trace_tab, text="Convert Trace")
-        tab_parent.add(filter_traces_tab, text="Filter Traces")
-        tab_parent.add(extract_tracedata_tab, text="Extract Tracedata")
-        tab_parent.add(validate_trace_tab, text="Validate Trace")
-        tab_parent.pack(expand=1, fill='both')
-
-        # Prepare File Tab
-        file_entry_pft = Entry(prepare_file_tab, width=config.get('entries', 'entry_width'))
-
-        browse_file_button_pft = Button(prepare_file_tab, text="Choose File", command=browse_file_pft)
+        browse_file_button_pft = Button(self, text="Choose File", command=browse_file_pft)
         browse_file_button_pft.grid(column=1, row=0)
 
-        remove_rows_label_pft = Label(prepare_file_tab, text="Number of Lines to Be Removed")
+        remove_rows_label_pft = Label(self, text="Number of Lines to Be Removed")
         remove_rows_label_pft.grid(column=0, row=2)
 
-        remove_rows_entry_pft = Entry(prepare_file_tab, width=config.get('entries', 'entry_width'))
+        remove_rows_entry_pft = Entry(self, width=config.get('entries', 'entry_width'))
         remove_rows_entry_pft.grid(column=1, row=2)
 
-        remove_rows_button_pft = Button(prepare_file_tab, text="Remove Lines",
+        remove_rows_button_pft = Button(self, text="Remove Lines",
                                         command=lambda: [model.remove_lines_from_csv(file_entry_pft.get(),
                                                                                      remove_rows_entry_pft.get()),
                                                          display_file_pft(file_entry_pft.get())])
         remove_rows_button_pft.grid(column=2, row=2)
 
-        add_header_label_pft = Label(prepare_file_tab, text="Header")
+        add_header_label_pft = Label(self, text="Header")
         add_header_label_pft.grid(column=0, row=3)
 
-        add_header_entry_pft = Entry(prepare_file_tab, width=config.get('entries', 'entry_width'))
+        add_header_entry_pft = Entry(self, width=config.get('entries', 'entry_width'))
         add_header_entry_pft.grid(column=1, row=3)
 
-        add_header_button_pft = Button(prepare_file_tab, text="Add Header to CSV File",
+        add_header_button_pft = Button(self, text="Add Header to CSV File",
                                        command=lambda: [model.add_header_to_csv(file_entry_pft.get(),
                                                                                 list(
                                                                                     add_header_entry_pft.get().split(
@@ -216,82 +220,82 @@ class TraceConvertingToolGUI:
                                                         display_file_pft(file_entry_pft.get())])
         add_header_button_pft.grid(column=2, row=3)
 
-        file_displayer_label_pft = Label(prepare_file_tab)
+        file_displayer_label_pft = Label(self)
         file_displayer_label_pft.grid(column=0, row=8)
-        file_displayer_pft = scrolledtext.ScrolledText(prepare_file_tab, width=200, height=33)
+        file_displayer_pft = scrolledtext.ScrolledText(self, width=200, height=33)
 
-        date_format_label_pft = Label(prepare_file_tab, text="Format Strings of Timestamps")
+        date_format_label_pft = Label(self, text="Format Strings of Timestamps")
         date_format_label_pft.grid(column=2, row=4)
-        date_format_entry_pft = Entry(prepare_file_tab, width=config.get('entries', 'entry_width'))
+        date_format_entry_pft = Entry(self, width=config.get('entries', 'entry_width'))
         date_format_entry_pft.grid(column=3, row=4)
         date_format_entry_pft.insert(END, config.get('entries', 'default_date_format_entry_pft'))
 
-        date_columns_label_pft = Label(prepare_file_tab, text="Timestamp Column Indexes")
+        date_columns_label_pft = Label(self, text="Timestamp Column Indexes")
         date_columns_label_pft.grid(column=0, row=4)
-        date_columns_entry_pft = Entry(prepare_file_tab, width=config.get('entries', 'entry_width'))
+        date_columns_entry_pft = Entry(self, width=config.get('entries', 'entry_width'))
         date_columns_entry_pft.grid(column=1, row=4)
 
-        column_wise_difference_label_pft = Label(prepare_file_tab, text="Difference between Columns: Indexes")
+        column_wise_difference_label_pft = Label(self, text="Difference between Columns: Indexes")
         column_wise_difference_label_pft.grid(column=0, row=5)
-        column_wise_difference_entry_pft = Entry(prepare_file_tab, width=config.get('entries', 'entry_width'))
+        column_wise_difference_entry_pft = Entry(self, width=config.get('entries', 'entry_width'))
         column_wise_difference_entry_pft.grid(column=1, row=5)
 
-        column_wise_difference_result_column_label_pft = Label(prepare_file_tab,
+        column_wise_difference_result_column_label_pft = Label(self,
                                                                text="Difference between Columns: Result Column Name")
         column_wise_difference_result_column_label_pft.grid(column=2, row=5)
-        column_wise_difference_result_column_entry_pft = Entry(prepare_file_tab,
+        column_wise_difference_result_column_entry_pft = Entry(self,
                                                                width=config.get('entries', 'entry_width'))
         column_wise_difference_result_column_entry_pft.grid(column=3, row=5)
 
-        row_wise_difference_label_pft = Label(prepare_file_tab, text="Difference over Rows: Column Index")
+        row_wise_difference_label_pft = Label(self, text="Difference over Rows: Column Index")
         row_wise_difference_label_pft.grid(column=0, row=6)
-        row_wise_difference_entry_pft = Entry(prepare_file_tab, width=config.get('entries', 'entry_width'))
+        row_wise_difference_entry_pft = Entry(self, width=config.get('entries', 'entry_width'))
         row_wise_difference_entry_pft.grid(column=1, row=6)
 
-        row_wise_difference_result_column_label_pft = Label(prepare_file_tab,
+        row_wise_difference_result_column_label_pft = Label(self,
                                                             text="Difference over Rows: Result Column Name")
         row_wise_difference_result_column_label_pft.grid(column=2, row=6)
-        row_wise_difference_result_column_entry_pft = Entry(prepare_file_tab,
+        row_wise_difference_result_column_entry_pft = Entry(self,
                                                             width=config.get('entries', 'entry_width'))
         row_wise_difference_result_column_entry_pft.grid(column=3, row=6)
 
-        calculate_timestamp_button_pft = Button(prepare_file_tab, text="Calculate Unix Time",
+        calculate_timestamp_button_pft = Button(self, text="Calculate Unix Time",
                                                 command=lambda: calculate_timestamp_pft(
                                                     file_entry_pft.get(),
                                                     date_columns_entry_pft.get(),
                                                     date_format_entry_pft.get()))
         calculate_timestamp_button_pft.grid(column=4, row=4)
 
-        column_wise_difference_button_pft = Button(prepare_file_tab, text="Calculate Difference between Columns",
+        column_wise_difference_button_pft = Button(self, text="Calculate Difference between Columns",
                                                    command=lambda: calculate_difference_columns_pft(
                                                        file_entry_pft.get(),
                                                        column_wise_difference_entry_pft.get()))
         column_wise_difference_button_pft.grid(column=4, row=5)
 
-        row_wise_difference_button_pft = Button(prepare_file_tab, text="Calculate Difference over Rows",
+        row_wise_difference_button_pft = Button(self, text="Calculate Difference over Rows",
                                                 command=lambda: calculate_difference_rows_pft(
                                                     file_entry_pft.get()))
         row_wise_difference_button_pft.grid(column=4, row=6)
 
-        delimiter_label_pft = Label(prepare_file_tab, text="Delimiter of the Input File")
+        delimiter_label_pft = Label(self, text="Delimiter of the Input File")
         delimiter_label_pft.grid(column=0, row=7)
-        delimiter_entry_pft = Entry(prepare_file_tab, width=config.get('entries', 'entry_width'))
+        delimiter_entry_pft = Entry(self, width=config.get('entries', 'entry_width'))
         delimiter_entry_pft.grid(column=1, row=7)
-        header_label_pft = Label(prepare_file_tab, text="Header of the New CSV File")
+        header_label_pft = Label(self, text="Header of the New CSV File")
         header_label_pft.grid(column=2, row=7)
-        header_entry_pft = Entry(prepare_file_tab, width=config.get('entries', 'entry_width'),
+        header_entry_pft = Entry(self, width=config.get('entries', 'entry_width'),
                                  bg=config.get('entries', 'background_colour_optional_entries'))
         header_entry_pft.grid(column=3, row=7)
 
         keep_header_checkbutton_var_pft = IntVar()
-        keep_header_checkbutton_pft = Checkbutton(prepare_file_tab, text="Use first Line as Header",
+        keep_header_checkbutton_pft = Checkbutton(self, text="Use first Line as Header",
                                                   variable=keep_header_checkbutton_var_pft, onvalue=1,
                                                   offvalue=0,
                                                   selectcolor=config.get('entries',
                                                                          'background_colour_optional_entries'))
         keep_header_checkbutton_pft.grid(column=5, row=7)
 
-        transform_filetype_button_pft = Button(prepare_file_tab,
+        transform_filetype_button_pft = Button(self,
                                                text="Convert File to CSV",
                                                command=lambda:
                                                convert_file_to_csv_pft(file_entry_pft.get(),
