@@ -417,8 +417,11 @@ class ConvertTraceTab(Frame):
                     model.add_hash_value_to_trace(filename)
                     # If tracedata checkbox is selected the data will also be extracted
                     if extract_tracedata_checkbutton_var_ctt.get() == 1:
-                        extract_tracedata_after_conversion(
-                            filename)
+                        tracedata_filename = config.get('directories',
+                                                        'tracedata_dir') + self.tracedata_filename_entry_ctt.get() + \
+                                             config.get('files', 'tracedata_file_suffix')
+                        model.extract_tracedata(
+                            filename, tracedata_filename, float_format_entry_ctt.get())
                     mb.showinfo("Trace successfully converted", "Displaying converted Trace")
                 else:
                     mb.showinfo("File already exists", "Displaying existing File")
@@ -438,41 +441,6 @@ class ConvertTraceTab(Frame):
                 file_displayer_ctt.insert(INSERT, f.read())
                 file_displayer_ctt.config(state=DISABLED)
                 file_displayer_ctt.grid(column=5, row=1, columnspan=12, rowspan=10)
-
-        def extract_tracedata_after_conversion(filename):
-            """
-            Extracts tracedata from the file can be used for ProFiDo
-            :param filename: Name of the converted tracefile
-            """
-            with open(filename) as tr:
-                tracedata = json.load(tr)["tracebody"]["tracedata"]
-                df = pd.DataFrame(tracedata)
-                write_file = 1
-                result_filename = config.get('directories', 'tracedata_dir') + tracedata_filename_entry_ctt.get() + \
-                                  config.get('files', 'tracedata_file_suffix')
-                if os.path.exists(result_filename):
-                    write_file = mb.askyesno("File already exists",
-                                             os.path.basename(result_filename) +
-                                             " already exists. "
-                                             "\n Would you like to overwrite it?")
-                if write_file:
-                    try:
-                        df = df.transpose().dropna()
-                        if len(float_format_entry_ctt.get()) > 0:
-                            df.to_csv(result_filename,
-                                      sep='\t',
-                                      float_format=float_format_entry_ctt.get(),
-                                      index=False, header=False)
-                        if len(float_format_entry_ctt.get()) == 0:
-                            df.to_csv(result_filename,
-                                      sep='\t',
-                                      index=False, header=False)
-                    except TypeError:
-                        mb.showerror('Invalid float format string', 'Please enter a valid format string')
-                    except ValueError:
-                        mb.showerror('Invalid float format string', 'Please enter a valid format string')
-                    except FileNotFoundError:
-                        mb.showerror('Invalid Path or Filename', 'Please check if path and filename are valid')
 
         columns_label_ctt = Label(self, text="Tracedata Column Indexes")
         columns_label_ctt.grid(row=2)
@@ -740,34 +708,14 @@ class ExtractTracedataTab(Frame):
             org_filename = self.input_trace_entry_ett.get()
             if os.path.isfile(org_filename) and pathlib.Path(org_filename).suffix == ".json":
                 try:
-                    with open(self.input_trace_entry_ett.get()) as trace_in:
-                        tracedata = json.load(trace_in)["tracebody"]["tracedata"]
-                        df = pd.DataFrame(tracedata)
-                        filename = config.get('directories', 'tracedata_dir') \
-                                   + self.tracedata_filename_entry_ett.get() + '_dat.trace'
-                        write_file = 1
-                        if os.path.exists(filename):
-                            write_file = mb.askyesno("File already exists", os.path.basename(filename) +
-                                                     " already exists. \n Would you like to overwrite it?")
-                        if write_file:
-                            df = df.transpose().dropna()
-                            try:
-                                if len(self.float_format_entry_ett.get()) > 0:
-                                    df.to_csv(filename, sep='\t', float_format=self.float_format_entry_ett.get(),
-                                              index=False, header=False)
-                                if len(self.float_format_entry_ett.get()) == 0:
-                                    df.to_csv(filename, sep='\t', index=False, header=False)
-                            except TypeError:
-                                mb.showerror('Invalid float format string', 'Please enter a valid format string')
-                            except ValueError:
-                                mb.showerror('Invalid float format string', 'Please enter a valid format string')
-                            except FileNotFoundError:
-                                mb.showerror('Invalid Path or Filename', 'Please check if path and filename are valid')
-                        display_file_ett(filename)
-                        mb.showinfo("Data extracted", "Displaying extracted columns")
+                    filename = config.get('directories', 'tracedata_dir') + self.tracedata_filename_entry_ett.get() + \
+                               config.get('files', 'tracedata_file_suffix')
+                    model.extract_tracedata(self.input_trace_entry_ett.get(), filename,
+                                            self.float_format_entry_ett.get())
+                    display_file_ett(filename)
+                    mb.showinfo("Data extracted", "Displaying extracted columns")
                 except json.decoder.JSONDecodeError:
                     mb.showerror('Invalid Trace', 'The selected file is not a valid Trace')
-
             else:
                 mb.showinfo('No file selected', 'Please select a valid file')
 

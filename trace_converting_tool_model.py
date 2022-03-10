@@ -117,6 +117,41 @@ def columns_valid(columns, size):
     return True
 
 
+def extract_tracedata(tracename, result_filename, float_format_string):
+    """
+    Extracts tracedata from the file can be used for ProFiDo
+    :param float_format_string: Format string for tracedata
+    :param result_filename: Name for the tracedata file
+    :param tracename: Name of the converted tracefile
+    """
+    try:
+        with open(tracename) as tr:
+            tracedata = json.load(tr)["tracebody"]["tracedata"]
+            df = pd.DataFrame(tracedata)
+            write_file = 1
+            if os.path.exists(result_filename):
+                write_file = mb.askyesno("File already exists", os.path.basename(result_filename) +
+                                         " already exists. \n Would you like to overwrite it?")
+            if write_file:
+                try:
+                    df = df.transpose().dropna()
+                    if len(float_format_string) > 0:
+                        df.to_csv(result_filename, sep='\t', float_format=float_format_string, index=False,
+                                  header=False)
+                    if len(float_format_string) == 0:
+                        df.to_csv(result_filename, sep='\t', index=False, header=False)
+                except TypeError:
+                    mb.showerror('Invalid float format string', 'Please enter a valid format string')
+                except ValueError:
+                    mb.showerror('Invalid float format string', 'Please enter a valid format string')
+                except FileNotFoundError:
+                    mb.showerror('Invalid Path or Filename', 'Please check if the result path and filename are valid')
+    except json.decoder.JSONDecodeError:
+        mb.showerror('Invalid Trace', 'The selected file is not a valid Trace')
+    except FileNotFoundError:
+        mb.showerror('Could not find trace', 'Please check if path and filename are valid')
+
+
 def verify_statistics(converted_trace_file, tolerance):
     """
     Checks if the statistics of the trace are valid
