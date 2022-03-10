@@ -771,29 +771,7 @@ class ValidateTraceTab(Frame):
             self.file_entry_vtt.insert(END, selected_trace)
             self.file_entry_vtt.grid(row=0, column=0)
 
-        def restore_traceheader(filename):
-            """
-            (Re)generates statistics and hash for the input trace
-            :param filename: Input file
-            """
-            if os.path.isfile(filename) and pathlib.Path(filename).suffix == ".json":
-                try:
-                    with open(filename) as tr:
-                        tracedata = json.load(tr)
-                        trace = model.generate_statistic(tracedata, self.statistics_format_string_entry_vtt.get())
-                    write_file = 1
-                    if os.path.exists(filename):
-                        write_file = mb.askyesno("Overwriting File",
-                                                 "Restoring the traceheader will overwrite the file. Continue?")
-                    if write_file:
-                        with open(filename, 'w') as fp:
-                            json.dump(trace, fp, indent=4)
-                    model.add_hash_value_to_trace(filename)
-                    mb.showinfo('Traceheader restored', 'Statistics and has value restored successfully')
-                except json.decoder.JSONDecodeError:
-                    mb.showerror("Trace content invalid", "Please check if the trace content is valid")
-            else:
-                mb.showerror("Trace invalid", "Please check if the file is valid")
+
 
         # GUI Elements
         self.file_entry_vtt = Entry(self, width=config.get('entries', 'entry_width'))
@@ -818,7 +796,9 @@ class ValidateTraceTab(Frame):
         self.validate_hash_button_vtt.grid(row=3, column=0)
 
         self.restore_traceheader_button_vtt = Button(self, text="Restore Traceheader",
-                                                     command=lambda: restore_traceheader(self.file_entry_vtt.get()))
+                                                     command=lambda: model.restore_traceheader(
+                                                         self.file_entry_vtt.get(),
+                                                         self.statistics_format_string_entry_vtt.get()))
         self.restore_traceheader_button_vtt.grid(row=4, column=0)
 
         self.statistics_format_string_label_vtt = Label(self, text="Statistics Format String")
