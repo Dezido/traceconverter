@@ -20,6 +20,9 @@ config = configparser.RawConfigParser()
 config.read('config.properties')
 
 
+
+
+
 class TraceConvertingToolGUI:
     def __init__(self, master):
 
@@ -147,7 +150,7 @@ class TraceConvertingToolGUI:
                 return
             if os.path.exists(result_filename):
                 write_file = mb.askyesno("File already exists", result_filename +
-                                                 " already exists. \n Would you like to overwrite it?")
+                                         " already exists. \n Would you like to overwrite it?")
             try:
                 if write_file:
                     if header_entry_pft.get() != "" and keep_header_checkbutton_var_pft.get() == 0:
@@ -219,7 +222,7 @@ class TraceConvertingToolGUI:
                 #  Generates statistics and adds them into a list.
                 #  Each list entry represents one column of the raw trace
                 if amount_tracedata > 4:
-                    trace = generate_statistic(trace_template, statistics_format_entry_ctt.get())
+                    trace = model.generate_statistic(trace_template, statistics_format_entry_ctt.get())
                 else:
                     trace = trace_template
                     mb.showinfo("Statistics won't be computed", "Tracedata only contains " + str(amount_tracedata) +
@@ -230,12 +233,12 @@ class TraceConvertingToolGUI:
                 write_file = 1
                 if os.path.exists(filename):
                     write_file = mb.askyesno("File already exists",
-                                                     os.path.basename(filename) + " already exists. \n "
-                                                                                  "Would you like to overwrite it?")
+                                             os.path.basename(filename) + " already exists. \n "
+                                                                          "Would you like to overwrite it?")
                 if write_file:
                     with open(filename, 'w') as fp:
                         json.dump(trace, fp, indent=4)
-                    add_hash_value_to_trace(filename)
+                    model.add_hash_value_to_trace(filename)
                     # If tracedata checkbox is selected the data will also be extracted
                     if extract_tracedata_checkbutton_var_ctt.get() == 1:
                         extract_tracedata_after_conversion(
@@ -247,53 +250,6 @@ class TraceConvertingToolGUI:
                 display_file_ctt(filename)
             else:
                 mb.showinfo('No file selected', 'Please select a valid file')
-
-        def generate_statistic(trace, formatstring):
-            """
-            Computes the statistics for the trace
-            :param trace: Tracefile to compute from and add the statistics to
-            :param formatstring: For formatting the computed values
-            """
-            # Clear statistic lists so the next trace won't have old values
-            trace["traceheader"]["statistical characteristics"]["mean"] = []
-            trace["traceheader"]["statistical characteristics"]["median"] = []
-            trace["traceheader"]["statistical characteristics"]["skewness"] = []
-            trace["traceheader"]["statistical characteristics"]["kurtosis"] = []
-            trace["traceheader"]["statistical characteristics"]["autocorrelation"] = []
-            trace["traceheader"]["statistical characteristics"]["variance"] = []
-            try:
-                for i in range(len(trace["tracebody"]["tracedata"])):
-                    df = pd.DataFrame(trace["tracebody"]["tracedata"][i])
-                    trace["traceheader"]["statistical characteristics"]["mean"].append(
-                        format(df[0].mean(), formatstring))
-                    trace["traceheader"]["statistical characteristics"]["median"].append(
-                        format(df[0].median(), formatstring))
-                    trace["traceheader"]["statistical characteristics"]["skewness"].append(
-                        format(df[0].skew(), formatstring))
-                    trace["traceheader"]["statistical characteristics"]["kurtosis"].append(
-                        format(df[0].kurtosis(), formatstring))
-                    trace["traceheader"]["statistical characteristics"]["autocorrelation"].append(
-                        format(df[0].autocorr(), formatstring))
-                    trace["traceheader"]["statistical characteristics"]["variance"].append(
-                        format(df[0].var(), formatstring))
-                return trace
-            except TypeError:
-                mb.showerror("Type Error", "One of the selected columns does not contain valid data")
-                raise
-            except (KeyError, IndexError):
-                mb.showerror("Format Error", "Invalid Numerical Format entered")
-                raise
-
-        def add_hash_value_to_trace(filename):
-            """
-            Adds hash value to metainformation
-            :param filename: File the hash will be computed for
-            """
-            with open(filename) as tr:
-                tracedata = json.load(tr)
-                tracedata["traceheader"]["metainformation"]["hash value"] = model.hash_from_trace(filename)
-            with open(filename, 'w') as fp:
-                json.dump(tracedata, fp, indent=4)
 
         def display_file_ctt(filename):
             """
@@ -320,9 +276,9 @@ class TraceConvertingToolGUI:
                                   config.get('files', 'tracedata_file_suffix')
                 if os.path.exists(result_filename):
                     write_file = mb.askyesno("File already exists",
-                                                     os.path.basename(result_filename) +
-                                                     " already exists. "
-                                                     "\n Would you like to overwrite it?")
+                                             os.path.basename(result_filename) +
+                                             " already exists. "
+                                             "\n Would you like to overwrite it?")
                 if write_file:
                     try:
                         df = df.transpose().dropna()
@@ -453,7 +409,7 @@ class TraceConvertingToolGUI:
                         write_file = 1
                         if os.path.exists(filename):
                             write_file = mb.askyesno("File already exists", os.path.basename(filename) +
-                                                             " already exists. \n Would you like to overwrite it?")
+                                                     " already exists. \n Would you like to overwrite it?")
                         if write_file:
                             df = df.transpose().dropna()
                             try:
@@ -476,41 +432,6 @@ class TraceConvertingToolGUI:
             else:
                 mb.showinfo('No file selected', 'Please select a valid file')
 
-        def browse_file_vtt():
-            """Opens file explorer to select a file"""
-            file_entry_vtt.delete(0, END)
-            selected_trace = fd.askopenfilename(initialdir=config.get('directories', 'converted_traces_dir'),
-                                                title="Select a File",
-                                                filetypes=(("JSON files", "*.json*"),))
-            if not selected_trace:
-                mb.showinfo('No file selected', 'Please select a valid file')
-            file_entry_vtt.insert(END, selected_trace)
-            file_entry_vtt.grid(row=0, column=0)
-
-        def restore_traceheader(filename):
-            """
-            (Re)generates statistics and hash for the input trace
-            :param filename: Input file
-            """
-            if os.path.isfile(filename) and pathlib.Path(filename).suffix == ".json":
-                try:
-                    with open(filename) as tr:
-                        tracedata = json.load(tr)
-                        trace = generate_statistic(tracedata, statistics_format_string_entry_vtt.get())
-                    write_file = 1
-                    if os.path.exists(filename):
-                        write_file = mb.askyesno("Overwriting File",
-                                                         "Restoring the traceheader will overwrite the file. Continue?")
-                    if write_file:
-                        with open(filename, 'w') as fp:
-                            json.dump(trace, fp, indent=4)
-                    add_hash_value_to_trace(filename)
-                    mb.showinfo('Traceheader restored', 'Statistics and has value restored successfully')
-                except json.decoder.JSONDecodeError:
-                    mb.showerror("Trace content invalid", "Please check if the trace content is valid")
-            else:
-                mb.showerror("Trace invalid", "Please check if the file is valid")
-
         """Creates a GUI for the tool"""
         self.master = master
         master.title("Trace Converting Tool")
@@ -521,7 +442,7 @@ class TraceConvertingToolGUI:
         convert_trace_tab = ttk.Frame(tab_parent)
         filter_traces_tab = ttk.Frame(tab_parent)
         extract_tracedata_tab = ttk.Frame(tab_parent)
-        validate_trace_tab = ttk.Frame(tab_parent)
+        validate_trace_tab = ValidateTraceTab(tab_parent)
 
         # Add tabs to master
         tab_parent.add(prepare_file_tab, text="Prepare File")
@@ -793,39 +714,6 @@ class TraceConvertingToolGUI:
                                             command=extract_tracedata_ett)
         extract_columns_button_ett.grid(row=2, column=2)
 
-        # Validation tab
-        file_entry_vtt = Entry(validate_trace_tab, width=config.get('entries', 'entry_width'))
-
-        relative_tolerance_label_vtt = Label(validate_trace_tab, text="Relative Tolerance")
-        relative_tolerance_label_vtt.grid(column=1, row=2)
-
-        relative_tolerance_entry_vtt = Entry(validate_trace_tab, width=config.get('entries', 'entry_width'))
-        relative_tolerance_entry_vtt.grid(column=2, row=2)
-
-        browse_file_button_vtt = Button(validate_trace_tab, text="Choose File", command=browse_file_vtt)
-        browse_file_button_vtt.grid(row=1, column=0)
-
-        validate_statistics_button_vtt = Button(validate_trace_tab, text="Validate Statistics",
-                                                command=lambda:
-                                                model.verify_statistics(file_entry_vtt.get(),
-                                                                        relative_tolerance_entry_vtt.get()))
-        validate_statistics_button_vtt.grid(row=2, column=0)
-
-        validate_hash_button_vtt = Button(validate_trace_tab, text="Validate Hash",
-                                          command=lambda: model.hash_check(file_entry_vtt.get()))
-        validate_hash_button_vtt.grid(row=3, column=0)
-
-        restore_traceheader_button_vtt = Button(validate_trace_tab, text="Restore Traceheader",
-                                                command=lambda: restore_traceheader(file_entry_vtt.get()))
-        restore_traceheader_button_vtt.grid(row=4, column=0)
-
-        statistics_format_string_label_vtt = Label(validate_trace_tab, text="Statistics Format String")
-        statistics_format_string_label_vtt.grid(column=1, row=4)
-
-        statistics_format_string_entry_vtt = Entry(validate_trace_tab, width=config.get('entries', 'entry_width'),
-                                                   bg=config.get('entries', 'background_colour_optional_entries'))
-        statistics_format_string_entry_vtt.grid(column=2, row=4)
-
         # Tooltips
 
         # Prepare File Tab
@@ -908,23 +796,100 @@ class TraceConvertingToolGUI:
         float_format_label_tooltip_ett = Hovertip(float_format_label_ett,
                                                   config.get('tooltips', 'float_format_label_ett'))
 
-        # Validate Trace Tab
-        browse_file_button_tooltip_vtt = Hovertip(browse_file_button_vtt,
-                                                  config.get('tooltips', 'browse_file_button_vtt'))
-        validate_statistics_button_tooltip_vtt = Hovertip(validate_statistics_button_vtt,
-                                                          config.get('tooltips', 'validate_statistics_button_vtt'))
-        relative_tolerance_tooltip_vtt = Hovertip(relative_tolerance_label_vtt,
-                                                  config.get('tooltips', 'relative_tolerance_vtt'))
-        validate_hash_button_tooltip_vtt = Hovertip(validate_hash_button_vtt,
-                                                    config.get('tooltips', 'validate_hash_button_vtt'))
-        restore_traceheader_button_tooltip_vtt = Hovertip(restore_traceheader_button_vtt,
-                                                          config.get('tooltips', 'restore_traceheader_button_vtt'))
-        numerical_format_tooltip_vtt = Hovertip(statistics_format_string_label_vtt,
-                                                config.get('tooltips', 'statistics_format_string'))
 
+class ValidateTraceTab(Frame):
+    def __init__(self, master):
+        """Creates a Validate Trace Tab"""
+        ttk.Frame.__init__(self, master)
+
+        def browse_file_vtt():
+            """Opens file explorer to select a file"""
+            self.file_entry_vtt.delete(0, END)
+            selected_trace = fd.askopenfilename(initialdir=config.get('directories', 'converted_traces_dir'),
+                                                title="Select a File",
+                                                filetypes=(("JSON files", "*.json*"),))
+            if not selected_trace:
+                mb.showinfo('No file selected', 'Please select a valid file')
+            self.file_entry_vtt.insert(END, selected_trace)
+            self.file_entry_vtt.grid(row=0, column=0)
+
+        def restore_traceheader(filename):
+            """
+            (Re)generates statistics and hash for the input trace
+            :param filename: Input file
+            """
+            if os.path.isfile(filename) and pathlib.Path(filename).suffix == ".json":
+                try:
+                    with open(filename) as tr:
+                        tracedata = json.load(tr)
+                        trace = model.generate_statistic(tracedata, self.statistics_format_string_entry_vtt.get())
+                    write_file = 1
+                    if os.path.exists(filename):
+                        write_file = mb.askyesno("Overwriting File",
+                                                 "Restoring the traceheader will overwrite the file. Continue?")
+                    if write_file:
+                        with open(filename, 'w') as fp:
+                            json.dump(trace, fp, indent=4)
+                    model.add_hash_value_to_trace(filename)
+                    mb.showinfo('Traceheader restored', 'Statistics and has value restored successfully')
+                except json.decoder.JSONDecodeError:
+                    mb.showerror("Trace content invalid", "Please check if the trace content is valid")
+            else:
+                mb.showerror("Trace invalid", "Please check if the file is valid")
+
+        # GUI Elements
+        self.file_entry_vtt = Entry(self, width=config.get('entries', 'entry_width'))
+
+        self.relative_tolerance_label_vtt = Label(self, text="Relative Tolerance")
+        self.relative_tolerance_label_vtt.grid(column=1, row=2)
+
+        self.relative_tolerance_entry_vtt = Entry(self, width=config.get('entries', 'entry_width'))
+        self.relative_tolerance_entry_vtt.grid(column=2, row=2)
+
+        self.browse_file_button_vtt = Button(self, text="Choose File", command=browse_file_vtt)
+        self.browse_file_button_vtt.grid(row=1, column=0)
+
+        self.validate_statistics_button_vtt = Button(self, text="Validate Statistics",
+                                                     command=lambda:
+                                                     model.verify_statistics(self.file_entry_vtt.get(),
+                                                                             self.relative_tolerance_entry_vtt.get()))
+        self.validate_statistics_button_vtt.grid(row=2, column=0)
+
+        self.validate_hash_button_vtt = Button(self, text="Validate Hash",
+                                               command=lambda: model.hash_check(self.file_entry_vtt.get()))
+        self.validate_hash_button_vtt.grid(row=3, column=0)
+
+        self.restore_traceheader_button_vtt = Button(self, text="Restore Traceheader",
+                                                     command=lambda: restore_traceheader(self.file_entry_vtt.get()))
+        self.restore_traceheader_button_vtt.grid(row=4, column=0)
+
+        self.statistics_format_string_label_vtt = Label(self, text="Statistics Format String")
+        self.statistics_format_string_label_vtt.grid(column=1, row=4)
+
+        self.statistics_format_string_entry_vtt = Entry(self,
+                                                        width=config.get('entries', 'entry_width'),
+                                                        bg=config.get('entries',
+                                                                      'background_colour_optional_entries'))
+        self.statistics_format_string_entry_vtt.grid(column=2, row=4)
+
+        # Tooltips
+        browse_file_button_tooltip_vtt = Hovertip(self.browse_file_button_vtt,
+                                                  config.get('tooltips', 'browse_file_button_vtt'))
+        validate_statistics_button_tooltip_vtt = Hovertip(self.validate_statistics_button_vtt,
+                                                          config.get('tooltips', 'validate_statistics_button_vtt'))
+        relative_tolerance_tooltip_vtt = Hovertip(self.relative_tolerance_label_vtt,
+                                                  config.get('tooltips', 'relative_tolerance_vtt'))
+        validate_hash_button_tooltip_vtt = Hovertip(self.validate_hash_button_vtt,
+                                                    config.get('tooltips', 'validate_hash_button_vtt'))
+        restore_traceheader_button_tooltip_vtt = Hovertip(self.restore_traceheader_button_vtt,
+                                                          config.get('tooltips', 'restore_traceheader_button_vtt'))
+        numerical_format_tooltip_vtt = Hovertip(self.statistics_format_string_label_vtt,
+                                                config.get('tooltips', 'statistics_format_string'))
 
 # Create TCGUI instance and run mainloop
 root = Tk()
 converting_tool_gui = TraceConvertingToolGUI(root)
 root.mainloop()
 sys.exit()
+
+

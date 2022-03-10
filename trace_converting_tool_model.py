@@ -19,6 +19,43 @@ config = configparser.RawConfigParser()
 config.read('config.properties')
 
 
+def generate_statistic(trace, formatstring):
+    """
+    Computes the statistics for the trace
+    :param trace: Tracefile to compute from and add the statistics to
+    :param formatstring: For formatting the computed values
+    """
+    # Clear statistic lists so the next trace won't have old values
+    trace["traceheader"]["statistical characteristics"]["mean"] = []
+    trace["traceheader"]["statistical characteristics"]["median"] = []
+    trace["traceheader"]["statistical characteristics"]["skewness"] = []
+    trace["traceheader"]["statistical characteristics"]["kurtosis"] = []
+    trace["traceheader"]["statistical characteristics"]["autocorrelation"] = []
+    trace["traceheader"]["statistical characteristics"]["variance"] = []
+    try:
+        for i in range(len(trace["tracebody"]["tracedata"])):
+            df = pd.DataFrame(trace["tracebody"]["tracedata"][i])
+            trace["traceheader"]["statistical characteristics"]["mean"].append(
+                format(df[0].mean(), formatstring))
+            trace["traceheader"]["statistical characteristics"]["median"].append(
+                format(df[0].median(), formatstring))
+            trace["traceheader"]["statistical characteristics"]["skewness"].append(
+                format(df[0].skew(), formatstring))
+            trace["traceheader"]["statistical characteristics"]["kurtosis"].append(
+                format(df[0].kurtosis(), formatstring))
+            trace["traceheader"]["statistical characteristics"]["autocorrelation"].append(
+                format(df[0].autocorr(), formatstring))
+            trace["traceheader"]["statistical characteristics"]["variance"].append(
+                format(df[0].var(), formatstring))
+        return trace
+    except TypeError:
+        mb.showerror("Type Error", "One of the selected columns does not contain valid data")
+        raise
+    except (KeyError, IndexError):
+        mb.showerror("Format Error", "Invalid Numerical Format entered")
+        raise
+
+
 def df_columns_to_epoch(dataframe, columns, date_time_format):
     """
     Transforms columns in a dataframe to unix timestamp
@@ -202,6 +239,18 @@ def hash_from_trace(filename):
             if 'hash value' not in line:
                 sha256_hash.update(line.encode('UTF-8'))
         return sha256_hash.hexdigest()
+
+
+def add_hash_value_to_trace(filename):
+    """
+    Adds hash value to metainformation
+    :param filename: File the hash will be computed for
+    """
+    with open(filename) as tr:
+        tracedata = json.load(tr)
+        tracedata["traceheader"]["metainformation"]["hash value"] = hash_from_trace(filename)
+    with open(filename, 'w') as fp:
+        json.dump(tracedata, fp, indent=4)
 
 
 def hash_check(filename):
