@@ -822,7 +822,8 @@ class ValidateTraceTab(Frame):
 
 
 # Create TCGUI instance and run mainloop
-root = Tk()
-converting_tool_gui = TraceConvertingToolGUI(root)
-root.mainloop()
-sys.exit()
+if __name__ == "__main__":
+    root = Tk()
+    converting_tool_gui = TraceConvertingToolGUI(root)
+    root.mainloop()
+    sys.exit()
