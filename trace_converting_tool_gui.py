@@ -600,12 +600,16 @@ class FilterTraceTab(Frame):
                 autocorrelation_list = selected_files[i]["autocorrelation"]
                 variance_list = selected_files[i]["variance"]
                 for j in range(len(selected_files[i]["mean"])):
-                    mean = float(mean_list[j])
-                    median = float(median_list[j])
-                    skewness = float(skewness_list[j])
-                    kurtosis = float(kurtosis_list[j])
-                    autocorrelation = float(autocorrelation_list[j])
-                    variance = float(variance_list[j])
+                    try:
+                        mean = float(mean_list[j])
+                        median = float(median_list[j])
+                        skewness = float(skewness_list[j])
+                        kurtosis = float(kurtosis_list[j])
+                        autocorrelation = float(autocorrelation_list[j])
+                        variance = float(variance_list[j])
+                    except ValueError:
+                        mb.showerror('Invalid Trace', 'Trace number ' + str(i + 1) + ' contains invalid statistics')
+                        return
                     try:
                         if eval(expression):
                             trace = [os.path.basename(selected_filenames[i]),

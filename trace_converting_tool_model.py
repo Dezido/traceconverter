@@ -56,6 +56,77 @@ def generate_statistic(trace, formatstring):
         raise
 
 
+def verify_statistics(converted_trace_file, tolerance):
+    """
+    Checks if the statistics of the trace are valid
+    :param tolerance: relative tolerance
+    :param converted_trace_file: An already converted trace
+    """
+    if os.path.isfile(converted_trace_file) and pathlib.Path(converted_trace_file).suffix == ".json":
+        try:
+            try:
+                tolerance = float(tolerance)
+                if tolerance < 0 or tolerance > 1:
+                    mb.showerror('Tolerance must be between 0 and 1', 'Please enter a value between 0 and 1')
+                    return
+            except ValueError:
+                mb.showerror('Tolerance Entry invalid', 'Please enter a valid float')
+                return
+            with open(converted_trace_file) as trace_file:
+                input_trace = json.load(trace_file)
+                saved = input_trace["traceheader"]["statistical characteristics"]
+            with open(converted_trace_file) as trace_file:
+                input_trace = json.load(trace_file)
+                comp = generate_statistic(input_trace, '')["traceheader"]["statistical characteristics"]
+            statistics_valid = True
+            invalid_statistics = ""
+            for i in range(len(comp["mean"])):
+                if not math.isclose(float(comp["mean"][i]), float(saved["mean"][i]), rel_tol=tolerance):
+                    invalid_statistics += (
+                            "Mean [" + str(i) + "] not equal. Should be: " + str(comp["mean"][i]) + " but is " +
+                            str(saved["mean"][i]) + "\n")
+                    statistics_valid = False
+                if not math.isclose(float(comp["median"][i]), float(saved["median"][i]), rel_tol=tolerance):
+                    invalid_statistics += (
+                            "Median [" + str(i) + "] not equal. Should be: " + str(comp["median"][i]) + " but is " +
+                            str(saved["median"][i]) + "\n")
+                    statistics_valid = False
+                if not math.isclose(float(comp["skewness"][i]), float(saved["skewness"][i]), rel_tol=tolerance):
+                    invalid_statistics += (
+                            "Skewness [" + str(i) + "] not equal. Should be: " + str(comp["skewness"][i])
+                            + " but is " + str(saved["skewness"][i]) + "\n")
+                    statistics_valid = False
+                if not math.isclose(float(comp["kurtosis"][i]), float(saved["kurtosis"][i]),
+                                    rel_tol=tolerance):
+                    invalid_statistics += (
+                            "Kurtosis [" + str(i) + "] not equal. Should be: " + str(comp["kurtosis"][i]) +
+                            " but is " + str(saved["kurtosis"][i]) + "\n")
+                    statistics_valid = False
+                if not math.isclose(float(comp["autocorrelation"][i]), float(saved["autocorrelation"][i]),
+                                    rel_tol=tolerance):
+                    invalid_statistics += (
+                            "Autocorrelation [" + str(i) + "] not equal. Should be: " +
+                            str(comp["autocorrelation"][i]) + " but is " + str(saved["autocorrelation"][i]) + "\n")
+                    statistics_valid = False
+                if not math.isclose(float(comp["variance"][i]), float(saved["variance"][i]), rel_tol=tolerance):
+                    invalid_statistics += (
+                            "Variance [" + str(i) + "] not equal. Should be: " + str(comp["variance"][i])
+                            + " but is " + str(saved["variance"][i]) + "\n")
+                    statistics_valid = False
+            if statistics_valid:
+                mb.showinfo("Statistic Validation",
+                            "All statistics are close considering the passed relative tolerance")
+            else:
+                mb.showinfo("Statistic Validation", invalid_statistics)
+        except json.decoder.JSONDecodeError:
+            mb.showerror("Trace content invalid", "Please check if the trace content is valid")
+        except ValueError:
+            mb.showerror('Invalid Trace', 'Trace contains invalid statistics')
+            return
+    else:
+        mb.showerror("Trace invalid", "Please check if the file is valid")
+
+
 def df_columns_to_epoch(dataframe, columns, date_time_format):
     """
     Transforms columns in a dataframe to unix timestamp
@@ -150,72 +221,6 @@ def extract_tracedata(tracename, result_filename, float_format_string):
         mb.showerror('Invalid Trace', 'The selected file is not a valid Trace')
     except FileNotFoundError:
         mb.showerror('Could not find trace', 'Please check if path and filename are valid')
-
-
-def verify_statistics(converted_trace_file, tolerance):
-    """
-    Checks if the statistics of the trace are valid
-    :param tolerance: relative tolerance
-    :param converted_trace_file: An already converted trace
-    """
-    if os.path.isfile(converted_trace_file) and pathlib.Path(converted_trace_file).suffix == ".json":
-        try:
-            try:
-                tolerance = float(tolerance)
-                if tolerance < 0 or tolerance > 1:
-                    mb.showerror('Tolerance must be between 0 and 1', 'Please enter a value between 0 and 1')
-                    return
-            except ValueError:
-                mb.showerror('Tolerance Entry invalid', 'Please enter a valid float')
-                return
-            with open(converted_trace_file) as trace_file:
-                trace = json.load(trace_file)
-                statistics = trace["traceheader"]["statistical characteristics"]
-                tracedata = trace["tracebody"]["tracedata"]
-                statistics_valid = True
-                invalid_statistics = ""
-                for i in range(len(tracedata)):
-                    df = pd.DataFrame(tracedata[i])
-                    if not math.isclose(float(df.mean()[0]), float(statistics["mean"][i]), rel_tol=tolerance):
-                        invalid_statistics += (
-                                "Mean [" + str(i) + "] not equal. Should be: " + str(df.mean()[0]) + " but is " +
-                                str(statistics["mean"][i]) + "\n")
-                        statistics_valid = False
-                    if not math.isclose(float(df.median()[0]), float(statistics["median"][i]), rel_tol=tolerance):
-                        invalid_statistics += (
-                                "Median [" + str(i) + "] not equal. Should be: " + str(df.median()[0]) + " but is " +
-                                str(statistics["median"][i]) + "\n")
-                        statistics_valid = False
-                    if not math.isclose(float(df.skew()[0]), float(statistics["skewness"][i]), rel_tol=tolerance):
-                        invalid_statistics += (
-                                "Skewness [" + str(i) + "] not equal. Should be: " + str(df.skew()[0]) + " but is " +
-                                str(statistics["skewness"][i]) + "\n")
-                        statistics_valid = False
-                    if not math.isclose(float(df.kurtosis()[0]), float(statistics["kurtosis"][i]), rel_tol=tolerance):
-                        invalid_statistics += (
-                                "Kurtosis [" + str(i) + "] not equal. Should be: " + str(df.kurtosis()[0]) +
-                                " but is " + str(statistics["kurtosis"][i]) + "\n")
-                        statistics_valid = False
-                    if not math.isclose(float(df[0].autocorr()), float(statistics["autocorrelation"][i]),
-                                        rel_tol=tolerance):
-                        invalid_statistics += (
-                                "Autocorrelation [" + str(i) + "] not equal. Should be: " + str(df[0].autocorr()) +
-                                " but is " + str(statistics["autocorrelation"][i]) + "\n")
-                        statistics_valid = False
-                    if not math.isclose(float(df.var()[0]), float(statistics["variance"][i]), rel_tol=tolerance):
-                        invalid_statistics += (
-                                "Variance [" + str(i) + "] not equal. Should be: " + str(df[0].var()) + " but is " +
-                                str(statistics["variance"][i]) + "\n")
-                        statistics_valid = False
-                if statistics_valid:
-                    mb.showinfo("Statistic Validation",
-                                "All statistics are close considering the passed relative tolerance")
-                else:
-                    mb.showinfo("Statistic Validation", invalid_statistics)
-        except json.decoder.JSONDecodeError:
-            mb.showerror("Trace content invalid", "Please check if the trace content is valid")
-    else:
-        mb.showerror("Trace invalid", "Please check if the file is valid")
 
 
 def restore_traceheader(filename, stat_format_string):
