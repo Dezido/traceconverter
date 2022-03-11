@@ -373,56 +373,42 @@ class ConvertTraceTab(Frame):
         def convert_trace():
             """Takes the user input from the entry fields and converts the selected trace to the standard format"""
             org_filename = original_tracefile_entry_ctt.get()
+            write_file = 1
+            result_filename = config.get('directories', 'converted_traces_dir') + \
+                              '/' + result_filename_entry_ctt.get() + config.get('files', 'trace_file_suffix')
             if os.path.isfile(org_filename) and pathlib.Path(org_filename).suffix == ".csv":
+                if os.path.exists(result_filename):
+                    write_file = mb.askyesno("File already exists",
+                                             os.path.basename(result_filename) + " already exists. \n "
+                                                                                 "Would you like to overwrite it?")
                 try:
                     col = list(map(int, (column_indexes_entry_ctt.get().split(";"))))
                 except ValueError:
                     mb.showerror("Column indexes invalid",
                                  "Indexes need to be integers seperated by a semicolon [;]")
                     return
-                trace_template["tracebody"]["tracedata"] = \
-                    model.get_tracedata_from_file(original_tracefile_entry_ctt.get(), col)
-                amount_tracedata = len(trace_template["tracebody"]["tracedata"][0])
-                trace_template["tracebody"]["tracedata description"] = tracedata_description_entry_ctt.get().split(";")
-                trace_template["traceheader"]["metainformation"]["original name"] = os.path.basename(
-                    original_tracefile_entry_ctt.get())
-                trace_template["traceheader"]["metainformation"]["description"] = description_entry_ctt.get()
-                trace_template["traceheader"]["metainformation"]["source"] = source_entry_ctt.get()
-                trace_template["traceheader"]["metainformation"]["user"] = username_entry_ctt.get()
-                trace_template["traceheader"]["metainformation"]["additional information"] = \
-                    additional_information_entry_ctt.get('1.0', 'end-1c').replace("\n", "").split(";")
-                trace_template["traceheader"]["metainformation"]["creation time"] = str(datetime.datetime.now())
-                # Generates statistics and adds them into a list. Each list entry represents one column of the raw trace
-                if amount_tracedata > 4:
-                    trace = model.generate_statistic(trace_template, statistics_format_entry_ctt.get())
-                else:
-                    trace = trace_template
-                    mb.showinfo("Statistics won't be computed", "Tracedata only contains " + str(amount_tracedata) +
-                                " elements per column. Computing statistics requires five or more.")
-                # Save trace to file
-                filename = config.get('directories', 'converted_traces_dir') + \
-                           '/' + result_filename_entry_ctt.get() + config.get('files', 'trace_file_suffix')
-                write_file = 1
-                if os.path.exists(filename):
-                    write_file = mb.askyesno("File already exists",
-                                             os.path.basename(filename) + " already exists. \n "
-                                                                          "Would you like to overwrite it?")
                 if write_file:
-                    with open(filename, 'w') as fp:
-                        json.dump(trace, fp, indent=4)
-                    model.add_hash_value_to_trace(filename)
-                    # If tracedata checkbox is selected the data will also be extracted
-                    if extract_tracedata_checkbutton_var_ctt.get() == 1:
-                        tracedata_filename = config.get('directories',
-                                                        'tracedata_dir') + tracedata_filename_entry_ctt.get() + \
-                                             config.get('files', 'tracedata_file_suffix')
-                        model.extract_tracedata(
-                            filename, tracedata_filename, float_format_entry_ctt.get())
-                    mb.showinfo("Trace successfully converted", "Displaying converted Trace")
+                    model.convert_trace(original_tracefile_entry_ctt.get(),
+                                        col,
+                                        tracedata_description_entry_ctt.get().split(";"),
+                                        description_entry_ctt.get(),
+                                        source_entry_ctt.get(),
+                                        username_entry_ctt.get(),
+                                        additional_information_entry_ctt.get('1.0', 'end-1c').replace("\n", "").split(";"),
+                                        statistics_format_entry_ctt.get(),
+                                        result_filename)
                 else:
                     mb.showinfo("File already exists", "Displaying existing File")
+                    # If tracedata checkbox is selected the data will also be extracted
+                if extract_tracedata_checkbutton_var_ctt.get() == 1:
+                    tracedata_filename = config.get('directories',
+                                                    'tracedata_dir') + tracedata_filename_entry_ctt.get() + \
+                                         config.get('files', 'tracedata_file_suffix')
+                    model.extract_tracedata(
+                        result_filename, tracedata_filename, float_format_entry_ctt.get())
+                mb.showinfo("Trace successfully converted", "Displaying converted Trace")
                 # Display the created traces
-                display_file_ctt(filename)
+                display_file_ctt(result_filename)
             else:
                 mb.showinfo('No file selected', 'Please select a valid file')
 

@@ -47,6 +47,30 @@ def generate_statistic(trace, formatstring):
         raise
 
 
+def convert_trace(input_file, indexes, data_desc, desc, source, user, additional_info, stat_format, result_filename):
+    trace_template["tracebody"]["tracedata"] = \
+        get_tracedata_from_file(input_file, indexes)
+    amount_tracedata = len(trace_template["tracebody"]["tracedata"][0])
+    trace_template["tracebody"]["tracedata description"] = data_desc
+    trace_template["traceheader"]["metainformation"]["original name"] = os.path.basename(input_file)
+    trace_template["traceheader"]["metainformation"]["description"] = desc
+    trace_template["traceheader"]["metainformation"]["source"] = source
+    trace_template["traceheader"]["metainformation"]["user"] = user
+    trace_template["traceheader"]["metainformation"]["additional information"] = additional_info
+    trace_template["traceheader"]["metainformation"]["creation time"] = str(datetime.datetime.now())
+    # Generates statistics and adds them into a list. Each list entry represents one column of the raw trace
+    if amount_tracedata > 4:
+        trace = generate_statistic(trace_template, stat_format)
+    else:
+        trace = trace_template
+        mb.showinfo("Statistics won't be computed", "Tracedata only contains " + str(amount_tracedata) +
+                    " elements per column. Computing statistics requires five or more.")
+    # Save trace to file
+    with open(result_filename, 'w') as fp:
+        json.dump(trace, fp, indent=4)
+    add_hash_value_to_trace(result_filename)
+
+
 def verify_statistics(converted_trace_file, tolerance):
     """
     Checks if the statistics of the trace are valid
