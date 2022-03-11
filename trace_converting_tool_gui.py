@@ -27,7 +27,6 @@ class TraceConvertingToolGUI:
         master.title("Trace Converting Tool")
         # Notebook and Tabs
         tab_parent = ttk.Notebook(master)
-
         prepare_file_tab = PrepareFileTab(tab_parent)
         convert_trace_tab = ConvertTraceTab(tab_parent)
         filter_traces_tab = FilterTraceTab(tab_parent)
@@ -593,20 +592,14 @@ class FilterTraceTab(Frame):
             for i in filter_results_tv.get_children():
                 filter_results_tv.delete(i)
             for i in range(len(selected_files)):
-                mean_list = selected_files[i]["mean"]
-                median_list = selected_files[i]["median"]
-                skewness_list = selected_files[i]["skewness"]
-                kurtosis_list = selected_files[i]["kurtosis"]
-                autocorrelation_list = selected_files[i]["autocorrelation"]
-                variance_list = selected_files[i]["variance"]
                 for j in range(len(selected_files[i]["mean"])):
                     try:
-                        mean = float(mean_list[j])
-                        median = float(median_list[j])
-                        skewness = float(skewness_list[j])
-                        kurtosis = float(kurtosis_list[j])
-                        autocorrelation = float(autocorrelation_list[j])
-                        variance = float(variance_list[j])
+                        mean = float(selected_files[i]["mean"][j])
+                        median = float(selected_files[i]["median"][j])
+                        skewness = float(selected_files[i]["skewness"][j])
+                        kurtosis = float(selected_files[i]["kurtosis"][j])
+                        autocorrelation = float(selected_files[i]["autocorrelation"][j])
+                        variance = float(selected_files[i]["variance"][j])
                     except ValueError:
                         mb.showerror('Invalid Trace', 'Trace number ' + str(i + 1) + ' contains invalid statistics')
                         return

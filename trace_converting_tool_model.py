@@ -26,12 +26,8 @@ def generate_statistic(trace, formatstring):
     :param formatstring: For formatting the computed values
     """
     # Clear statistic lists so the next trace won't have old values
-    trace["traceheader"]["statistical characteristics"]["mean"] = []
-    trace["traceheader"]["statistical characteristics"]["median"] = []
-    trace["traceheader"]["statistical characteristics"]["skewness"] = []
-    trace["traceheader"]["statistical characteristics"]["kurtosis"] = []
-    trace["traceheader"]["statistical characteristics"]["autocorrelation"] = []
-    trace["traceheader"]["statistical characteristics"]["variance"] = []
+    for statistic in trace["traceheader"]["statistical characteristics"]:
+        trace["traceheader"]["statistical characteristics"][statistic] = []
     try:
         for i in range(len(trace["tracebody"]["tracedata"])):
             df = pd.DataFrame(trace["tracebody"]["tracedata"][i])
@@ -81,38 +77,12 @@ def verify_statistics(converted_trace_file, tolerance):
             statistics_valid = True
             invalid_statistics = ""
             for i in range(len(comp["mean"])):
-                if not math.isclose(float(comp["mean"][i]), float(saved["mean"][i]), rel_tol=tolerance):
-                    invalid_statistics += (
-                            "Mean [" + str(i) + "] not equal. Should be: " + str(comp["mean"][i]) + " but is " +
-                            str(saved["mean"][i]) + "\n")
-                    statistics_valid = False
-                if not math.isclose(float(comp["median"][i]), float(saved["median"][i]), rel_tol=tolerance):
-                    invalid_statistics += (
-                            "Median [" + str(i) + "] not equal. Should be: " + str(comp["median"][i]) + " but is " +
-                            str(saved["median"][i]) + "\n")
-                    statistics_valid = False
-                if not math.isclose(float(comp["skewness"][i]), float(saved["skewness"][i]), rel_tol=tolerance):
-                    invalid_statistics += (
-                            "Skewness [" + str(i) + "] not equal. Should be: " + str(comp["skewness"][i])
-                            + " but is " + str(saved["skewness"][i]) + "\n")
-                    statistics_valid = False
-                if not math.isclose(float(comp["kurtosis"][i]), float(saved["kurtosis"][i]),
-                                    rel_tol=tolerance):
-                    invalid_statistics += (
-                            "Kurtosis [" + str(i) + "] not equal. Should be: " + str(comp["kurtosis"][i]) +
-                            " but is " + str(saved["kurtosis"][i]) + "\n")
-                    statistics_valid = False
-                if not math.isclose(float(comp["autocorrelation"][i]), float(saved["autocorrelation"][i]),
-                                    rel_tol=tolerance):
-                    invalid_statistics += (
-                            "Autocorrelation [" + str(i) + "] not equal. Should be: " +
-                            str(comp["autocorrelation"][i]) + " but is " + str(saved["autocorrelation"][i]) + "\n")
-                    statistics_valid = False
-                if not math.isclose(float(comp["variance"][i]), float(saved["variance"][i]), rel_tol=tolerance):
-                    invalid_statistics += (
-                            "Variance [" + str(i) + "] not equal. Should be: " + str(comp["variance"][i])
-                            + " but is " + str(saved["variance"][i]) + "\n")
-                    statistics_valid = False
+                for statistic in saved:
+                    if not math.isclose(float(comp[statistic][i]), float(saved[statistic][i]), rel_tol=tolerance):
+                        invalid_statistics += (
+                                str(statistic) + " [" + str(i) + "] not equal. Should be: " + str(comp[statistic][i]) +
+                                " but is " + str(saved[statistic][i]) + "\n")
+                        statistics_valid = False
             if statistics_valid:
                 mb.showinfo("Statistic Validation",
                             "All statistics are close considering the passed relative tolerance")
