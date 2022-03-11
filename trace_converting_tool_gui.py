@@ -392,9 +392,7 @@ class ConvertTraceTab(Frame):
                 trace_template["traceheader"]["metainformation"]["additional information"] = \
                     additional_information_entry_ctt.get('1.0', 'end-1c').replace("\n", "").split(";")
                 trace_template["traceheader"]["metainformation"]["creation time"] = str(datetime.datetime.now())
-
-                #  Generates statistics and adds them into a list.
-                #  Each list entry represents one column of the raw trace
+                # Generates statistics and adds them into a list. Each list entry represents one column of the raw trace
                 if amount_tracedata > 4:
                     trace = model.generate_statistic(trace_template, statistics_format_entry_ctt.get())
                 else:
