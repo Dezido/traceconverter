@@ -583,9 +583,9 @@ class FilterTraceTab(Frame):
 
         def filter_traces_ftt(expression):
             """Evaluates the expression for the selected traces"""
-            filter_result.clear()
-            for i in filter_results_tv.get_children():
-                filter_results_tv.delete(i)
+            filter_results.clear()
+            for i in filter_results_treeviw.get_children():
+                filter_results_treeviw.delete(i)
             for i in range(len(selected_files)):
                 for j in range(len(selected_files[i]["mean"])):
                     try:
@@ -608,20 +608,20 @@ class FilterTraceTab(Frame):
                                      autocorrelation,
                                      variance
                                      ]
-                            filter_result.append(trace)
+                            filter_results.append(trace)
                     except (NameError, SyntaxError):
                         mb.showerror("Expression invalid", "Please enter a valid expression")
                         raise
-            for i in range(len(filter_result)):
-                filter_results_tv.insert('', 'end', values=(filter_result[i][0],
-                                                            filter_result[i][1],
-                                                            filter_result[i][2],
-                                                            filter_result[i][3],
-                                                            filter_result[i][4],
-                                                            filter_result[i][5],
-                                                            filter_result[i][6]))
+            for i in range(len(filter_results)):
+                filter_results_treeviw.insert('', 'end', values=(filter_results[i][0],
+                                                                 filter_results[i][1],
+                                                                 filter_results[i][2],
+                                                                 filter_results[i][3],
+                                                                 filter_results[i][4],
+                                                                 filter_results[i][5],
+                                                                 filter_results[i][6]))
             Label(self, text="Results").grid(column=1, row=10)
-            filter_results_tv.grid(column=1, row=11, columnspan=10)
+            filter_results_treeviw.grid(column=1, row=11, columnspan=10)
             vsb_filter_results_tv.grid(column=11, row=11, sticky=N + S)
 
         # GUI Elements
@@ -632,22 +632,22 @@ class FilterTraceTab(Frame):
                                      height=config.get('listbox', 'listbox_height'))
 
         treeview_columns = ['name', 'mean', 'median', 'skewness', 'kurtosis', 'autocorrelation', 'variance']
-        filter_results_tv = ttk.Treeview(self, columns=treeview_columns, show='headings',
-                                         height=config.get('treeview', 'filter_treeview_height'))
-        vsb_filter_results_tv = ttk.Scrollbar(self, orient="vertical", command=filter_results_tv.yview)
-        filter_results_tv.configure(yscrollcommand=vsb_filter_results_tv.set)
-        filter_results_tv.heading('name', text='Name')
-        filter_results_tv.column('name', width=300)
-        filter_results_tv.heading('mean', text='Mean')
-        filter_results_tv.heading('median', text='Median')
-        filter_results_tv.heading('skewness', text='Skewness')
-        filter_results_tv.heading('kurtosis', text='Kurtosis')
-        filter_results_tv.heading('autocorrelation', text='Autocorrelation')
-        filter_results_tv.heading('variance', text='Variance')
+        filter_results_treeviw = ttk.Treeview(self, columns=treeview_columns, show='headings',
+                                              height=config.get('treeview', 'filter_treeview_height'))
+        vsb_filter_results_tv = ttk.Scrollbar(self, orient="vertical", command=filter_results_treeviw.yview)
+        filter_results_treeviw.configure(yscrollcommand=vsb_filter_results_tv.set)
+        filter_results_treeviw.heading('name', text='Name')
+        filter_results_treeviw.column('name', width=300)
+        filter_results_treeviw.heading('mean', text='Mean')
+        filter_results_treeviw.heading('median', text='Median')
+        filter_results_treeviw.heading('skewness', text='Skewness')
+        filter_results_treeviw.heading('kurtosis', text='Kurtosis')
+        filter_results_treeviw.heading('autocorrelation', text='Autocorrelation')
+        filter_results_treeviw.heading('variance', text='Variance')
 
         selected_filenames = []
         selected_files = []
-        filter_result = []
+        filter_results = []
 
         expression_label_ftt = Label(self, text="Boolean Expression")
         expression_label_ftt.grid(column=3, row=2)

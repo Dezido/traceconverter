@@ -26,23 +26,18 @@ def generate_statistic(trace, formatstring):
     :param formatstring: For formatting the computed values
     """
     # Clear statistic lists so the next trace won't have old values
+    statistics = trace["traceheader"]["statistical characteristics"]
     for statistic in trace["traceheader"]["statistical characteristics"]:
         trace["traceheader"]["statistical characteristics"][statistic] = []
     try:
         for i in range(len(trace["tracebody"]["tracedata"])):
             df = pd.DataFrame(trace["tracebody"]["tracedata"][i])
-            trace["traceheader"]["statistical characteristics"]["mean"].append(
-                format(df[0].mean(), formatstring))
-            trace["traceheader"]["statistical characteristics"]["median"].append(
-                format(df[0].median(), formatstring))
-            trace["traceheader"]["statistical characteristics"]["skewness"].append(
-                format(df[0].skew(), formatstring))
-            trace["traceheader"]["statistical characteristics"]["kurtosis"].append(
-                format(df[0].kurtosis(), formatstring))
-            trace["traceheader"]["statistical characteristics"]["autocorrelation"].append(
-                format(df[0].autocorr(), formatstring))
-            trace["traceheader"]["statistical characteristics"]["variance"].append(
-                format(df[0].var(), formatstring))
+            statistics["mean"].append(format(df[0].mean(), formatstring))
+            statistics["median"].append(format(df[0].median(), formatstring))
+            statistics["skewness"].append(format(df[0].skew(), formatstring))
+            statistics["kurtosis"].append(format(df[0].kurtosis(), formatstring))
+            statistics["autocorrelation"].append(format(df[0].autocorr(), formatstring))
+            statistics["variance"].append(format(df[0].var(), formatstring))
         return trace
     except TypeError:
         mb.showerror("Type Error", "One of the selected columns does not contain valid data")
