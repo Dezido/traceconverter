@@ -389,11 +389,8 @@ class ConvertTraceTab(Frame):
                 trace_template["traceheader"]["metainformation"]["description"] = description_entry_ctt.get()
                 trace_template["traceheader"]["metainformation"]["source"] = source_entry_ctt.get()
                 trace_template["traceheader"]["metainformation"]["user"] = username_entry_ctt.get()
-                if len(additional_information_entry_ctt.get('1.0', 'end-1c')) != 0:
-                    trace_template["traceheader"]["metainformation"]["additional information"] = \
-                        additional_information_entry_ctt.get('1.0', 'end-1c').replace("\n", "").split(";")
-                else:
-                    trace_template["traceheader"]["metainformation"].pop("additional information", None)
+                trace_template["traceheader"]["metainformation"]["additional information"] = \
+                    additional_information_entry_ctt.get('1.0', 'end-1c').replace("\n", "").split(";")
                 trace_template["traceheader"]["metainformation"]["creation time"] = str(datetime.datetime.now())
 
                 #  Generates statistics and adds them into a list.
