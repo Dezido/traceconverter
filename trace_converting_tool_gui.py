@@ -583,35 +583,9 @@ class FilterTraceTab(Frame):
 
         def filter_traces_ftt(expression):
             """Evaluates the expression for the selected traces"""
-            filter_results.clear()
             for i in filter_results_treeviw.get_children():
                 filter_results_treeviw.delete(i)
-            for i in range(len(selected_files)):
-                for j in range(len(selected_files[i]["mean"])):
-                    try:
-                        mean = float(selected_files[i]["mean"][j])
-                        median = float(selected_files[i]["median"][j])
-                        skewness = float(selected_files[i]["skewness"][j])
-                        kurtosis = float(selected_files[i]["kurtosis"][j])
-                        autocorrelation = float(selected_files[i]["autocorrelation"][j])
-                        variance = float(selected_files[i]["variance"][j])
-                    except ValueError:
-                        mb.showerror('Invalid Trace', 'Trace number ' + str(i + 1) + ' contains invalid statistics')
-                        return
-                    try:
-                        if eval(expression):
-                            trace = [os.path.basename(selected_filenames[i]),
-                                     mean,
-                                     median,
-                                     skewness,
-                                     kurtosis,
-                                     autocorrelation,
-                                     variance
-                                     ]
-                            filter_results.append(trace)
-                    except (NameError, SyntaxError):
-                        mb.showerror("Expression invalid", "Please enter a valid expression")
-                        raise
+            filter_results = model.filter_traces_by_expression(selected_files, expression, selected_filenames)
             for i in range(len(filter_results)):
                 filter_results_treeviw.insert('', 'end', values=(filter_results[i][0],
                                                                  filter_results[i][1],
@@ -647,7 +621,6 @@ class FilterTraceTab(Frame):
 
         selected_filenames = []
         selected_files = []
-        filter_results = []
 
         expression_label_ftt = Label(self, text="Boolean Expression")
         expression_label_ftt.grid(column=3, row=2)

@@ -92,6 +92,37 @@ def verify_statistics(converted_trace_file, tolerance):
         mb.showerror("Trace invalid", "Please check if the file is valid")
 
 
+def filter_traces_by_expression(selected_files, expression, selected_filenames):
+    filter_results = []
+    for i in range(len(selected_files)):
+        for j in range(len(selected_files[i]["mean"])):
+            try:
+                mean = float(selected_files[i]["mean"][j])
+                median = float(selected_files[i]["median"][j])
+                skewness = float(selected_files[i]["skewness"][j])
+                kurtosis = float(selected_files[i]["kurtosis"][j])
+                autocorrelation = float(selected_files[i]["autocorrelation"][j])
+                variance = float(selected_files[i]["variance"][j])
+            except ValueError:
+                mb.showerror('Invalid Trace', 'Trace number ' + str(i + 1) + ' contains invalid statistics')
+                return
+            try:
+                if eval(expression):
+                    trace = [os.path.basename(selected_filenames[i]),
+                             mean,
+                             median,
+                             skewness,
+                             kurtosis,
+                             autocorrelation,
+                             variance
+                             ]
+                    filter_results.append(trace)
+            except (NameError, SyntaxError):
+                mb.showerror("Expression invalid", "Please enter a valid expression")
+                raise
+    return filter_results
+
+
 def df_columns_to_epoch(dataframe, columns, date_time_format):
     """
     Transforms columns in a dataframe to unix timestamp
