@@ -717,24 +717,21 @@ class ValidateTraceTab(Frame):
         browse_file_button = Button(self, text="Choose File", command=browse_file)
         browse_file_button.grid(row=1, column=0)
 
-        validate_statistics_button = Button(self, text="Validate Statistics",
-                                            command=lambda:
+        validate_statistics_button = Button(self, text="Validate Statistics", command=lambda:
                                             model.verify_statistics(file_entry.get(), relative_tolerance_entry.get()))
         validate_statistics_button.grid(row=2, column=0)
 
         validate_hash_button = Button(self, text="Validate Hash", command=lambda: model.hash_check(file_entry.get()))
         validate_hash_button.grid(row=3, column=0)
 
-        restore_traceheader_button = Button(self, text="Restore Traceheader",
-                                            command=lambda: model.restore_traceheader(
+        restore_traceheader_button = Button(self, text="Restore Traceheader", command=lambda: model.restore_traceheader(
                                                 file_entry.get(), statistics_format_string_entry.get()))
         restore_traceheader_button.grid(row=4, column=0)
 
         statistics_format_string_label = Label(self, text="Statistics Format String")
         statistics_format_string_label.grid(column=1, row=4)
 
-        statistics_format_string_entry = Entry(self,
-                                               width=config.get('entries', 'entry_width'),
+        statistics_format_string_entry = Entry(self, width=config.get('entries', 'entry_width'),
                                                bg=config.get('entries', 'background_colour_optional_entries'))
         statistics_format_string_entry.grid(column=2, row=4)
 
