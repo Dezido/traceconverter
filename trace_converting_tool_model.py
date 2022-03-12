@@ -48,6 +48,19 @@ def generate_statistic(trace, formatstring):
 
 
 def convert_trace(input_file, indexes, data_desc, desc, source, user, additional_info, stat_format, result_filename):
+    """
+    Converts the input trace to standard format
+    :param input_file: input trace
+    :param indexes: column indexes with tracedata
+    :param data_desc: tracedata description
+    :param desc: trace description
+    :param source: trace source
+    :param user: username
+    :param additional_info: additional information about the trace
+    :param stat_format: format string for statistical characteristics
+    :param result_filename: result filename
+    :return: converzted trace
+    """
     trace_template["tracebody"]["tracedata"] = \
         get_tracedata_from_file(input_file, indexes)
     amount_tracedata = len(trace_template["tracebody"]["tracedata"][0])
@@ -117,6 +130,13 @@ def verify_statistics(converted_trace_file, tolerance):
 
 
 def filter_traces_by_expression(selected_files, expression, selected_filenames):
+    """
+    filters the selected files with the expression
+    :param selected_files: set of files to filter from
+    :param expression: expression to filter by
+    :param selected_filenames: names of selected files
+    :return: results of filtering
+    """
     filter_results = []
     for i in range(len(selected_files)):
         for j in range(len(selected_files[i]["mean"])):
