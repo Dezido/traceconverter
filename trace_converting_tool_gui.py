@@ -210,9 +210,8 @@ class PrepareFileTab(Frame):
         add_header_entry = Entry(self, width=config.get('entries', 'entry_width'))
         add_header_entry.grid(column=1, row=3)
 
-        add_header_button = Button(self, text="Add Header to CSV File",
-                                   command=lambda: [model.add_header_to_csv(file_entry.get(),
-                                                                            list(add_header_entry.get().split(","))),
+        add_header_button = Button(self, text="Add Header to CSV File", command=lambda: [model.add_header_to_csv(
+                                           file_entry.get(), list(add_header_entry.get().split(","))),
                                                     display_file(file_entry.get())])
         add_header_button.grid(column=2, row=3)
 
@@ -253,9 +252,7 @@ class PrepareFileTab(Frame):
 
         calculate_timestamp_button = Button(self, text="Calculate Unix Time",
                                             command=lambda: calculate_timestamp(
-                                                file_entry.get(),
-                                                date_columns_entry.get(),
-                                                date_format_entry.get()))
+                                                file_entry.get(), date_columns_entry.get(), date_format_entry.get()))
         calculate_timestamp_button.grid(column=4, row=4)
 
         column_wise_difference_button = Button(self, text="Calculate Difference between Columns",
@@ -281,15 +278,13 @@ class PrepareFileTab(Frame):
         keep_header_checkbutton = Checkbutton(self, text="Use first Line as Header",
                                               variable=keep_header_checkbutton, onvalue=1,
                                               offvalue=0,
-                                              selectcolor=config.get('entries',
-                                                                     'background_colour_optional_entries'))
+                                              selectcolor=config.get('entries','background_colour_optional_entries'))
         keep_header_checkbutton.grid(column=5, row=7)
 
         transform_filetype_button = Button(self,
                                            text="Convert File to CSV",
                                            command=lambda:
-                                           convert_file_to_csv(file_entry.get(),
-                                                               delimiter_entry.get()))
+                                           convert_file_to_csv(file_entry.get(), delimiter_entry.get()))
         transform_filetype_button.grid(column=4, row=7)
 
         # Tooltips
