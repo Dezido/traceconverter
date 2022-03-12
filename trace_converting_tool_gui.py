@@ -481,7 +481,7 @@ class ConvertTraceTab(Frame):
         result_filename_entry.grid(row=8, column=1)
 
         # Text widget to display the converted trace
-        file_displayer = scrolledtext.ScrolledText(self, width=100, height=33)
+        file_displayer = scrolledtext.ScrolledText(self, width=105, height=33)
 
         convert_button = Button(self, text='Convert Trace', command=convert_trace)
         convert_button.grid(row=13, column=1)

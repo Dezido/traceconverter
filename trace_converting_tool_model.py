@@ -80,7 +80,7 @@ def convert_trace(input_file, indexes, data_desc, desc, source, user, additional
                     " elements per column. Computing statistics requires five or more.")
     # Save trace to file
     with open(result_filename, 'w') as fp:
-        json.dump(trace, fp, indent=4)
+        json.dump(trace, fp, indent='\t')
     add_hash_value_to_trace(result_filename)
 
 
@@ -280,7 +280,7 @@ def restore_traceheader(filename, stat_format_string):
                                          "Restoring the traceheader will overwrite the file. Continue?")
             if write_file:
                 with open(filename, 'w') as fp:
-                    json.dump(trace, fp, indent=4)
+                    json.dump(trace, fp, indent='\t')
             add_hash_value_to_trace(filename)
             mb.showinfo('Traceheader restored', 'Statistics and has value restored successfully')
         except json.decoder.JSONDecodeError:
@@ -356,7 +356,7 @@ def add_hash_value_to_trace(filename):
         tracedata = json.load(tr)
         tracedata["traceheader"]["metainformation"]["hash value"] = hash_from_trace(filename)
     with open(filename, 'w') as fp:
-        json.dump(tracedata, fp, indent=4)
+        json.dump(tracedata, fp, indent='\t')
 
 
 def hash_check(filename):
