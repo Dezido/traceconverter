@@ -355,7 +355,7 @@ def add_hash_value_to_trace(filename):
     with open(filename) as tr:
         tracedata = json.load(tr)
         tracedata["traceheader"]["metainformation"]["hash value"] = hash_from_trace(filename)
-    with open(filename, 'w') as fp:
+    with open(filename, 'w', newline='\n') as fp:
         json.dump(tracedata, fp, indent='\t')
 
 
