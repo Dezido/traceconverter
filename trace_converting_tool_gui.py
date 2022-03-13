@@ -662,7 +662,7 @@ class ExtractTracedataTab(Frame):
         float_format_entry.insert(END, config.get('entries', 'default_float_format_entry_ett'))
         input_trace_entry = Entry(self, width=config.get('entries', 'entry_width'))
 
-        trace_column_display = scrolledtext.ScrolledText(self, width=100, height=33)
+        trace_column_display = scrolledtext.ScrolledText(self, width=120, height=33)
 
         choose_trace_button = Button(self, text="Choose File", command=browse_file)
         choose_trace_button.grid(row=0, column=0)
