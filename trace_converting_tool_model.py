@@ -59,7 +59,7 @@ def convert_trace(input_file, indexes, data_desc, desc, source, user, additional
     :param additional_info: additional information about the trace
     :param stat_format: format string for statistical characteristics
     :param result_filename: result filename
-    :return: converzted trace
+    :return: converted trace
     """
     trace_template["tracebody"]["tracedata"] = \
         get_tracedata_from_file(input_file, indexes)
@@ -281,8 +281,8 @@ def restore_traceheader(filename, stat_format_string):
             if write_file:
                 with open(filename, 'w') as fp:
                     json.dump(trace, fp, indent='\t')
-            add_hash_value_to_trace(filename)
-            mb.showinfo('Traceheader restored', 'Statistics and has value restored successfully')
+                    add_hash_value_to_trace(filename)
+                    mb.showinfo('Traceheader restored', 'Statistics and has value restored successfully')
         except json.decoder.JSONDecodeError:
             mb.showerror("Trace content invalid", "Please check if the trace content is valid")
     else:
