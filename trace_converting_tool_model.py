@@ -247,7 +247,8 @@ def filter_traces_by_expression(selected_files, expression, selected_filenames):
                 return
             try:
                 if eval(expression):
-                    trace = [os.path.basename(selected_filenames[i]),
+                    trace = [os.path.basename(os.path.dirname((selected_filenames[i]))) +
+                             '/' + os.path.basename((selected_filenames[i])),
                              mean,
                              median,
                              skewness,

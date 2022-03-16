@@ -378,14 +378,16 @@ class ConvertTraceTab(Frame):
                                         additional_information_entry.get('1.0', 'end-1c').replace("\n", "").split(";"),
                                         statistics_format_entry.get(),
                                         result_filename)
+                    if extract_tracedata_checkbutton_var.get() == 1:
+                        tracedata_filename = config.get('directories',
+                                                        'tracedata_dir') + tracedata_filename_entry.get() + \
+                                             config.get('files', 'tracedata_file_suffix')
+                        model.extract_tracedata(result_filename, tracedata_filename, float_format_entry.get())
+                        mb.showinfo("Trace successfully converted", "Displaying converted Trace")
+                        display_file(result_filename)
                 else:
                     mb.showinfo("File already exists", "Displaying existing File")
                     # If tracedata checkbox is selected the data will also be extracted
-                if extract_tracedata_checkbutton_var.get() == 1:
-                    tracedata_filename = config.get('directories', 'tracedata_dir') + tracedata_filename_entry.get() + \
-                                         config.get('files', 'tracedata_file_suffix')
-                    model.extract_tracedata(result_filename, tracedata_filename, float_format_entry.get())
-                mb.showinfo("Trace successfully converted", "Displaying converted Trace")
                 # Display the created traces
                 display_file(result_filename)
             else:
@@ -652,7 +654,7 @@ class ExtractTracedataTab(Frame):
         # GUI Elements
         converted_trace_label = Label(self, text="Trace")
         converted_trace_label.grid(row=0)
-        tracedata_filename_label = Label(self, text="Result Filename")
+        tracedata_filename_label = Label(self, text="Tracedata Filename")
         tracedata_filename_label.grid(row=1, column=0)
         float_format_label = Label(self, text="Float Format String")
         float_format_label.grid(row=2, column=0)
