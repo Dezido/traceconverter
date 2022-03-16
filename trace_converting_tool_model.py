@@ -156,7 +156,7 @@ def convert_trace(input_file, indexes, data_desc, desc, source, user, additional
         mb.showinfo("Statistics won't be computed", "Tracedata only contains " + str(amount_tracedata) +
                     " elements per column. Computing statistics requires five or more.")
     # Save trace to file
-    with open(result_filename, 'w') as fp:
+    with open(result_filename, 'w', newline='\n') as fp:
         json.dump(trace, fp, indent='\t')
     add_hash_value_to_trace(result_filename)
 
@@ -169,7 +169,7 @@ def extract_tracedata(tracename, result_filename, float_format_string):
     :param tracename: Name of the converted tracefile
     """
     try:
-        with open(tracename) as tr:
+        with open(tracename, newline='\n') as tr:
             tracedata = json.load(tr)["tracebody"]["tracedata"]
             df = pd.DataFrame(tracedata)
             write_file = 1
@@ -270,7 +270,7 @@ def hash_from_trace(filename):
     :return: Computed hash value
     """
     sha256_hash = hashlib.sha256()
-    with open(filename, "r") as file:
+    with open(filename, "r", newline='\n') as file:
         for line in file:
             if 'hash value' not in line:
                 sha256_hash.update(line.encode('UTF-8'))
@@ -284,7 +284,7 @@ def hash_check(filename):
     """
     if os.path.isfile(filename) and pathlib.Path(filename).suffix == ".json":
         try:
-            with open(filename) as file:
+            with open(filename, newline='\n') as file:
                 tracedata = json.load(file)
                 stored_hash = tracedata["traceheader"]["metainformation"]["hash value"]
                 computed_hash = hash_from_trace(filename)
@@ -304,7 +304,7 @@ def add_hash_value_to_trace(filename):
     Adds hash value to metainformation
     :param filename: File the hash will be computed for
     """
-    with open(filename) as tr:
+    with open(filename, newline='\n') as tr:
         tracedata = json.load(tr)
         tracedata["traceheader"]["metainformation"]["hash value"] = hash_from_trace(filename)
     with open(filename, 'w', newline='\n') as fp:
@@ -327,10 +327,10 @@ def verify_statistics(converted_trace_file, tolerance):
             except ValueError:
                 mb.showerror('Tolerance Entry invalid', 'Please enter a valid float')
                 return
-            with open(converted_trace_file) as trace_file:
+            with open(converted_trace_file, newline='\n') as trace_file:
                 input_trace = json.load(trace_file)
                 saved = input_trace["traceheader"]["statistical characteristics"]
-            with open(converted_trace_file) as trace_file:
+            with open(converted_trace_file, newline='\n') as trace_file:
                 input_trace = json.load(trace_file)
                 comp = generate_statistic(input_trace, '')["traceheader"]["statistical characteristics"]
             statistics_valid = True
@@ -364,7 +364,7 @@ def restore_traceheader(filename, stat_format_string):
     """
     if os.path.isfile(filename) and pathlib.Path(filename).suffix == ".json":
         try:
-            with open(filename) as tr:
+            with open(filename, newline='\n') as tr:
                 tracedata = json.load(tr)
                 trace = generate_statistic(tracedata, stat_format_string)
             write_file = 1
@@ -372,10 +372,10 @@ def restore_traceheader(filename, stat_format_string):
                 write_file = mb.askyesno("Overwriting File",
                                          "Restoring the traceheader will overwrite the file. Continue?")
             if write_file:
-                with open(filename, 'w') as fp:
+                with open(filename, 'w', newline='\n') as fp:
                     json.dump(trace, fp, indent='\t')
-                    add_hash_value_to_trace(filename)
-                    mb.showinfo('Traceheader restored', 'Statistics and has value restored successfully')
+                add_hash_value_to_trace(filename)
+                mb.showinfo('Traceheader restored', 'Statistics and has value restored successfully')
         except json.decoder.JSONDecodeError:
             mb.showerror("Trace content invalid", "Please check if the trace content is valid")
     else:

@@ -139,7 +139,7 @@ class PrepareFileTab(Frame):
             :param filename: File that will be displayed
             """
             if os.path.isfile(filename):
-                with open(filename, 'r') as file:
+                with open(filename, 'r', newline='\n') as file:
                     file_displayer_label.configure(text=os.path.basename(filename))
                     file_displayer.grid(column=0, row=9, columnspan=12, rowspan=10)
                     file_displayer.config(state=NORMAL)
@@ -398,7 +398,7 @@ class ConvertTraceTab(Frame):
             Displays the selected file in the convert tab
             :param filename: File that will be displayed
             """
-            with open(filename, 'r') as f:
+            with open(filename, 'r', newline='\n') as f:
                 file_displayer.config(state=NORMAL)
                 file_displayer.delete("1.0", "end")
                 file_displayer.insert(INSERT, f.read())
@@ -536,7 +536,7 @@ class FilterTraceTab(Frame):
                 selected_files.clear()
                 selected_filenames.clear()
                 for i in file_tuple:
-                    with open(str(i)) as json_file:
+                    with open(str(i), newline='\n') as json_file:
                         selected_files.append(json.load(json_file)["traceheader"]["statistical characteristics"])
                         selected_filenames.append(os.path.basename(os.path.dirname(i)) + '/' + os.path.basename(i))
                 for i in range(len(selected_filenames)):
@@ -629,7 +629,7 @@ class ExtractTracedataTab(Frame):
             Displays the selected file in the extract tracedata tab
             :param filename: File that will be displayed
             """
-            with open(filename, 'r') as f:
+            with open(filename, 'r', newline='\n') as f:
                 trace_column_display.config(state=NORMAL)
                 trace_column_display.delete("1.0", "end")
                 trace_column_display.insert(INSERT, f.read())
