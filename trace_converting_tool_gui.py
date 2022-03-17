@@ -383,8 +383,8 @@ class ConvertTraceTab(Frame):
                                                         'tracedata_dir') + tracedata_filename_entry.get() + \
                                              config.get('files', 'tracedata_file_suffix')
                         model.extract_tracedata(result_filename, tracedata_filename, float_format_entry.get())
-                        mb.showinfo("Trace successfully converted", "Displaying converted Trace")
-                        display_file(result_filename)
+                    mb.showinfo("Trace successfully converted", "Displaying converted Trace")
+                    display_file(result_filename)
                 else:
                     mb.showinfo("File already exists", "Displaying existing File")
                     # If tracedata checkbox is selected the data will also be extracted
@@ -421,7 +421,7 @@ class ConvertTraceTab(Frame):
         result_filename_label = Label(self, text="Result Filename")
         result_filename_label.grid(row=8)
 
-        tracedata_filename_label = Label(self, text="Filename")
+        tracedata_filename_label = Label(self, text="Tracedata Filename")
         tracedata_filename_entry = Entry(self)
 
         float_format_label = Label(self, text="Float Format String")

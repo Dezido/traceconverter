@@ -289,10 +289,11 @@ def hash_check(filename):
                 stored_hash = tracedata["traceheader"]["metainformation"]["hash value"]
                 computed_hash = hash_from_trace(filename)
             if stored_hash == computed_hash:
-                tkinter.messagebox.showinfo("Hash check result", "Hashes are equal")
+                tkinter.messagebox.showinfo("Hash value check succeeded",
+                                            "The stored and the computed hash value are equal")
             else:
-                tkinter.messagebox.showinfo("Hash check result", "Stored Hash: " + stored_hash + "\n" +
-                                            "Computed Hash: " + hash_from_trace(filename))
+                tkinter.messagebox.showinfo("Hash value check failed", "Stored Hash value: " + stored_hash + "\n" +
+                                            "Computed Hash value: " + hash_from_trace(filename))
         except json.decoder.JSONDecodeError:
             mb.showerror("Trace content invalid", "Please check if the trace content is valid")
     else:
@@ -339,14 +340,14 @@ def verify_statistics(converted_trace_file, tolerance):
                 for statistic in saved:
                     if not math.isclose(float(comp[statistic][i]), float(saved[statistic][i]), rel_tol=tolerance):
                         invalid_statistics += (
-                                str(statistic) + " [" + str(i) + "] not equal. Should be: " + str(comp[statistic][i]) +
-                                " but is " + str(saved[statistic][i]) + "\n")
+                                str(statistic) + " [" + str(i) + "]: Computed: " + str(comp[statistic][i]) +
+                                " Stored: " + str(saved[statistic][i]) + "\n")
                         statistics_valid = False
             if statistics_valid:
-                mb.showinfo("Statistic Validation",
-                            "All statistics are close considering the passed relative tolerance")
+                mb.showinfo("Statistic Validation Result",
+                            "All statistics are close enough")
             else:
-                mb.showinfo("Statistic Validation", invalid_statistics)
+                mb.showinfo("The following statistics are not close enough", invalid_statistics)
         except json.decoder.JSONDecodeError:
             mb.showerror("Trace content invalid", "Please check if the trace content is valid")
         except ValueError:
