@@ -157,7 +157,7 @@ class PrepareFileTab(Frame):
             try:
                 if len(delimiter) == 0:
                     delimiter = None
-                if keep_header_checkbutton.get() == 1:
+                if keep_header_checkbutton_var.get() == 1:
                     df = pd.read_csv(filename, header=0, sep=delimiter)
                 else:
                     df = pd.read_csv(filename, header=None, sep=delimiter)
@@ -172,7 +172,7 @@ class PrepareFileTab(Frame):
                                          " already exists. \n Would you like to overwrite it?")
             try:
                 if write_file:
-                    if header_entry.get() != "" and keep_header_checkbutton.get() == 0:
+                    if header_entry.get() != "" and keep_header_checkbutton_var.get() == 0:
                         df.to_csv(result_filename, index=False, sep=',', header=header_entry.get().split(','))
                     else:
                         df.to_csv(result_filename, index=False, sep=',')
@@ -274,9 +274,9 @@ class PrepareFileTab(Frame):
                              bg=config.get('entries', 'background_colour_optional_entries'))
         header_entry.grid(column=3, row=7)
 
-        keep_header_checkbutton = IntVar()
+        keep_header_checkbutton_var = IntVar()
         keep_header_checkbutton = Checkbutton(self, text="Use first Line as Header",
-                                              variable=keep_header_checkbutton, onvalue=1,
+                                              variable=keep_header_checkbutton_var, onvalue=1,
                                               offvalue=0,
                                               selectcolor=config.get('entries','background_colour_optional_entries'))
         keep_header_checkbutton.grid(column=5, row=7)
